@@ -458,7 +458,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		//    genmc = thrown trees created during simulation process
 		bool bSignalRegion;
 		float branchWeight;
-                int choice=3;
+                int choice=2;
 		//---------CHOICE 1 FOR "data" RUN OVER SIGNAL/DATA-------------
                 if (choice==1){
 		    bSignalRegion=(pi0_sbweight==1)*(eta_sbweight==1)*(locHistAccidWeightFactor==1); // Keep combos ONLY in the signal region

@@ -10,7 +10,7 @@ void split_flat_kinematics(){
     //         USED FOR AMPLITUDE FITS WITH POLARIZATION
     // ********************************************
 
-    string folder="phase1_selected/";
+    string folder="kmatrix_selected/";
 
     bool sumRuns=true;
     vector<string> runs={"2017_1","2018_1","2018_8"};
