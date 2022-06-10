@@ -25,14 +25,14 @@ $m="104180";
 #$baseAccFileName="_t0103_m$m\_FTOT_selected_acc_flat";
 #$baseBkgFileName="_t0103_m$m\_DTOT_selected_bkgnd_flat";
 #$baseDatFileName="_t0103_m$m\_DTOT_selected_data_flat";
-$baseAccDir="/d/grid17/ln16/dselector_v2/test/phase1_selected/tall_m080180/";
-$baseGenDir="/d/grid17/ln16/dselector_v2/test/phase1_selected/tall_m080180/";
+$baseAccDir="/d/grid17/ln16/dselector_v2/test/kmatrix_selected/tall_m080180/";
+$baseGenDir="/d/grid17/ln16/dselector_v2/test/kmatrix_selected/tall_m080180/";
 $baseDatDir="/d/grid17/ln16/dselector_v2/test/kmatrix_selected/";
 $baseBkgDir="/d/grid17/ln16/dselector_v2/test/kmatrix_selected/";
 $baseAccFileName="_tall_m080180_F2018_8_gen_data_flat";
 $baseGenFileName="_tall_m080180_F2018_8_gen_data_flat";
-$baseDatFileName="_kmatrix_gen_data_flat";
-$baseBkgFileName="_kmatrix_selected_bkgnd_flat";
+$baseDatFileName="_tall_m080180_kmatrix_gen_data_flat";
+$baseBkgFileName="_tall_m080180_kmatrix_selected_bkgnd_flat";
 
 @polTags=qw(000);# 045 090 135);
 print "DATAFILES:\n";

@@ -35,7 +35,6 @@ void DSelector_etapi::Init(TTree *locTree)
  	    dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Target_Mass"); 
  	    dFlatTreeInterface->Create_Branch_FundamentalArray<Int_t>("PID_FinalState","NumFinalState");
  	    dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("BeamAngle");
- 	    dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Weight"); 
             // Photon Related 
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonTheta1");	
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonTheta2");	
@@ -105,6 +104,9 @@ void DSelector_etapi::Init(TTree *locTree)
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0eta_thrown");
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mandelstam_t_thrown");
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Ebeam_thrown");
+            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("isCorrectCombo");
+            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("isCorrectBeam");
+            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("isCorrectSpect");
         }
 	/*********************************** EXAMPLE USER INITIALIZATION: ANALYSIS ACTIONS **********************************/
 
@@ -324,6 +326,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                 else if (locPID==17)
                     locEtaP4_thrown=locThrownP4_thrown;
 	}
+
 	locMetapi0_thrown=(locPi0P4_thrown+locEtaP4_thrown).M();
 	locT_thrown=-(dTargetP4-locProtonP4_thrown).M2();		
 	//bool bMetapi0_thrown = (locMetapi0_thrown>1.04)*(locMetapi0_thrown<1.56);
@@ -364,6 +367,73 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		//Step 2
 		Int_t locPhoton3NeutralID = dPhoton3Wrapper->Get_NeutralID();
 		Int_t locPhoton4NeutralID = dPhoton4Wrapper->Get_NeutralID();
+
+                // We have access to the truth information so we can construct a scheme to select the true combination
+                //    in the simulated recon tree there is a branch "isTrueCombo" that exists but for some reason
+                //    it is all set to zero for our trees. We can do this manually though by checking PIDs
+                // Set the default values to true so that if we do not have thrown information we do not need to do any matching
+                // USAGE: Filling the output tree with the information allows us to select on the truth
+                //      1. Accidental subtraction statistically selects the true beam photon = isCorrectBeam
+                //      2. Mass sideband subtraction statistically selects the true pi0/eta combination = isCorrectSpect
+                //      The idea is to apply all selections then make a plot. Compare subtraction scheme to correct particles
+                bool isCorrectCombo=true; 
+                bool isCorrectBeam=true;
+                bool isCorrectSpect=true;
+	        vector<Int_t> thrownPIDs;
+	        vector<Int_t> parentIDs;
+                vector<Int_t> matchedParentPIDs;
+                cout << endl;
+	        if (Get_NumThrown()!=0){
+	            for(UInt_t loc_i = 0; loc_i < Get_NumThrown(); ++loc_i)
+	            {	
+	                dThrownWrapper->Set_ArrayIndex( loc_i );
+	                //cout << "thrown PID: " << dThrownWrapper->Get_PID() << " with parent thrown index: " <<  dThrownWrapper->Get_ParentIndex() << endl;
+	                thrownPIDs.push_back(dThrownWrapper->Get_PID());
+	                parentIDs.push_back(dThrownWrapper->Get_ParentIndex());
+	            }
+
+                    // Obtain all the thrown IDs for the photons
+                    vector<Int_t> thrownID_phs = {
+                        dPhoton1Wrapper->Get_ThrownIndex(), 
+                        dPhoton2Wrapper->Get_ThrownIndex(), 
+                        dPhoton3Wrapper->Get_ThrownIndex(), 
+                        dPhoton4Wrapper->Get_ThrownIndex(),
+                    };
+
+                    for (auto thrownID: thrownID_phs){
+                        if (thrownID != -1){ // if -1 then not matched to a thrown particle
+                            //cout << "ph parent " << parentIDs[thrownID] << " has PID " << thrownPIDs[parentIDs[thrownID]] << endl;
+                            matchedParentPIDs.push_back(thrownPIDs[parentIDs[thrownID]]);
+                        }
+                        else{ // if any of  the photons did not match to a thrown particle we do not have the correct combo clearly
+                            isCorrectSpect=false;
+                            //cout << "ph has no parent" << endl;
+                            matchedParentPIDs.push_back(-1);
+                        }
+                    }
+                    // photons 1,2 should pair to a pi0 (Geant PID=7) and photons 3,4 should pair to an eta (17)
+                    //    proton should have a proton PID=14
+                    if ((matchedParentPIDs[0]==7)*
+                        (matchedParentPIDs[1]==7)*
+                        (matchedParentPIDs[2]==17)*
+                        (matchedParentPIDs[3]==17)*
+                        (thrownPIDs[dProtonWrapper->Get_ThrownIndex()]==14)){
+                        isCorrectSpect=true;}
+                    else{
+                        isCorrectSpect=false;}
+
+                    // Checking to see if the beam photon matches the thrown by comparing the energies
+                    //cout << "Thrown:Combo Beam E " << locBeamE_thrown << ":" << (dComboBeamWrapper->Get_P4()).E() << endl;
+                    if ( abs(locBeamE_thrown-(dComboBeamWrapper->Get_P4()).E())<0.0001 )
+                        isCorrectBeam=true;
+                    else
+                        isCorrectBeam=false;
+
+                    // Finally, the true combo is when we have the true spectroscopic combination and the true beam photon
+                    isCorrectCombo=isCorrectSpect*isCorrectBeam;
+                    cout << "correct beam/spect/combo: " << isCorrectBeam << "/" << isCorrectSpect << "/" << isCorrectCombo <<endl;
+	        }
+
 
 		/*********************************************** GET FOUR-MOMENTUM **********************************************/
 
@@ -458,7 +528,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		//    genmc = thrown trees created during simulation process
 		bool bSignalRegion;
 		float branchWeight;
-                int choice=2;
+                int choice=3;
 		//---------CHOICE 1 FOR "data" RUN OVER SIGNAL/DATA-------------
                 if (choice==1){
 		    bSignalRegion=(pi0_sbweight==1)*(eta_sbweight==1)*(locHistAccidWeightFactor==1); // Keep combos ONLY in the signal region
@@ -770,6 +840,9 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0eta_thrown",locMetapi0_thrown);
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_t_thrown",locT_thrown);
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("Ebeam_thrown",locBeamE_thrown);
+                    dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectCombo",isCorrectCombo);
+                    dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectBeam",isCorrectBeam);
+                    dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectSpect",isCorrectSpect);
 		    // AmpTools tree output - step 3
 		    // Filling the branches of the flat tree
 		    vector<TLorentzVector> locFinalStateP4; // should be in the same order as PID_FinalState

@@ -12,15 +12,18 @@ void split_flat_kinematics(){
 
     string folder="kmatrix_selected/";
 
-    bool sumRuns=true;
+    bool sumRuns=false;
     vector<string> runs={"2017_1","2018_1","2018_8"};
     vector<string> files;
-    for (auto run: runs){
-        //files.push_back("D"+run+"_selected_data_flat.root");
-        //files.push_back("D"+run+"_selected_bkgnd_flat.root");
-        files.push_back("F"+run+"_selected_acc_flat.root");
-        files.push_back("F"+run+"_gen_data_flat.root");
-    }
+    //for (auto run: runs){
+    //    //files.push_back("D"+run+"_selected_data_flat.root");
+    //    //files.push_back("D"+run+"_selected_bkgnd_flat.root");
+    //    files.push_back("F"+run+"_selected_acc_flat.root");
+    //    files.push_back("F"+run+"_gen_data_flat.root");
+    //}
+    //files.push_back("kmatrix_selected_bkgnd_flat.root");
+    //files.push_back("kmatrix_selected_data_flat.root");
+    files.push_back("kmatrix_gen_data_flat.root");
     int nFileTypes=((int)files.size())/((int)runs.size());
 
     // ********************************************
@@ -140,7 +143,6 @@ void split_flat_kinematics(){
                     newfile[ip][it][im]->Close();
         }}}
     } // closes files loop
-
 
 
     // ********************************************
