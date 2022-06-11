@@ -50,11 +50,9 @@ thrownTreeName="Thrown_Tree"
 
 ### KMATRIX MC
 reconTreeName="pi0eta__B4_M7_M17_Tree"
-#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/malte_kmatrix_10M_030322/root/trees/tree*"',reconTreeName,"kmatrix_selected",1,proof_Nthreads,recon_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/malte_kmatrix_10M_030322/root/trees/tree*"',reconTreeName,"kmatrix_selected",2,proof_Nthreads,recon_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/malte_kmatrix_10M_030322/root/thrown/tree*"',thrownTreeName,"kmatrix_gen",1,proof_Nthreads,thrown_cfiles)
-
-runSelector('"/d/grid17/ln16/rootFiles/pi0eta/malte_kmatrix_10M_030322/root/trees/tree*"',reconTreeName,"kmatrix_selected",3,proof_Nthreads,recon_cfiles)
+runSelector('"/d/grid17/ln16/rootFiles/pi0eta/malte_kmatrix_10M_030322/root/trees_pt0/tree*"',reconTreeName,"kmatrix_selected_halved",1,proof_Nthreads,recon_cfiles)
+runSelector('"/d/grid17/ln16/rootFiles/pi0eta/malte_kmatrix_10M_030322/root/trees_pt0/tree*"',reconTreeName,"kmatrix_selected_halved",2,proof_Nthreads,recon_cfiles)
+runSelector('"/d/grid17/ln16/rootFiles/pi0eta/malte_kmatrix_10M_030322/root/thrown_pt0/tree*"',thrownTreeName,"kmatrix_gen_halved",1,proof_Nthreads,thrown_cfiles)
 
 
 

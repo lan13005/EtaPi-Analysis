@@ -1,7 +1,7 @@
 #include "DSelector_etapi.h"
 
 // "4#gammap[#pi^{0},#eta]"
-string topologyString="4#gammap[#pi^{0},#eta]";
+string topologyString="6#gammap[2#pi^{0},#eta]";
 
 void DSelector_etapi::Init(TTree *locTree)
 {
@@ -531,7 +531,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		//    genmc = thrown trees created during simulation process
 		bool bSignalRegion;
 		float branchWeight;
-                int choice=2;
+                int choice=1;
 		//---------CHOICE 1 FOR "data" RUN OVER SIGNAL/DATA-------------
                 if (choice==1){
 		    bSignalRegion=(pi0_sbweight==1)*(eta_sbweight==1)*(locHistAccidWeightFactor==1); // Keep combos ONLY in the signal region

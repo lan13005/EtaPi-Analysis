@@ -21,9 +21,9 @@ void split_flat_kinematics(){
     //    files.push_back("F"+run+"_selected_acc_flat.root");
     //    files.push_back("F"+run+"_gen_data_flat.root");
     //}
-    //files.push_back("kmatrix_selected_bkgnd_flat.root");
-    //files.push_back("kmatrix_selected_data_flat.root");
-    files.push_back("kmatrix_gen_data_flat.root");
+    files.push_back("kmatrix_selected_halved_bkgnd_flat.root");
+    files.push_back("kmatrix_selected_halved_data_flat.root");
+    files.push_back("kmatrix_gen_halved_data_flat.root");
     int nFileTypes=((int)files.size())/((int)runs.size());
 
     // ********************************************
