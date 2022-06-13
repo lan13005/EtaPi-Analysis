@@ -1,11 +1,12 @@
 int nBins=1;
 string fitName="EtaPi0";
-vector<string> pols={"000","045","090","135","allPols"};
+//vector<string> pols={"000","045","090","135","allPols"};
+vector<string> pols={"000"};
 
-vector<string> groups={"_S0+-_S0++_D1--_D0+-_D1+-_D0++_D1++_D2++_pD1--_pD0+-_pD1+-_pD0++_pD1++_pD2++","_S0+-","_S0++","_D1--","_D0+-","_D1+-","_D0++","_D1++","_D2++","_D1--_pD1--","_D0+-_pD0+-","_D1+-_pD1+-","_D0++_pD0++","_D1++_pD1++","_D2++_pD2++","_pD1--","_pD0+-","_pD1+-","_pD0++","_pD1++","_pD2++","_S0+-_S0++","_D1--_D0+-_D1+-_D0++_D1++_D2++","_pD1--_pD0+-_pD1+-_pD0++_pD1++_pD2++","_D1--_D0+-_D1+-_D0++_D1++_D2++_pD1--_pD0+-_pD1+-_pD0++_pD1++_pD2++","_S0++_D0++_D1++_D2++_pD0++_pD1++_pD2++","_S0+-_D1--_D0+-_D1+-_pD1--_pD0+-_pD1+-"};
+vector<string> groups={"_S0+-_S0++_D0+-_D0++_D2+-_D2++","_S0+-","_S0++","_D0+-","_D0++","_D2+-","_D2++","_S0+-_S0++","_D0+-_D0++_D2+-_D2++","_S0++_D0++_D2++","_S0+-_D0+-_D2+-"};
 void overlaySingleBin(int iBin,int nBins, vector<string> names1D, vector<TCanvas*> allCanvases, string selectPol){
         gStyle->SetOptStat(kFALSE);
-        string folder = ".";
+        string folder="kmatrix_fit_results";
 
         TH1F *any1DHist_dat;
         TH1F *any1DHist_acc;
@@ -80,7 +81,7 @@ void overlaySingleBin(int iBin,int nBins, vector<string> names1D, vector<TCanvas
                 c2->cd(histIdx+1);
                 any1DHist_sig_all->Draw();
                 any1DHist_acc_all->Draw("HIST SAME");
-                c2->Print(("overlayPlots/diagnostic"+group+"_"+selectPol+".pdf").c_str(),"pdf");
+                c2->Print((folder+"/overlayPlots/diagnostic"+group+"_"+selectPol+".pdf").c_str(),"pdf");
             }
             ++igroup;
         }
@@ -90,17 +91,17 @@ void overlaySingleBin(int iBin,int nBins, vector<string> names1D, vector<TCanvas
                 names1D[histIdx]="BigPhi";
             }
             if (iBin==(nBins-1)){
-                allCanvases[histIdx]->Print(("overlayPlots/"+names1D[histIdx]+"_"+selectPol+".pdf)").c_str(),"pdf");
+                allCanvases[histIdx]->Print((folder+"/overlayPlots/"+names1D[histIdx]+"_"+selectPol+".pdf)").c_str(),"pdf");
                 continue;
             }
             if (iBin==0){
-                allCanvases[histIdx]->Print(("overlayPlots/"+names1D[histIdx]+"_"+selectPol+".pdf(").c_str(),"pdf");
+                allCanvases[histIdx]->Print((folder+"/overlayPlots/"+names1D[histIdx]+"_"+selectPol+".pdf(").c_str(),"pdf");
             }
             if (iBin==(nBins-1)){
-                allCanvases[histIdx]->Print(("overlayPlots/"+names1D[histIdx]+"_"+selectPol+".pdf)").c_str(),"pdf");
+                allCanvases[histIdx]->Print((folder+"/overlayPlots/"+names1D[histIdx]+"_"+selectPol+".pdf)").c_str(),"pdf");
             }
             else{
-                allCanvases[histIdx]->Print(("overlayPlots/"+names1D[histIdx]+"_"+selectPol+".pdf").c_str(),"pdf");
+                allCanvases[histIdx]->Print((folder+"/overlayPlots/"+names1D[histIdx]+"_"+selectPol+".pdf").c_str(),"pdf");
             }
         }
 }

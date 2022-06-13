@@ -29,9 +29,9 @@ $baseAccDir="/d/grid17/ln16/dselector_v2/test/kmatrix_selected/tall_m080180/";
 $baseGenDir="/d/grid17/ln16/dselector_v2/test/kmatrix_selected/tall_m080180/";
 $baseDatDir="/d/grid17/ln16/dselector_v2/test/kmatrix_selected/";
 $baseBkgDir="/d/grid17/ln16/dselector_v2/test/kmatrix_selected/";
-$baseAccFileName="_tall_m080180_F2018_8_gen_data_flat";
+$baseAccFileName="_tall_m080180_F2018_8_selected_acc_flat";
 $baseGenFileName="_tall_m080180_F2018_8_gen_data_flat";
-$baseDatFileName="_tall_m080180_kmatrix_gen_halved_data_flat";
+$baseDatFileName="_tall_m080180_kmatrix_selected_halved_data_flat";
 $baseBkgFileName="_tall_m080180_kmatrix_selected_halved_bkgnd_flat";
 
 @polTags=qw(000);# 045 090 135);
@@ -60,7 +60,7 @@ foreach $polTag (@polTags){
 print "------------------\n";
 
 
-$cfgTempl = "$workingDir/config_files/zlm_etapi_bothReflect_bothM_noBkg.cfg";
+$cfgTempl = "$workingDir/config_files/zlm_etapi_bothReflect_bothM.cfg";
 
 ### things below here probably don't need to be modified
 

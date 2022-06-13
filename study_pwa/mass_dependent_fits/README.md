@@ -18,6 +18,8 @@ This set of programs will output a folder that compares various distributions wi
 can quickly glance how the fits perform and how the partial waves look. The more important output of this program is a root file
 that contains the shape of the partial wave. This can then be used to plot i.e. the piecewise s-wave and a breit-wigner D-wave 
 
+./run_overlayBins.py
+
 To get a cross section we need the integrated luminosity which we can obtain from plot_flux_ccdb.py program. getFluxs.py is
 used to maintain the correct arguments to obtain the correct luminosity and to run the program
 

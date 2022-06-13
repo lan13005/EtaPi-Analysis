@@ -1,7 +1,7 @@
 #include "DSelector_etapi.h"
 
 // "4#gammap[#pi^{0},#eta]"
-string topologyString="6#gammap[2#pi^{0},#eta]";
+string topologyString="4#gammap[#pi^{0},#eta]";
 
 void DSelector_etapi::Init(TTree *locTree)
 {
@@ -303,6 +303,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 	/******************************************* LOOP OVER THROWN DATA (OPTIONAL) ***************************************/
 
 	TString locThrownTopology = Get_ThrownTopologyString();
+        topologies.insert(locThrownTopology);
 
 	//Thrown beam: just use directly
         float locBeamE_thrown=0;
@@ -337,7 +338,8 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
         bool bBeamE_thrown = (locBeamE_thrown<8.8)*(locBeamE_thrown>8.2);
         bool bMpi0eta_thrown = (locMetapi0_thrown<1.80)*(locMetapi0_thrown>0.8);
         bool bTopology = locThrownTopology==topologyString; 
-        bool selection_thrown=bTopology*bBeamE_thrown*bmandelstamt_thrown*bMpi0eta_thrown;
+        cout << locThrownTopology << endl;
+        bool selection_thrown=bTopology*bBeamE_thrown;//*bmandelstamt_thrown*bMpi0eta_thrown;
         if (dIsMC*!selection_thrown)
             return kTRUE;
 
@@ -503,19 +505,25 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		float etaMean=0.548625;
 		float pi0Std=0.0076;
 		float etaStd=0.0191;
+                float pi0Sig=3; // number of sigmas to the left and right of the mean
+                float etaSig=3;
+                float pi0Skip=1; // number of sigmas to skip right after signal region
+                float etaSkip=1;
+                float pi0SB=1.5; // number of sigmas that define the sideband region which is right after the skip region
+                float etaSB=2;
 		float pi0_sbweight;
 		float eta_sbweight;
 		// The signal regions are both +/- 3 sigmas around the peak the left and right sidebands 
 		// 	which are some N sigmas wide with some M sigma skip region included 
 		// 	between the signal and sideband regions. The weight = the ratio the lengths
 		// 	spanned by the signal to that of the sideband times -1.
-		if (Mpi0 > pi0Mean-3*pi0Std && Mpi0 < pi0Mean+3*pi0Std){ pi0_sbweight=1; }
-		else if (Mpi0 > pi0Mean+4*pi0Std && Mpi0 < pi0Mean+5.5*pi0Std){ pi0_sbweight=-2.0; }
-		else if (Mpi0 > pi0Mean-5.5*pi0Std && Mpi0 < pi0Mean-4*pi0Std){ pi0_sbweight=-2.0; }
+		if (Mpi0 > pi0Mean-pi0Sig*pi0Std && Mpi0 < pi0Mean+pi0Sig*pi0Std){ pi0_sbweight=1; }
+		else if (Mpi0 > pi0Mean+(pi0Sig+pi0Skip)*pi0Std && Mpi0 < pi0Mean+(pi0Sig+pi0Skip+pi0SB)*pi0Std){ pi0_sbweight=-1*pi0Sig/pi0SB; }
+		else if (Mpi0 > pi0Mean-(pi0Sig+pi0Skip+pi0SB)*pi0Std && Mpi0 < pi0Mean-(pi0Sig+pi0Skip)*pi0Std){ pi0_sbweight=-1*pi0Sig/pi0SB; }
 		else { pi0_sbweight=0; }
-		if (Meta > etaMean-3*etaStd && Meta < etaMean+3*etaStd){ eta_sbweight=1; }
-		else if (Meta > etaMean+4*etaStd && Meta < etaMean+6*etaStd){ eta_sbweight=-1.5; }
-		else if (Meta > etaMean-6*etaStd && Meta < etaMean-4*etaStd){ eta_sbweight=-1.5; }
+		if (Meta > etaMean-etaSig*etaStd && Meta < etaMean+etaSig*etaStd){ eta_sbweight=1; }
+		else if (Meta > etaMean+(etaSig+etaSkip)*etaStd && Meta < etaMean+(etaSig+etaSkip+etaSB)*etaStd){ eta_sbweight=-1*etaSig/etaSB; }
+		else if (Meta > etaMean-(etaSig+etaSkip+etaSB)*etaStd && Meta < etaMean-(etaSig+etaSkip)*etaStd){ eta_sbweight=-1*etaSig/etaSB; }
 		else { eta_sbweight=0; }
 		float sbweight=pi0_sbweight*eta_sbweight;
 		float weight=sbweight*locHistAccidWeightFactor;
@@ -531,7 +539,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		//    genmc = thrown trees created during simulation process
 		bool bSignalRegion;
 		float branchWeight;
-                int choice=1;
+                int choice=3;
 		//---------CHOICE 1 FOR "data" RUN OVER SIGNAL/DATA-------------
                 if (choice==1){
 		    bSignalRegion=(pi0_sbweight==1)*(eta_sbweight==1)*(locHistAccidWeightFactor==1); // Keep combos ONLY in the signal region
@@ -714,10 +722,10 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 			dHist_Mpi0->Fill((locPhoton1P4+locPhoton2P4).M(),locHistAccidWeightFactor);
 			dHist_Meta->Fill((locPhoton3P4+locPhoton4P4).M(),locHistAccidWeightFactor);
 		}
-		if (!bWeight){ // We do not want to keep any combos with weight 0. Not just a waste of space, can cause problems during fitting
-			dComboWrapper->Set_IsComboCut(true);
-			continue;
-		}
+//		if (!bWeight){ // We do not want to keep any combos with weight 0. Not just a waste of space, can cause problems during fitting
+//			dComboWrapper->Set_IsComboCut(true);
+//			continue;
+//		}
 		if(bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bBeamEnergy*bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion){
 			dHist_mmsq->Fill(locMissingMassSquared,weight);}
 		if(bPhotonE*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bMMsq*bBeamEnergy*bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion){
@@ -929,6 +937,9 @@ void DSelector_etapi::Finalize(void)
 		//Besides, it is best-practice to do post-processing (e.g. fitting) separately, in case there is a problem.
 
 	//DO YOUR STUFF HERE
+        cout << "Topologies in chain" << endl;
+        for (auto topology: topologies)
+            cout << topology << endl;
 
 	//CALL THIS LAST
 	DSelector::Finalize(); //Saves results to the output file

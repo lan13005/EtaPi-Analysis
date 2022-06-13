@@ -221,12 +221,12 @@ void drawAmptoolsVar(){
         //sbHistFiles.push_back("/d/grid17/ln16/dselector_v2/test/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_DTOT_selected_bkgnd_flat.root");
         flatHistFiles.push_back("/d/grid17/ln16/dselector_v2/test/kmatrix_selected/tall_m080180/pol000_tall_m080180_F2018_8_selected_acc_flat.root");
         flatThrownHistFiles.push_back("/d/grid17/ln16/dselector_v2/test/kmatrix_selected/tall_m080180/pol000_tall_m080180_F2018_8_gen_data_flat.root");
-        totHistFiles.push_back("/d/grid17/ln16/dselector_v2/test/kmatrix_selected/pol000_tall_m080180_kmatrix_selected_data_flat.root");
-        sbHistFiles.push_back("/d/grid17/ln16/dselector_v2/test/kmatrix_selected/pol000_tall_m080180_kmatrix_selected_bkgnd_flat.root");
+        totHistFiles.push_back("/d/grid17/ln16/dselector_v2/test/kmatrix_selected/pol000_tall_m080180_kmatrix_selected_halved_data_flat.root");
+        sbHistFiles.push_back("/d/grid17/ln16/dselector_v2/test/kmatrix_selected/pol000_tall_m080180_kmatrix_selected_halved_bkgnd_flat.root");
     }
     // genHists need atleast 1 null string if you dont want it draw anything, otherwise it should crash.
     //     We still need getHists to initialize a set of empty histograms
-    vector<string> genHistFiles={"/d/grid17/ln16/dselector_v2/test/kmatrix_selected/pol000_tall_m080180_kmatrix_gen_data_flat.root"};
+    vector<string> genHistFiles={"/d/grid17/ln16/dselector_v2/test/kmatrix_selected/pol000_tall_m080180_kmatrix_gen_halved_data_flat.root"};
 
     map<string, TH1*> flatHists = loadAndCombine(flatHistFiles,"flat");
     map<string, TH1*> flatThrownHists = loadAndCombine(flatThrownHistFiles,"flatThrown");

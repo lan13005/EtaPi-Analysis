@@ -50,7 +50,7 @@ topologies=[
         "4#gammap[2#pi^{0}]",
         "5#gammap[2#pi^{0}]",
         "5#gammap[2#pi^{0}]",
-        "5#gammap[2#pi^{0}]"
+        "5#gammap[2#pi^{0}]",
         ]
 ofolders=[
         "zDSelectedBkgndSamples/a2pi",
@@ -61,7 +61,7 @@ ofolders=[
         "zDSelectedBkgndSamples/pi0pi0",
         "zDSelectedBkgndSamples/b1vps_2018_8",
         "zDSelectedBkgndSamples/b1vps_2018_1",
-        "zDSelectedBkgndSamples/b1vps_2017_1"
+        "zDSelectedBkgndSamples/b1vps_2017_1",
         ]
 ifolders=[
         '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/a2pi/tree_',
@@ -72,21 +72,29 @@ ifolders=[
         '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/pi0pi0/tree_',
         '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_08_ver03.0_60M/root/merged/tree_',
         '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_01_ver03.0/root/merged/tree_',
-        '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2017_01_ver03.0/root/merged/tree_'
+        '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2017_01_ver03.0/root/merged/tree_',
         ]
-
 
 assert len(ifolders)==len(ofolders) and len(ifolders)==len(topologies)
 
 
+######## THINGS TO KEEP IN MIND ###########
+# 1. We do not want to select on the any region in Meta vs Mpi so we "choice" 3
+# 2. DSelector_etapi should not throw out 0 weights so we have that line commented out
+# This will give us access to the full mass region so we can see how, for instance, 
+#   the b1 leakage looks like in Meta 
+###########################################
+
 for ifolder,ofolder,topology in zip(ifolders,ofolders,topologies):
     replaceTopology(topology)
-    runSelector(ifolder+'pi0eta*"',reconTreeName,"bkgndSample_recon",1,proof_Nthreads,recon_cfiles)
+    runSelector(ifolder+'pi0eta*"',reconTreeName,"bkgndSample_recon",3,proof_Nthreads,recon_cfiles)
     runSelector(ifolder+'thrown*"',thrownTreeName,"bkgndSample_gen",1,proof_Nthreads,thrown_cfiles)
     move(ofolder)
 
+#for run in ["2017_1","2018_1","2018_8"]:
+#    replaceTopology("4#gammap[#pi^{0},#eta]")
+#    f='"/d/grid17/ln16/dselector_v2/test/phase1_data_looseChiUE/D'+run+'_loose_tree.root"'
+#    runSelector(f,reconTreeName,"bkgndSample_recon",3,proof_Nthreads,recon_cfiles)
+#    move("zDSelectedBkgndSamples/gluex_"+run)
+
 replaceTopology("4#gammap[#pi^{0},#eta]")
-
-
-
-

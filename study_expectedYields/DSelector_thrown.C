@@ -1,6 +1,6 @@
 #include "DSelector_thrown.h"
 
-string topologyString="6#gammap[2#pi^{0},#eta]";
+string topologyString="4#gammap[#pi^{0},#eta]";
 
 void DSelector_thrown::Init(TTree *locTree)
 {
@@ -152,7 +152,7 @@ Bool_t DSelector_thrown::Process(Long64_t locEntry)
         bool bMpi0eta = (Metapi0<1.80)*(Metapi0>0.8);
         bool bBeamE = (beam_e<8.8)*(beam_e>8.2);
         bool bTopology = locThrownTopology==topologyString; 
-        bool selection=bTopology*bBeamE*bmandelstamt*bMpi0eta;
+        bool selection=bTopology*bBeamE;//*bmandelstamt*bMpi0eta;
 
         if ((dFlatTreeFileName!="")*(selection)){
 	    vector<TLorentzVector> locFinalStateP4; // should be in the same order as PID_FinalState

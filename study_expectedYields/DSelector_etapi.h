@@ -56,6 +56,8 @@ class DSelector_etapi : public DSelector
 		DNeutralParticleHypothesis* dPhoton3Wrapper;
 		DNeutralParticleHypothesis* dPhoton4Wrapper;
 
+                set<TString> topologies;
+
 		// DEFINE YOUR HISTOGRAMS HERE
 		// EXAMPLES:
 		TH1F* dHist_BeamEnergy;
