@@ -401,7 +401,7 @@ def mapYields(startBin,endBin,fitDir):
 if __name__ == '__main__':
     os.chdir(fitDir)
     startBin=0
-    endBin=25
+    endBin=19
     numIters=50 # number of iterations to randomly sample and try to fit. No guarantees any of them will converge
     # EACH BIN SHARES THE SAME SEED FOR A GIVEN ITERATION
     seeds=[random.randint(1,100000) for _ in range(numIters)]
@@ -419,25 +419,25 @@ if __name__ == '__main__':
     #potential_vects=getVectorOfPotentialLMEs(fitDir,startBin,endBin,numIters)
     potential_vects=[
             #### S + TMD
-            #[
-            #[0,0,"+",True],
-            #[0,0,"-",True],
-            #[2,-1,"-",False],
-            #[2,0,"+",False],
-            #[2,0,"-",False],
-            #[2,1,"+",False],
-            #[2,1,"-",False],
-            #[2,2,"+",False]
-            #],
-            ### K-MATRIX
             [
             [0,0,"+",True],
             [0,0,"-",True],
+            [2,-1,"-",False],
             [2,0,"+",False],
             [2,0,"-",False],
-            [2,2,"-",False],
+            [2,1,"+",False],
+            [2,1,"-",False],
             [2,2,"+",False]
             ],
+            ### K-MATRIX
+            #[
+            #[0,0,"+",True],
+            #[0,0,"-",True],
+            #[2,0,"+",False],
+            #[2,0,"-",False],
+            #[2,2,"-",False],
+            #[2,2,"+",False]
+            #],
     ]
     os.chdir(fitDir)
     for ibin in range(startBin,endBin):

@@ -1,8 +1,14 @@
 # EtaPi0 Analysis at GlueX
 
-DSelector_etapi.C/h provide an implementation of a DSelector for the reaction 
-\gamma p\rightarrow\pi^0\eta p \rightarrow 4\gamma p
+## Reaction of interest
+DSelector_etapi.C/h provide an implementation of a DSelector for the following reaction 
+![Alt text](images/reaction.png?raw=true)
 
+## Diagrams of potential production mechanisms
+(Top Left) Reaction of interest with etapi production at the top vertex. (Top Right) double regge production. (Bottom) Baryon production.
+![Alt text](images/bkgReaction.png?raw=true)
+
+## Event Selection 
 To run the DSelector, runDSelector.C is used. Inside this macro, the physics analysis trees can be run over by Adding
 them to a TChain. Once in a chain, PROOF can be used to run the DSelector multi-threaded for quicker runtimes. PROOF 
 will output a root file of the reduced tree and a root file of the histograms made during the process. Once you are satisfied
