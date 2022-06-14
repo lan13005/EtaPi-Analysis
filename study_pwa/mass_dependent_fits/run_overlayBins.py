@@ -62,8 +62,10 @@ def draw(t):
     else:
         fitFile="etapi0_SD_TMD_piecewise_update.fit"
 
-    cmd="sed -i 's/folder=\".*\"/folder=\"%s\"/' %s" % (workingDir+"/"+t,workingDir+"/overlayBins.C")
-    subprocess.Popen(cmd.split(" "), stdout=subprocess.PIPE, stderr=subprocess.STDOUT).wait()
+    replace=workingDir+"/"+t
+    fname=workingDir+"/overlayBins.C"
+    cmd=["sed","-i",'s@folder=.*@folder="'+replace+'";@g',fname]
+    subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).wait()
 
     cmd="python3 ../overlayBins.py 2 '"+waves+"' '"+fitFile+"' '..' "+Ls
     print(cmd)

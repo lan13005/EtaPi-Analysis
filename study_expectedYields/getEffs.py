@@ -29,12 +29,12 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 baseDir="zExpectedLeakage/"
 os.system("mkdir -p "+baseDir)
-f=open(baseDir+"tabulate_calculations.csv","w")
-f.write("Channel,Weight,signalRegion,Ecenter,Ewidth,Yield,YieldErr,XSec,XSecErr,Flux,FluxErr,Eff,EffErr,BR,FR\n")
+#f=open(baseDir+"tabulate_calculations.csv","w")
+#f.write("Channel,Weight,signalRegion,Ecenter,Ewidth,Yield,YieldErr,XSec,XSecErr,Flux,FluxErr,Eff,EffErr,BR,FR\n")
 simplify={"AccWeight":"AS", "weightASBS":"ASBS"}
 
 
-def runAnalysis(channel,weightBranch,signalTag):
+def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
     getB1 = True if channel=="b1" else False
     getOmega = True if channel=="omega" else False
     getEta = True if channel=="eta" else False
@@ -56,13 +56,14 @@ def runAnalysis(channel,weightBranch,signalTag):
     #### Plotting sidebands distributions comparing data to expected b1 background leakage
     def getVal(search):
         val=-1
-        with open("/d/grid17/ln16/myDSelector/DSelector_etapi.C") as selector:
+        with open("/d/grid17/ln16/dselector_v2/test/study_expectedYields/DSelector_etapi.C") as selector:
             for line in selector:
-                if search in line:
-                    val=float(line.split("=")[1].split(";")[0])
+                if search in line and "float" in line:
+                    match=line.split("=")[1].split(";")[0]
+                    val=float(match)
         return val
     def getSidebands():
-        with open("/d/grid17/ln16/myDSelector/DSelector_etapi.C") as selector:
+        with open("/d/grid17/ln16/dselector_v2/test/study_expectedYields/DSelector_etapi.C") as selector:
             for line in selector:
                 pi0Mean=getVal("pi0Mean")
                 etaMean=getVal("etaMean")
@@ -74,10 +75,12 @@ def runAnalysis(channel,weightBranch,signalTag):
                 etaSkip=getVal("etaSkip")
                 pi0SB=getVal("pi0SB")
                 etaSB=getVal("etaSB")
-        pi0args=[pi0Mean,pi0Std,pi0Sig,pi0Skip,pi0SB]
-        etaargs=[etaMean,etaStd,etaSig,etaSkip,etaSB]
+        pi0args=np.array([pi0Mean,pi0Std,pi0Sig,pi0Skip,pi0SB])
+        etaargs=np.array([etaMean,etaStd,etaSig,etaSkip,etaSB])
+        print("pi0 args: {}".format(pi0args))
+        print("eta args: {}".format(etaargs))
         return pi0args,etaargs
-    
+
     fig,ax=plt.subplots(2,2,figsize=(12,9))
     ax=ax.flatten()
     target=1.22*1E-9 # its in INVERSE barns units - http://hadron.physics.fsu.edu/Theses/AErnst_FSU_thesis.pdf
@@ -89,21 +92,20 @@ def runAnalysis(channel,weightBranch,signalTag):
             "cosTheta_eta_gj","cosTheta_eta_hel","phi_eta_gj","phi_eta_hel"]
     
 
-
     if getB1:
         BR=1*0.0834*0.988*0.988; # assumed b1->omegapi dominant=1, omega->pi0g is 8.24, 99% decay to 2g for the 2 pi0s 
-        csAxisLabel=r"$b_1$"+" Cross Section (b)"
+        csAxisLabel=r"$b_1$"+" Cross Section (nb)"
         title=r"$b_1\rightarrow\omega\pi^0\rightarrow5\gamma$"
         outputFolder=baseDir+"zB1_efficiency/"
-        binedges=np.linspace(6.6,11.4,49)
-        binMin=14
-        binMax=25
-        sp2017=[1.414,1.430,1.398,1.378,1.372,1.367,1.336,1.341,1.341,1.268,1.304]
-        sp2017_err=[0.052,0.047,0.047,0.041,0.042,0.037,0.036,0.037,0.031,0.047,0.068]
-        sp2018=[1.409,1.383,1.409,1.404,1.388,1.331,1.341,1.320,1.268,1.294,1.362]
-        sp2018_err=[0.084,0.083,0.073,0.068,0.073,0.062,0.063,0.058,0.047,0.073,0.131]
-        fa2018=[1.524,1.529,1.466,1.482,1.461,1.440,1.393,1.409,1.383,1.367,1.325]
-        fa2018_err=[0.052,0.052,0.047,0.047,0.037,0.032,0.037,0.036,0.031,0.047,0.053]
+        binedges=np.linspace(6.6,11.4,49)[14:25]
+        binMin=2
+        binMax=-3
+        sp2017=[1.414,1.430,1.398,1.378,1.372,1.367,1.336,1.341,1.341,1.268]#,1.304] # I think we grabbed an extra bin
+        sp2017_err=[0.052,0.047,0.047,0.041,0.042,0.037,0.036,0.037,0.031,0.047]#,0.068]
+        sp2018=[1.409,1.383,1.409,1.404,1.388,1.331,1.341,1.320,1.268,1.294]#,1.362]
+        sp2018_err=[0.084,0.083,0.073,0.068,0.073,0.062,0.063,0.058,0.047,0.073]#,0.131]
+        fa2018=[1.524,1.529,1.466,1.482,1.461,1.440,1.393,1.409,1.383,1.367]#,1.325]
+        fa2018_err=[0.052,0.052,0.047,0.047,0.037,0.032,0.037,0.036,0.031,0.047]#,0.053]
         crossSections=np.array([fa2018,sp2018,sp2017])*1000 
         crossSectionErrs=np.array([fa2018_err,sp2018_err,sp2017_err])*1000
         baseFolder="./zDSelectedBkgndSamples/b1vps_"
@@ -133,7 +135,7 @@ def runAnalysis(channel,weightBranch,signalTag):
         binedges=np.linspace(8,9,3)
         binMin=0
         binMax=-1
-        crossSections=[37.9,34.5]
+        crossSections=np.array([[37.9,34.5]])
         crossSectionErrs=np.array([[0,0]]) 
         baseFolder="./zDSelectedBkgndSamples/f1_1285_to_etapipi/"
         recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
@@ -198,19 +200,28 @@ def runAnalysis(channel,weightBranch,signalTag):
 
 
     os.system("mkdir -p "+outputFolder)
-    xerrs=(binedges[1]-binedges[0])/2
+
+    # The last element of an array can be accessed as -1. To get a slice of an array
+    #   that includes the last element we cannot do -1+1 since that = 0. We have
+    #   to select until the len(array)
     if binMax==-1:
-        includingBinMax=len(bincenters)
+        includeBinMax=len(binedges)
     else:
-        includingBinMax=binMax
+        includeBinMax=binMax
+
+    xerrs=(binedges[1]-binedges[0])/2
     emin=binedges[binMin]
     emax=binedges[binMax]
-    binedges=binedges[binMin:binMax+1] # we want to include the max bin
+    print("emin, emax: {},{}".format(emin,emax))
+    binedges=binedges[binMin:includeBinMax] # we want to include the max bin
+    print(binedges)
     bincenters=(binedges[1:]+binedges[:-1])/2
     binwidth=binedges[1]-binedges[0]
     print("bin centers: {}".format(bincenters))
-    crossSections=[cs[binMin:binMax+1] for cs in crossSections]
-    crossSectionErrs=[err[binMin:binMax+1] for err in crossSectionErrs]
+    crossSections=[cs[binMin:includeBinMax] for cs in crossSections]
+    crossSectionErrs=[err[binMin:includeBinMax] for err in crossSectionErrs]
+    print("cross sections: {}".format(crossSections))
+    print("cross section errors: {}".format(crossSectionErrs))
     assert((len(binedges)-1==len(crossSections[0])) and 
         (len(crossSections[0])==len(crossSectionErrs[0])))
 
@@ -224,12 +235,14 @@ def runAnalysis(channel,weightBranch,signalTag):
     # Plot Cross Sections 
     ####################################
     for i,crossSection,crossSectionErr in zip(range(len(crossSections)),crossSections,crossSectionErrs):
-        ax[0].errorbar(bincenters,crossSection,yerr=crossSectionErr,xerr=xerrs,fmt="ro",ecolor=colors[i],label=labels[i])
+        ax[0].errorbar(bincenters,crossSection,yerr=crossSectionErr,xerr=xerrs,fmt="o",
+                markersize=4,c=colors[i],ecolor=colors[i],label=labels[i])
         ax[0].set_ylabel(csAxisLabel,size=16)
         ax[0].set_xlabel("Beam Energy (GeV)",size=16)
         ax[0].set_ylim(bottom=0, top=ax[0].get_ylim()[1]*1.2)
-        ax[0].axvline(emin,c="black",linestyle="--")
-        ax[0].axvline(emax,c="black",linestyle="--")
+        ax[0].set_ylim(0)
+        #ax[0].axvline(emin,c="black",linestyle="--")
+        #ax[0].axvline(emax,c="black",linestyle="--")
         ax[0].legend()
     
     
@@ -237,22 +250,21 @@ def runAnalysis(channel,weightBranch,signalTag):
     # Get/Plot reconstruction efficiency 
     ####################################
     if weightBranch=="AccWeight" and selectSignalRegion:
-        for i in len(recons):
+        print(" ** selecting signal region **")
+        for i in range(len(recons)):
             recons[i]=recons[i][(recons[i]["weightBSpi0"]==1)&(recons[i]["weightBSeta"]==1)]
 
 
     efficiencies=[]
     efficiencyErrors=[]
     for j,recon,thrown in zip(range(len(recons)),recons,throwns):
-        dat_counts, edges, _ = ax[0].hist(recon[dataEnergy],bins=binedges,weights=recon[weightBranch],label="8.2<\n$E_{beam}$\n<8.8 GeV")
-        thrown_counts, edges, _ = ax[1].hist(thrown[thrownEnergy],bins=binedges,label="8.2<\n$E_{beam}$\n<8.8 GeV")
+        dat_counts, edges = np.histogram(recon[dataEnergy],bins=binedges,weights=recon[weightBranch])
+        thrown_counts, edges = np.histogram(thrown[thrownEnergy],bins=binedges)
     
         # We will skip the bins that have exactly 0 entries, cant really calculate an efficiency and error from them due to div-by-zero
         skipSinceZero=[False if dat_count==0 and thrown_count==0 else True for dat_count,thrown_count in zip(dat_counts,thrown_counts)]
         dat_counts=dat_counts[skipSinceZero]
         thrown_counts=thrown_counts[skipSinceZero]
-        print(dat_counts)
-        print(thrown_counts)
         _bincenters=bincenters[skipSinceZero]
         efficiency=[dat_count/thrown_count for dat_count,thrown_count in zip(dat_counts,thrown_counts)]
         efficiencies.append(efficiency)
@@ -269,12 +281,17 @@ def runAnalysis(channel,weightBranch,signalTag):
         print("efficiencies error:")
         print(efficiencyErrors[j])
         
-        ax[1].errorbar(_bincenters,efficiencies[j],yerr=efficiencyErrors[j],xerr=xerrs,fmt="ro",ecolor=colors[j],label=labels[j])
+        ax[1].errorbar(_bincenters,efficiencies[j],yerr=efficiencyErrors[j],xerr=xerrs,fmt="o",c=colors[j],
+                markersize=4,ecolor=colors[j],label=labels[j])
         ax[1].set_ylabel("Efficiency",size=16)
         ax[1].set_xlabel("Beam Energy (GeV)",size=16)
         ax[1].ticklabel_format(style='sci')
-        ax[1].axvline(emin,c="black",linestyle="--")
-        ax[1].axvline(emax,c="black",linestyle="--")
+        #ax[1].axvline(emin,c="black",linestyle="--")
+        #ax[1].axvline(emax,c="black",linestyle="--")
+        if max(efficiencies[0])>0:
+            ax[1].set_ylim(0,max(efficiencies[0])*1.2)
+        else:
+            ax[1].set_ylim(min(efficiencies[0])*1.2,0)
 
     # convert to numpy arrays
     efficiencies=np.array(efficiencies)
@@ -284,6 +301,21 @@ def runAnalysis(channel,weightBranch,signalTag):
     ####################################
     # Obtain Tagged Flux In Specific Bins
     ####################################
+    def fluxIntegrator(fluxFile,minxs,maxxs):
+        #print("trying to open: {}".format(fluxFile))
+        h=uproot.open(fluxFile)['tagged_flux']
+        edges=h.edges
+        centers=edges[:-1]+(edges[1]-edges[0])/2
+        values=h.values
+        fluxIntegrals=[]
+        for minx,maxx in zip(minxs,maxxs):
+            extrema=[minx,maxx]
+            binRange=np.digitize(extrema,centers)
+            fluxIntegral=values[binRange[0]:binRange[1]].sum()
+            fluxIntegrals.append(fluxIntegral)
+            print("({}) Flux Integral between [{},{}] = {}".format(fluxFile,minx,maxx,fluxIntegral))
+        return fluxIntegrals
+
     print("\n\nGetting tagged flux\n------------------------")
     
     runs=["2018_8","2018_1","2017_1"]
@@ -292,81 +324,29 @@ def runAnalysis(channel,weightBranch,signalTag):
     rcdbQueries=[""," --rcdb-query='@is_2018production and @status_approved'"," --rcdb-query='@is_2018production and @status_approved and beam_on_current > 49'"]
     fluxCounts=[]
     for i in range(3):
-        fluxCounts.append([])
         cmd_base="/d/grid13/gluex/gluex_top/hd_utilities/hd_utilities-1.17/psflux/plot_flux_ccdb.py --begin-run="+str(runStarts[i])+" --end-run="+str(runEnds[i])
-        cmd_bins="--num-bins="+str(len(binedges)-1)
-        cmd_lowE="--energy-min="+str(binedges[0])
-        cmd_uppE="--energy-max="+str(binedges[-1])
+        cmd_bins="--num-bins=300"
+        cmd_lowE="--energy-min=8.2"
+        cmd_uppE="--energy-max=8.8"
         cmds=[cmd_base,cmd_bins,cmd_lowE,cmd_uppE]
         cmd=" ".join(cmds)
         cmd+=rcdbQueries[i]
-        if not os.path.exists(outputFolder+"flux_"+str(runStarts[i])+"_"+str(runEnds[i])+".root") or forceGetNewFluxVals:
+        if not os.path.exists(baseDir+"flux_"+str(runStarts[i])+"_"+str(runEnds[i])+"_finerBins.root") or forceGetNewFluxVals:
             print("Running following command:")
             print(cmd)
             os.system(cmd)
-            os.system("mv flux_"+str(runStarts[i])+"_"+str(runEnds[i])+".root "+outputFolder)
-        else:
-            print(outputFolder+"flux_"+str(runStarts[i])+"_"+str(runEnds[i])+".root exists already. Lets use this one")
-    
-        fluxFile=ROOT.TFile.Open(outputFolder+"flux_"+str(runStarts[i])+"_"+str(runEnds[i])+".root")
-        fluxHist=fluxFile.Get("tagged_flux")
-        for j in range(fluxHist.GetNbinsX()):
-            count=fluxHist.GetBinContent(j+1)
-            print("Bin{0} counts: {1}".format(j,count))
-            fluxCounts[i].append(count)
-        fluxCounts[i]=fluxCounts[i][binMin:binMax+1]
-    fluxCounts=np.array(fluxCounts)
-    fluxErrors=np.sqrt(fluxCounts) # poisson errors for the flux
-
-    ####################################
-    # Obtain Tagged Flux In Fine Bins For Scaling Factor
-    #   The flux binning we choose to get depends on the binning of the cross sections
-    #   but we want to make predictions for ONLY the coherent peak [8.2,8.8]. We can 
-    #   estimate the scale factor by getting a finely binned flux histogram with wider range
-    #   and integrating between various regions
-    # i.e. cross sections measured from [8,9] GeV but we want only [8.2,8.8] then the flux
-    #      must be scaled down by some factor
-    ####################################
-    print("\n\nDetermining Flux Ratio")
-    def fluxIntegrator(fluxFiles,minx,maxx):
-        fluxIntegrals=[]
-        for fluxFile in fluxFiles:
-            h=uproot.open(fluxFile)['tagged_flux']
-            edges=h.edges
-            centers=edges[:-1]+(edges[1]-edges[0])/2
-            values=h.values
-            
-            extrema=[minx,maxx]
-            binRange=np.digitize(extrema,centers)
-            fluxIntegral=values[binRange[0]:binRange[1]].sum()
-            print("({}) Flux Integral between [{},{}] = {}".format(fluxFile,minx,maxx,fluxIntegral))
-            fluxIntegrals.append(fluxIntegral)
-        return np.array(fluxIntegrals)
-
-    fluxHists=[]
-    for i in range(3):
-        cmd_base="/d/grid13/gluex/gluex_top/hd_utilities/hd_utilities-1.17/psflux/plot_flux_ccdb.py --begin-run="+str(runStarts[i])+" --end-run="+str(runEnds[i])
-        cmd_bins="--num-bins="+str(500)
-        cmd_lowE="--energy-min="+str(7)
-        cmd_uppE="--energy-max="+str(9)
-        cmds=[cmd_base,cmd_bins,cmd_lowE,cmd_uppE]
-        cmd=" ".join(cmds)
-        cmd+=rcdbQueries[i]
-        if not os.path.exists(baseDir+"flux_"+str(runStarts[i])+"_"+str(runEnds[i])+"_finerBins.root"):
-            print("Running following command:")
-            print(cmd)
-            os.system(cmd)
-            os.system("mv flux_"+str(runStarts[i])+"_"+str(runEnds[i])+".root "+baseDir+"flux_"+str(runStarts[i])+"_"+str(runEnds[i])+"_fineBins.root")
+            os.system("mv flux_"+str(runStarts[i])+"_"+str(runEnds[i])+"_finerBins.root "+baseDir)
         else:
             print(baseDir+"flux_"+str(runStarts[i])+"_"+str(runEnds[i])+"_finerBins.root exists already. Lets use this one")
-        fluxHists.append(ROOT.TFile.Open(baseDir+"flux_"+str(runStarts[i])+"_"+str(runEnds[i])+"_finerBins.root").Get("tagged_flux"))
     
-    fluxFiles=[baseDir+"flux_"+str(runStarts[i])+"_"+str(runEnds[i])+"_finerBins.root" for i in range(len(runStarts))]
-    flux8288=fluxIntegrator(fluxFiles,8.2,8.8)
-    fluxErange=fluxIntegrator(fluxFiles,emin,emax)
-    fluxRatios=flux8288/fluxErange
-    print("  Flux Ratios: {}".format(fluxRatios))
-    
+        fluxFileLoc=baseDir+"flux_"+str(runStarts[i])+"_"+str(runEnds[i])+"_finerBins.root"
+        minxs=binedges[:-1]
+        maxxs=binedges[1:]
+        fluxCounts.append(fluxIntegrator(fluxFileLoc,minxs,maxxs))
+    fluxCounts=np.array(fluxCounts)
+    print(fluxCounts)
+    fluxErrors=np.sqrt(fluxCounts) # poisson errors for the flux
+
     ####################################
     # Calculating Yield
     ####################################
@@ -381,19 +361,29 @@ def runAnalysis(channel,weightBranch,signalTag):
         fcerr=fluxErrors[i]
         eff=efficiencies[j]
         efferr=efficiencyErrors[j]
-        energies=bincenters[binMin:includingBinMax]
+        energies=bincenters
+        print("len of cs: {}".format(len(cs)))
+        print("len of eff: {}".format(len(eff)))
+        print("len of fc: {}".format(len(fc)))
         # Currently we assume no errors on the target, branching ratio, and flux ratios
-        expectedYield=cs*eff*fc*target*BR*fluxRatios
+        expectedYield=cs*eff*fc*target*BR
         expectedYields.append(expectedYield)
         expectedYieldErrs.append(expectedYield*np.sqrt((cserr/cs)*(cserr/cs)+(fcerr/fc)*(fcerr/fc)+(efferr/eff)*(efferr/eff)))
     expectedYields=np.array(expectedYields)
     expectedYieldErrs=np.array(expectedYieldErrs)
     totalExpectedYield=expectedYields.sum(axis=0) # total expected yield across all energy bins
     totalExpectedYieldErr=np.sqrt((expectedYieldErrs**2).sum(axis=0)) # errors add in quadruture
+    print("total expected yield: {}".format(totalExpectedYield))
+    print("total expected yield error: {}".format(totalExpectedYieldErr))
 
-    ax[2].errorbar(energies,totalExpectedYield,yerr=totalExpectedYieldErr,xerr=xerrs,fmt="ro",ecolor='black')
+    ax[2].errorbar(energies,totalExpectedYield,yerr=totalExpectedYieldErr,xerr=xerrs,fmt="o",markersize=4,c='black',ecolor='black')
     ax[2].set_ylabel("Phase 1 Expected Yield",size=16)
     ax[2].set_xlabel("Beam Energy (GeV)",size=16)
+    ax[2].set_ylim(0,max(totalExpectedYield)*1.3)
+    if max(totalExpectedYield)>0:
+        ax[2].set_ylim(0,max(totalExpectedYield)*1.2)
+    else:
+        ax[2].set_ylim(min(totalExpectedYield)*1.2,0)
     #ax[5].set_ylim(bottom=0)
     
     nsigs=3
@@ -408,13 +398,15 @@ def runAnalysis(channel,weightBranch,signalTag):
     ax[2].set_title(r"3$\sigma$ Integral: ["+s_lower3SigEstimate+", "+s_upper3SigEstimate+"]",size=16,fontweight='bold') 
 
     print("\n\nPlotting final plot!\n------------------------")
+    ax[3].axis('off')
     plt.tight_layout()
     plt.savefig(outputFolder+"efficiency_"+weightBranch+signalTag+".png")
     
     ###################################
     # Plotting
     ###################################
-    dataBaseLoc="zDSelectedBkgndSamples/gluex_"
+    print("Overlaying expected leakage from channel onto phase 1 data")
+    dataBaseFolder="zDSelectedBkgndSamples/gluex_"
     datas=[]
     for i,run in enumerate(["2018_8","2018_1","2017_1"]):
         tmp=rp.read_root(dataBaseFolder+run+"/bkgndSample_recon_acc_flat.root",columns=columns)
@@ -441,10 +433,11 @@ def runAnalysis(channel,weightBranch,signalTag):
                 assert(abs(rcount.sum()-1)<0.001) 
                 rcounts.append(rcount)
             rcounts=np.array(rcounts)
+            y=expectedYields.sum(axis=1)
             # to do proper matrix multiplication we need to transpose things a few times. The idea is to
             #   take each normalized recon distribution and construct a new density plot that is the
             #   weighted average of them (the 3 phase1 datasets)- weighted by the expectedYields
-            rcounts=(rcounts.T*expectedYields).T.sum(axis=0)/expectedYields.sum()
+            rcounts=(rcounts.T*y).sum(axis=1)/y.sum()
             assert(abs(rcounts.sum()-1)<0.001) # assert things are still normalized
         else:
             rcounts=np.histogram(recons[0][varx],weights=recons[0][weightBranch],bins=edges)[0]
@@ -463,18 +456,17 @@ def runAnalysis(channel,weightBranch,signalTag):
         ax.set_yscale('log')
         plt.savefig(outputFolder+"expectedYield_"+varx+"_"+weightBranch+signalTag+"_log.png")
     
-    if not selectSignalRegion: # dont make these sideband plots if we are going to select the signal  mass region
+    if weightBranch=="AccWeight" and not selectSignalRegion: # dont make these sideband plots if we are going to select the signal mass region
         pi0args,etaargs=getSidebands()
         fig,axes=plt.subplots(1,2,figsize=(14,6))
         for varx,args,label,ax in zip(["Mpi0","Meta"],[pi0args,etaargs],[r"$M(\gamma_1\gamma_2)$ GeV",r"$M(\gamma_3\gamma_4)$ GeV"],axes):
-            edges = np.histogram(data[varx],weights=data["AccWeight"],bins=100)[1]
+            edges = np.linspace(data[varx].min(), data[varx].max(), 101)
             centers=edges[:-1]+(edges[1]-edges[0])/2
             dcount=ax.hist(data[varx],weights=data["AccWeight"],bins=edges,histtype='step',color='black',linewidth=2,label="Phase1 Data")[0]
-            assert(abs(rcount.sum()-1)<0.001)
             if len(recons)==3:
                 rcounts=[]
                 for recon in recons:
-                    rcount=np.histogram(recon[varx],weights=recon[weightBranch],bins=edges)[0]
+                    rcount=np.histogram(recon[varx],weights=recon["AccWeight"],bins=edges)[0]
                     rcount/=rcount.sum() # make a density plot - which simply represents the shape
                     assert(abs(rcount.sum()-1)<0.001) 
                     rcounts.append(rcount)
@@ -482,10 +474,11 @@ def runAnalysis(channel,weightBranch,signalTag):
                 # to do proper matrix multiplication we need to transpose things a few times. The idea is to
                 #   take each normalized recon distribution and construct a new density plot that is the
                 #   weighted average of them - weighted by the expectedYields
-                rcounts=(rcounts.T*expectedYields).T.sum(axis=0)/expectedYields.sum()
+                y=expectedYields.sum(axis=1)
+                rcounts=(rcounts.T*y).sum(axis=1)/y.sum()
                 assert(abs(rcounts.sum()-1)<0.001) # assert things are still normalized
             else:
-                rcounts=np.histogram(recons[0][varx],weights=recons[0][weightBranch],bins=edges)[0]
+                rcounts=np.histogram(recons[0][varx],weights=recons[0]["AccWeight"],bins=edges)[0]
                 rcounts/=rcounts.sum()
 
             ax.step(centers,rcounts*upper3SigEstimate,color='red',linewidth=2,label=r"Upper 3$\sigma$ limit"+"\n leakage")
@@ -525,20 +518,34 @@ def montage(filename, nrows, ncols, baseDir,outputname):
     cmd="montage "+files+" -mode concatenate -tile "+str(nrows)+"x"+str(ncols)+" "+outputname
     print(cmd)
     os.system(cmd)
+    os.system("mkdir -p "+baseDir+"/montage")
+    os.system("mv "+baseDir+"/montage_* "+baseDir+"/montage")
 
 
 ###    The first AccWeight does not select the mass signal region whereas the second does. weightASBS also does not select on mass region
-for weightBranch, selectSignalRegion,signalTag in zip(["AccWeight", "AccWeight", "weightASBS"],[False, True, False],["","_sigRegion",""]):
-    channels=["omega"]#,"omega","eta","etapr","f1","a2pi","f2"]
-    for channel in channels:
-        runAnalysis(channel,weightBranch,signalTag)
-    for varx in ["Mpi0eta","Mpi0g3","Mpi0g4","cosTheta_eta_gj","cosTheta_eta_hel","phi_eta_gj","phi_eta_hel"]:
-        montage("expectedYield_"+varx+"_"+weightBranch+signalTag+".png",3,3,baseDir,baseDir+"/montage_"+varx+"_"+weightBranch+signalTag+".png")
-        montage("expectedYield_"+varx+"_"+weightBranch+signalTag+"_log.png",3,3,baseDir,baseDir+"/montage_"+varx+"_"+weightBranch+signalTag+"_log.png")
+#for weightBranch, selectSignalRegion,signalTag in zip(["AccWeight", "AccWeight", "weightASBS"],[False, True, False],["","_sigRegion",""]):
+#    channels=["b1","omega","eta","etapr","f1","a2pi","f2"]
+#    for channel in channels:
+#        print("\n=================\nRunning analysis for {}\n=================\n".format(channel))
+#        runAnalysis(channel,weightBranch,signalTag,selectSignalRegion)
+#    print("\nMaking montages of the histograms\n")
+#    for varx in ["Mpi0eta","Mpi0g3","Mpi0g4","cosTheta_eta_gj","cosTheta_eta_hel","phi_eta_gj","phi_eta_hel"]:
+#        montage("expectedYield_"+varx+"_"+weightBranch+signalTag+".png",3,3,baseDir,baseDir+"/montage_"+varx+"_"+weightBranch+signalTag+".png")
+#        montage("expectedYield_"+varx+"_"+weightBranch+signalTag+"_log.png",3,3,baseDir,baseDir+"/montage_"+varx+"_"+weightBranch+signalTag+"_log.png")
+#
+#f.close()
 
-f.close()
-os.system("cp "+baseDir+"tabulate_calculations.csv /d/home/ln16/notebooks/thesis_cutSelection_results/a2/")
 
+# Copy over the montaged images
+os.system("cp -r "+baseDir+"montage /d/home/ln16/notebooks/thesis_cutSelection_results/expected_leakage")
+# Copy over some individual plots related to the b1
+os.system("cp "+baseDir+"zB1_efficiency/expectedYield_Mpi0eta_AccWeight.png /d/home/ln16/notebooks/thesis_cutSelection_results/expected_leakage")
+os.system("cp "+baseDir+"zB1_efficiency/efficiency_AccWeight_sigRegion.png /d/home/ln16/notebooks/thesis_cutSelection_results/expected_leakage")
+os.system("cp "+baseDir+"zB1_efficiency/efficiency_weightASBS.png /d/home/ln16/notebooks/thesis_cutSelection_results/expected_leakage")
+os.system("cp "+baseDir+"zB1_efficiency/sidebands.png /d/home/ln16/notebooks/thesis_cutSelection_results/expected_leakage")
+
+
+#os.system("cp "+baseDir+"tabulate_calculations.csv /d/home/ln16/notebooks/thesis_cutSelection_results/a2/")
 
 
 
