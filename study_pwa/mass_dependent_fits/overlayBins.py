@@ -7,7 +7,7 @@ import shutil
 def printHelp():
     print("\nUsage: \n-----------------")
     print("Running etapi_plotter and plotting their results into a giant pdf")
-    print("python overlayBins.py x y z a b")
+    print("python overlayBins.py x y z a b c")
     print("where x=0 -- for all bins run etapi_plotter")
     print("      x=1 -- gather all results from etapi_plotter into overlayPlots folder")
     print("      x=2 -- do both")
@@ -18,6 +18,7 @@ def printHelp():
     print("where z is the .fit file")
     print("where a is the folder where overlayBins.C is in")
     print("where b is a semicolon separated list to gather fit fractions for (used in the etapi_plotter program)")
+    print('where c is either "T" or "F" to do or not apply acceptance correction')
     
 args=sys.argv
 nargs=len(args)
@@ -30,6 +31,7 @@ else:
     fitFile=str(args[3])
     cFolder=str(args[4])
     Ls=str(args[5])
+    doAccCorr=str(args[6])
     groupVec=ampString.split(";")
     groups=[tmp if tmp!="" else tmp for tmp in groupVec]
     groupTags=["_"+tmp if tmp!="" else tmp for tmp in groupVec]
@@ -39,7 +41,6 @@ else:
 baseDir=os.getcwd()
 
 verbose=True
-doAccCorr="T" # any other string will not do acceptance correction. Only "T" will turn it on
 
 def runEtaPiPlotterForAllBins():
     print("   running etapi_plotter...")

@@ -5,10 +5,14 @@ import sys
 import numpy as np
 import subprocess
 
-cfgFile="etapi0_SD_TMD_piecewise_EXAMPLE-copy"
-#cfgFile="etapi0_SD_TMD_piecewise_EXAMPLE_nonLoop-copy"
-fitFileName="etapi0_SD_TMD_piecewise_update.fit"
+nprocesses=9
+cfgFile="./config_files/etapi_hybrid-copy"
+fitFileName="etapi_result.fit"
 percent=3.0 # parameters must not be within percent of the defined parameter limits
+workingDir=os.getcwd()
+if os.path.exists("tmp"):
+    os.system("rm -r tmp")
+os.system("mkdir -p tmp")
 
 def checkParLimits(fitFile):
     '''
@@ -80,8 +84,8 @@ def spawnProcessChangeSetting(old,new):
 
 
 #ts=["010016", "016021", "021027", "027034", "034042", "042051", "051061", "061072", "072085", "085100","010016"]
-ts=["010020","0200325","0325050","050075","075100","010020"]
-#ts=["010020","010020"]
+#ts=["010020","0200325","0325050","050075","075100","010020"]
+ts=["010020","010020"]
 
 argc=len(sys.argv)
 if argc!=2:
@@ -115,23 +119,23 @@ if runFits:
         newFitFile="" # initialize fitFile
         nPassedCheck=0
         while not checkFit(newFitFile):
-        #while nPassedCheck<5:
-        #    if checkFit(newFitFile):
-        #        nPassedCheck+=1
+#        while nPassedCheck<1:
+#            if checkFit(newFitFile):
+#                nPassedCheck+=1
             os.system("python setup_mass_dep_fits.py") # reinitialize
             print("Starting a new fit attempt...")
-            cmd="mpirun -np 9 fitMPI -c "+cfgFile+".cfg -m 80000 -t 0.1"
+            cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -m 80000 -t 0.1"
             pipeCmd=' > fitAttempt'+str(i)+'.log'
             os.system(cmd+pipeCmd)
-            newFitFile="etapi0_SD_TMD_piecewise_update"+str(i)+".fit"
-            os.system("mv etapi0_SD_TMD_piecewise_update.fit "+newFitFile)
+            newFitFile="etapi_result"+str(i)+".fit"
+            os.system("mv etapi_result.fit "+newFitFile)
             os.system("mv "+cfgFile+".cfg "+cfgFile+str(i)+".cfg")
             i+=1
     
         # Move results to the desired folder
         os.system("mkdir -p "+t)
         #os.system("mv -f *.root "+t)
-        os.system("mv -f etapi0_SD_TMD_piecewise_update*.fit "+t)
+        os.system("mv -f etapi_result*.fit "+t)
         os.system("mv -f "+cfgFile+"*.cfg "+t)
         os.system("mv -f *.log "+t)
         os.system("mv -f *.ni "+t)
@@ -164,7 +168,7 @@ if getSummary:
                         if "wall" in line:
                             wall_time=float(line.split(" ")[-2])
                             wall_times.append(wall_time)
-            fitFile="./"+t+"/etapi0_SD_TMD_piecewise_update"+str(iteration)+".fit"
+            fitFile="./"+t+"/etapi_result"+str(iteration)+".fit"
             with open(fitFile) as fit:
                 for line in fit:
                     if any(ele for ele in interestingLines if ele in line):

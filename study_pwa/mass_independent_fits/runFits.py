@@ -22,8 +22,8 @@ fitName="EtaPi_fit" # location of the folder containing the inputs that were cre
 seedFileTag="param_init" # seedFile name. Should also match the variable from divideData.pl 
 seedAmpInit=9183 # choose a seed to randomly start to sample from
 verbose=False
-doAccCorr="true" # has to be a string input
-factorSample=[False,5] # (first arg)should we bootstrap the acc mc with a sampling factor(second argument)
+doAccCorr="false" # has to be a string input
+factorSample=[False,5] # (first arg) Should we bootstrap the acc mc with a sampling factor(second argument)
 keep_logs_fit_seed=False
 
 start = time.time()
@@ -231,8 +231,8 @@ def getVectorOfPotentialLMEs(fitDir,startBin,endBin,numIters):
     '''
     THIS FUNCTION WILL BE USED TO CREATE A LIST OF ALL POTENTIAL WAVESETS OF ALL POSSIBLE SIZES
         GIVEN SOME BASE WAVESET AND THE SET OF POSSIBLE WAVES
-    LOOPING THROUGH ALL POTENTIAL WAVE SETS WILL ALLOW USE TO DETERMINE SYSTEMATICS RELATED
-        TO WAVESET AND DETERMINE HOW LEAKAGE OCCURS. THIS IS AN EXHAUSTIVE SEARCH
+    LOOPING THROUGH ALL POTENTIAL WAVE SETS WILL ALLOW US TO DETERMINE SYSTEMATICS RELATED
+        TO WAVESET AND DETERMINE HOW LEAKAGE OCCURS. THIS IS AN EXHAUSTIVE SEARCH - EXPENSIVE
     '''
     def comb(n, r):
         ''' Formula for n choose r '''
@@ -254,7 +254,7 @@ def getVectorOfPotentialLMEs(fitDir,startBin,endBin,numIters):
     def determineBestBranch(potential_spects_perBin,seed_waveset,bins):
         '''
         Is a nested fucntion, will only be used as nested
-        Function to be used for growing waveset
+        Function to be used for growing a waveset
         Determine best branch to grow the waveset in the direction of 
         '''
         resultsFolder=os.listdir(workingDir+"/finalAmps")
@@ -329,9 +329,6 @@ def getVectorOfPotentialLMEs(fitDir,startBin,endBin,numIters):
     ###################################
     unused_waves=list(set(all_potential_spect)-set(seed_waveset))
     growIters=len(unused_waves)
-    print("Total number jobs to complete: {}".format((endBin-startBin)*numIters*sum([comb(growIters,j+1) for j in range(growIters)])))
-    print("** Beginning in 2 seconds **")
-    print("----------------------------------")
     time.sleep(2)
     potential_vects=[]
     potential_spects=[]
@@ -419,25 +416,25 @@ if __name__ == '__main__':
     #potential_vects=getVectorOfPotentialLMEs(fitDir,startBin,endBin,numIters)
     potential_vects=[
             #### S + TMD
-            [
-            [0,0,"+",True],
-            [0,0,"-",True],
-            [2,-1,"-",False],
-            [2,0,"+",False],
-            [2,0,"-",False],
-            [2,1,"+",False],
-            [2,1,"-",False],
-            [2,2,"+",False]
-            ],
-            ### K-MATRIX
             #[
             #[0,0,"+",True],
             #[0,0,"-",True],
+            #[2,-1,"-",False],
             #[2,0,"+",False],
             #[2,0,"-",False],
-            #[2,2,"-",False],
+            #[2,1,"+",False],
+            #[2,1,"-",False],
             #[2,2,"+",False]
             #],
+            ### K-MATRIX
+            [
+            [0,0,"+",True],
+            [0,0,"-",True],
+            [2,0,"+",False],
+            [2,0,"-",False],
+            [2,2,"-",False],
+            [2,2,"+",False]
+            ],
     ]
     os.chdir(fitDir)
     for ibin in range(startBin,endBin):
@@ -453,7 +450,9 @@ if __name__ == '__main__':
     ##############################################################
     ## BEGIN FITTING AND GETTING AMPLITUDE RESULTS
     ##############################################################
-    print("begin fitting...")
+    print("Total number jobs to complete: {}".format((endBin-startBin)*numIters*len(potential_vects))
+    print("** Beginning in 2 seconds **")
+    print("----------------------------------")
     os.chdir(fitDir)
     params=[(i,potential_vect,j) for i in range(startBin,endBin) for potential_vect in potential_vects for j in range(numIters)]
     p=Pool(processes)

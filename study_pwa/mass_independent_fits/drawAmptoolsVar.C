@@ -8,7 +8,7 @@ int nbins=19; //25; // THIS IS NOT TO BE CONFUSED WITH NM. THIS IS THE BINNING F
 int nbinsAng=30;
 int nm=1; // NUMBER OF BINNINGS TO MAKE THE HISTOGRAMS IN
 string foutTag="phase1";//"kmatrix"; 
-bool doAccCorr=true; // SHOULD WE ACCEPTANCE CORRECT THE YIELDS?
+bool doAccCorr=false; // SHOULD WE ACCEPTANCE CORRECT THE YIELDS?
 //// THE FILES YOU WANT TO RUN OVER IS IN THE DRAWAMPTOOLSVAR FUNCTION. SINCE WE USE A FOR LOOP FOR 
 //       INITIALIZATION WE CANNOT DO IN GLOBAL SCOPE
 
@@ -215,8 +215,8 @@ void drawAmptoolsVar(){
     string st="010020";
     string sm="104180";
     for (auto pol: pols){
-        flatHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/polALL_t"+st+"_m"+sm+"_FTOT_selected_acc_flat.root");
-        flatThrownHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/polALL_t"+st+"_m"+sm+"_FTOT_gen_data_flat.root");
+        flatHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_FTOT_selected_acc_flat.root");
+        flatThrownHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_FTOT_gen_data_flat.root");
         totHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_DTOT_selected_data_flat.root");
         sbHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_DTOT_selected_bkgnd_flat.root");
         //flatHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected/tall_m080180/pol000_tall_m080180_F2018_8_selected_acc_flat.root");
