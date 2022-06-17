@@ -34,9 +34,9 @@ void split_flat_kinematics(){
     map<string,int> ts={{"010020",0},{"0200325",1},{"0325050",2},{"050075",3},{"075100",4}}; // t
     vector<float> mint={0.1,0.2,0.325,0.5,0.75};
     vector<float> maxt={0.2,0.325,0.5,0.75,1.0};
-    map<string,int> mpi0etas={{"104180",0}}; // m 
+    map<string,int> mpi0etas={{"104156",0}}; // m 
     vector<float> minmpi0eta={1.04};
-    vector<float> maxmpi0eta={1.80};
+    vector<float> maxmpi0eta={1.56};
     //map<string,int> ts={{"all",0}}; // t
     //vector<float> mint={0};
     //vector<float> maxt={100};

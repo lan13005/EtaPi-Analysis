@@ -510,12 +510,12 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		// 	between the signal and sideband regions. The weight = the ratio the lengths
 		// 	spanned by the signal to that of the sideband times -1.
 		if (Mpi0 > pi0Mean-3*pi0Std && Mpi0 < pi0Mean+3*pi0Std){ pi0_sbweight=1; }
-		else if (Mpi0 > pi0Mean+4*pi0Std && Mpi0 < pi0Mean+5.5*pi0Std){ pi0_sbweight=-2.0; }
-		else if (Mpi0 > pi0Mean-5.5*pi0Std && Mpi0 < pi0Mean-4*pi0Std){ pi0_sbweight=-2.0; }
+		else if (Mpi0 > pi0Mean+4*pi0Std && Mpi0 < pi0Mean+5*pi0Std){ pi0_sbweight=-3.52; } // new one has sb size 1.5 and weight -2
+		else if (Mpi0 > pi0Mean-5*pi0Std && Mpi0 < pi0Mean-4*pi0Std){ pi0_sbweight=-3.52; }
 		else { pi0_sbweight=0; }
 		if (Meta > etaMean-3*etaStd && Meta < etaMean+3*etaStd){ eta_sbweight=1; }
-		else if (Meta > etaMean+4*etaStd && Meta < etaMean+6*etaStd){ eta_sbweight=-1.5; }
-		else if (Meta > etaMean-6*etaStd && Meta < etaMean-4*etaStd){ eta_sbweight=-1.5; }
+		else if (Meta > etaMean+4*etaStd && Meta < etaMean+5*etaStd){ eta_sbweight=-2.92; } // new one has sb size 2 and weight -1.5
+		else if (Meta > etaMean-5*etaStd && Meta < etaMean-4*etaStd){ eta_sbweight=-2.92; }
 		else { eta_sbweight=0; }
 		float sbweight=pi0_sbweight*eta_sbweight;
 		float weight=sbweight*locHistAccidWeightFactor;

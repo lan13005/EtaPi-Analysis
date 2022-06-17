@@ -2,12 +2,12 @@
 
 float PI=3.14159;
 float histLineWidth=5;
-float lowMass=1.04; //0.80;
+float lowMass=0.80; //0.80;
 float uppMass=1.80;
-int nbins=19; //25; // THIS IS NOT TO BE CONFUSED WITH NM. THIS IS THE BINNING FOR THE MASS HISTOGRAM
+int nbins=25; //25; // THIS IS NOT TO BE CONFUSED WITH NM. THIS IS THE BINNING FOR THE MASS HISTOGRAM
 int nbinsAng=30;
 int nm=1; // NUMBER OF BINNINGS TO MAKE THE HISTOGRAMS IN
-string foutTag="phase1";//"kmatrix"; 
+string foutTag="kmatrix";//"kmatrix"; 
 bool doAccCorr=false; // SHOULD WE ACCEPTANCE CORRECT THE YIELDS?
 //// THE FILES YOU WANT TO RUN OVER IS IN THE DRAWAMPTOOLSVAR FUNCTION. SINCE WE USE A FOR LOOP FOR 
 //       INITIALIZATION WE CANNOT DO IN GLOBAL SCOPE
@@ -211,18 +211,25 @@ void drawAmptoolsVar(){
     vector<string> flatThrownHistFiles;
     vector<string> totHistFiles;
     vector<string> sbHistFiles;
-    vector<string> pols={"000","045","090","135"};
+    vector<string> pols={"000"};//,"045","090","135"};
     string st="010020";
     string sm="104180";
     for (auto pol: pols){
-        flatHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_FTOT_selected_acc_flat.root");
-        flatThrownHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_FTOT_gen_data_flat.root");
-        totHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_DTOT_selected_data_flat.root");
-        sbHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_DTOT_selected_bkgnd_flat.root");
-        //flatHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected/tall_m080180/pol000_tall_m080180_F2018_8_selected_acc_flat.root");
-        //flatThrownHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected/tall_m080180/pol000_tall_m080180_F2018_8_gen_data_flat.root");
-        //totHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected/pol000_tall_m080180_kmatrix_selected_halved_data_flat.root");
-        //sbHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected/pol000_tall_m080180_kmatrix_selected_halved_bkgnd_flat.root");
+        //flatHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_FTOT_selected_acc_flat.root");
+        //flatThrownHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_FTOT_gen_data_flat.root");
+        //totHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_DTOT_selected_data_flat.root");
+        //sbHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_DTOT_selected_bkgnd_flat.root");
+
+        //string base="/d//grid17/ln16/myDSelector/amptools/zPhase1_t0103061_e79828890/baseFiles_v3/010020_malte/";
+        //flatHistFiles.push_back(base+"amptools_flat_phase1_t010020_e8288_sig_a2_pVHpi0p_"+pol+".root");
+        //flatThrownHistFiles.push_back(base+"amptools_flat_gen_phase_1_t010020_e8288_tree_flat_a2_pol"+pol+".root");
+        //totHistFiles.push_back(base+"amptools_data_phase1_t010020_e8288_tot_a2_pVHpi0p_"+pol+".root");
+        //sbHistFiles.push_back(base+"amptools_data_phase1_t010020_e8288_sb_a2_pVHpi0p_"+pol+".root");
+
+        flatHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected/tall_m080180/pol000_tall_m080180_F2018_8_selected_acc_flat.root");
+        flatThrownHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected/tall_m080180/pol000_tall_m080180_F2018_8_gen_data_flat.root");
+        totHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected/pol000_tall_m080180_kmatrix_selected_data_flat.root");
+        sbHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected/pol000_tall_m080180_kmatrix_selected_bkgnd_flat.root");
     }
     // genHists need atleast 1 null string if you dont want it draw anything, otherwise it should crash.
     //     We still need getHists to initialize a set of empty histograms

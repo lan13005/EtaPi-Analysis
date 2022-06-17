@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import os
+import re #regex
 import numpy as np
 import shutil
 import math
@@ -11,20 +12,31 @@ import subprocess
 import time
 import fileinput
 from multiprocessing import Pool
-from generate_cfg import writeCfg, constructOutputFileName
+from generate_cfg import writeCfg, constructOutputFileName, getPreamble
 from determineAmbiguities import executeFinders
 import pandas as pd
 import itertools
 import operator as op
 from functools import reduce
 
+logDirBaseName="logs" # creates a folder in each bin_x folder with the name logDirBaseName+"_"+waveset
 fitName="EtaPi_fit" # location of the folder containing the inputs that were created from divideData.pl
 seedFileTag="param_init" # seedFile name. Should also match the variable from divideData.pl 
-seedAmpInit=9183 # choose a seed to randomly start to sample from
-verbose=False
-doAccCorr="false" # has to be a string input
-factorSample=[False,5] # (first arg) Should we bootstrap the acc mc with a sampling factor(second argument)
-keep_logs_fit_seed=False
+writeCfgSeed=-1 # choose a seed to randomly start to sample from
+verbose=True
+doAccCorr="true" # has to be a string input
+
+############################
+# [True, ["data", "bkgnd"], [1, 1]] to bootstrap data 
+# [True, ["acc"], [1]] to bootstrap acceptance mc 
+# [True, ["data", "bkgnd", "accmc"], [1,1,1]] to bootstrap data and acceptance mc together (I think this is the proper final uncertainty) 
+# [True, ["acc", "genmc"], [N,N]] to under or oversample the MC that will be used for acceptance correction. "genmc" needs to be here also or else
+#      the acceptance changes
+bootstrapSettings=[False,["data","bkgnd"],[1,1]] 
+bsFolderTag="_bs_"+"_".join([sample+str(factor)+"x" for sample,factor in zip(bootstrapSettings[1],bootstrapSettings[2])]) # appends a tag to the logs folder in each bin subfolder
+bsFolderTag+="" # starts with underscore: include another tag for more folder separation
+forceDataBkngdSameSeed=True # data and bkgnd trees can be read with the same seed. If tree same size then it would grab same set of indicies
+############################
 
 start = time.time()
 workingDir = os.getcwd()
@@ -34,63 +46,184 @@ fitDir = workingDir+"/"+fitName
 print("fit directory: %s" % (fitDir))
 
 def reorderWaveset(waveset):
+    '''
+    We want a invariant way to denote a string of underscore separated waves
+      i.e. S0++_S0+- = S0+-_S0++
+    '''
     tmp=waveset.split("_")
-    tmp.sort()
+    tmp.sort() # We can apply a sort to order things
     return "_".join(tmp)
 
-def getAmplitudesInBin(params):
-    binNum,lmes,j=params
+def determineBestFit(srcLogDir,binNum):
+    '''
+    When running fits we can save a file whose name contains the best fit iteration
+       This file name can then be grabbed by the bootstrap function to construct
+       a new config file that bootstraps around this best fit
+    '''
+    bestIteration=9999
+    bestMinimum=0
+    os.system("rm -f FIT_ITER_USED*")
+    for i in range(numIters):
+        fname=srcLogDir+"/bin_"+str(binNum)+"-"+str(i)+".fit"
+        if not os.path.exists(fname):
+            raise ValueError("There should be a fit file at this location but there isnt! {}".format(fname))
+        with open(fname) as f:
+            for line in f:
+                ## While reading each file from top to bottom we will first encounter lastMinuitCommandStatus, eMatrixStatus, and then bestMinimum
+                if "lastMinuitCommandStatus" in line:
+                    #print(line.rstrip())
+                    #print(int(line.split("\t")[1]))
+                    if int(line.split("\t")[1])!=0:
+                        break
+                if "eMatrixStatus" in line:
+                    #print(line.rstrip())
+                    #print(int(line.split("\t")[1]))
+                    if int(line.split("\t")[1])!=3:
+                        break
+                if "bestMinimum" in line:
+                    NLL=float(line.rstrip().lstrip().split("\t")[1])
+                    if NLL<bestMinimum:
+                        bestIteration=i
+                        bestMinimum=NLL
+                    #print(bestIteration,bestMinimum)
+    if bestIteration==9999:
+        raise ValueError("(Bin "+str(binNum)+")Doesn't seem like any of the nominal fits "\
+                +"reached a good convergence = [lastMinuitCommandStatus, eMatrixStatus] = [0,3]")
+    os.system("touch FIT_ITER_USED_FOR_BOOTSTRAP-"+str(bestIteration))
 
+    #### CAN MANUALLY OVERWRITE OR SET bestIterations HERE
+
+
+def bootstrapCfgGenerator(srcLogDir,binNum,waveset,j):
+    '''
+    Generates a new config file by loading the best fit parameters from a 
+        set of nominal fits (without bootstrapping)
+    '''
+    bestIteration=9999
+    binDir=fitDir+"/bin_"+str(binNum)
+    fs=[f for f in os.listdir(binDir) if f.startswith("FIT_ITER")]
+    if len(fs)!=1:
+        raise ValueError("bootstrapCfgGenerator error: not able to locate file that holds the best fit iteration. Did you run a nominal pre-fit?")
+    bestIteration=int(fs[0].split("-")[1])
+
+    ##########################
+    # Load the best solution from seedFileTag
+    ##########################
+    mapInitializeLines={}
+    mapParameters={}
+    f=srcLogDir+"/"+seedFileTag+"_"+str(bestIteration)+".cfg"
+    if not os.path.exists(f):
+        raise ValueError("bootstrapCfgGenerator could not find the seed file: {}".format(f))
+    with open(srcLogDir+"/"+seedFileTag+"_"+str(bestIteration)+".cfg") as param:
+        lines=param.readlines()
+        lines=[line.rstrip().lstrip() for line in lines]
+        for line in lines:
+            if line.startswith("initialize"):
+                mapInitializeLines[line.split("::")[2].split(" ")[0]] = " ".join(line.split("::")[2].split(" ")[2:])
+            if line.startswith("parameter"):
+                mapParameters[line.split(" ")[1]] = line.split(" ")[2]
+    #    print(mapInitializeLines)
+    #    print(mapParameters)
+    
+    
+    ##########################
+    # Load the best solutions configuration file and manually update the cfg file 
+    # with the seed file with the best results
+    ##########################
+    f=srcLogDir+"/"+waveset+"("+str(bestIteration)+").cfg"
+    if not os.path.exists(f):
+        raise ValueError("bootstrapCfgGenerator could not find the config file: {}".format(f))
+    with open(srcLogDir+"/"+waveset+"("+str(bestIteration)+").cfg","r") as cfg:
+        lines=cfg.readlines()
+        for i,line in enumerate(lines):
+            if line.startswith("initialize") and "fixed" not in line:
+                wave=line.split("::")[2].split(" ")[0]
+                replacement=" ".join(line.split(" ")[:3])+" "+mapInitializeLines[wave]+"\n"
+                lines[i]=replacement
+            if line.startswith("parameter") and "fixed" not in line:
+                parName=line.split(" ")[1]
+                replacement=" ".join(line.split(" ")[:2])+" "+mapParameters[parName]+"\n"
+                lines[i]=replacement
+            if line.startswith("fit"):
+                lines[i]="fit bin_"+str(binNum)+"-"+str(j) 
+    
+    outputCfg=waveset+"("+str(j)+").cfg"
+    with open(outputCfg,"w") as cfg:
+        cfg.write("".join(lines))
+    return outputCfg
+
+
+def modifyCfgForBootstrapping(input_cfg,bootstrapSettings,binNum,j):
+    '''
+    Modifes input_cfg such that dataset(i.e. accmc/data/genmc) will use ROOTDataReaderBootstrap with sampling factor given by bootstrapSettings[1]
+    '''
+    #print("modifying cfg for bootstrapping")
+    if bootstrapSettings[0]:
+        with open(input_cfg,'r') as cfgFile:
+            for line in cfgFile.readlines():
+                if any(line.startswith(sample) for sample in bootstrapSettings[1]):
+                    line=re.sub('\s+',' ',line) # standardize input by converting multispaces into single spaces
+                    if forceDataBkngdSameSeed:
+                        random.seed(seeds[binNum][j%numIters]) # rolling seeds. With mod(20): when j=0,20,40 the seed(and thus cfg) will be the same
+                    searchStr=line.rstrip().lstrip()
+                    prefix=" ".join(searchStr.split(" ")[:2])
+                    files=searchStr.split(" ")[3]
+                    index=bootstrapSettings[1].index(searchStr.split(" ")[0])
+                    args=" -s "+str(random.randrange(9999999))+" -n "+str(bootstrapSettings[2][index])
+                    replaceStr=prefix+" ROOTDataReaderBootstrap "+files+args
+                    sedArgs=["sed","-i",'s@'+searchStr+'@'+replaceStr+'@g',input_cfg]
+                    subprocess.Popen(sedArgs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).wait()
+    #print("  modified!")
+
+
+def getAmplitudesInBin(params):
+    binNum,lmes,j,logDir=params
+    waveset=constructOutputFileName(lmes)
+    waveset=reorderWaveset(waveset)
+    os.chdir("bin_"+str(binNum))
+    seedFile=seedFileTag+"_"+str(j)+".cfg"
+    os.system("touch "+seedFile)
+
+    binCfgSrc = "bin_"+str(binNum)+"-full.cfg"
+
+    if os.path.exists(logDir+"_"+waveset):
+        fs=os.listdir(logDir+"_"+waveset)
+        if len([f for f in fs if f.endswith(".fit")])==numIters:
+            print("skipping fits for waveset {} in bin {} since we have all the expected number of fit files already...".format(waveset,binNum))
+            os.chdir("..")
+            return 0
+
+    ## Load the total {data-bkngd} yield. Used in BIC calculation
     entriesDF=pd.read_csv(fitDir+"/yields.txt",delimiter=" ")
     mapBinToEntries={k:v for k,v in zip(entriesDF["bin"],entriesDF["entries"])}
     entries=mapBinToEntries[binNum]
 
-    waveset=constructOutputFileName(lmes)
-    waveset=reorderWaveset(waveset)
-    if os.path.exists(workingDir+"/finalAmps"):
-        resultsFolder=os.listdir(workingDir+"/finalAmps")
-        if any([os.path.exists(workingDir+"/finalAmps/"+f) for f in resultsFolder if set(f.split("_"))==set(waveset.split("_"))]):
-            print("skipping fit since the waveset {} already exists...".format(waveset))
-            return 1
-    
-    seedFile=seedFileTag+"_"+str(j)+".cfg"
-    os.chdir("bin_"+str(binNum))
-
-    binCfgSrc = "bin_"+str(binNum)+"-full.cfg"
-    binCfgDest, pols=writeCfg(lmes,binCfgSrc,seedAmpInit,j)
-    replaceStr="fit {}({})".format(waveset,j)
-    searchStr="^fit .*";
-    sedArgs=["sed","-i",'s@'+searchStr+'@'+replaceStr+'@g',binCfgDest]
-    subprocess.Popen(sedArgs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).wait()
+    if bootstrapSettings[0]:
+        if verbose:
+            print("Making configuration file for bootstrapping")
+        _, pols=getPreamble(binCfgSrc,j) # use it just to get the polarizations
+        binCfgDest = bootstrapCfgGenerator(logDirBaseName+"_"+waveset, binNum, waveset, j) # should point to the log base directory where the nominal fits should exist
+        modifyCfgForBootstrapping(binCfgDest,bootstrapSettings,binNum,j)
+    else:
+        # Config generator with random initialization
+        if verbose:
+            print("Making configuration file for nominal fits")
+        binCfgDest, pols=writeCfg(lmes,binCfgSrc,writeCfgSeed,j)
+        # The following is left over code from a merge - no use I think
+        # replaceStr="fit {}({})".format(waveset,j)
+        # searchStr="^fit .*";
+        # sedArgs=["sed","-i",'s@'+searchStr+'@'+replaceStr+'@g',binCfgDest]
+        # subprocess.Popen(sedArgs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).wait()
         
-    if keep_logs_fit_seed:
-        os.system("touch "+seedFile)
-
-    if factorSample[0]:
-        with open(binCfgDest,'r') as cfgFile:
-            for line in cfgFile.readlines():
-                if line.startswith("accmc"):
-                    searchStr=line.rstrip().lstrip()
-        prefix=" ".join(searchStr.split(" ")[:2])
-        files=searchStr.split(" ")[3]
-        args=" -s "+str(random.randrange(9999999))+" -n "+str(factorSample[1])
-        replaceStr=prefix+" ROOTDataReaderBootstrap "+files+args
-        sedArgs=["sed","-i",'s@'+searchStr+'@'+replaceStr+'@g',binCfgDest]
-        subprocess.Popen(sedArgs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).wait()
-    
     haveHeader=False
-    if keep_logs_fit_seed:
-        logFile=open(logDir+"_"+waveset+"/amplitudeFits"+str(j)+".log","w+")
-    with open(logDir+"_"+waveset+"/amplitude"+str(j)+".txt","w") as outFile:
-        if keep_logs_fit_seed:
-            callFit = "fit -c "+binCfgDest+" -s "+seedFile
-        else:
-            callFit = "fit -c "+binCfgDest
+    with open(logDir+"_"+waveset+"/amplitude"+str(j)+".txt","w") as outFile, open(logDir+"_"+waveset+"/amplitudeFits"+str(j)+".log","w+") as logFile:
+        callFit = "fit -c "+binCfgDest+" -s "+seedFile
         if verbose:
             print(("({0:.1f}s)(Bin {1})(Iteration {2}): "+callFit).format(time.time()-start,binNum,j))
     
         # We needed to create another fit results file so we can run things in parallel
-        resultsFile="{}({}).fit".format(waveset,j)
+        #resultsFile="{}({}).fit".format(waveset,j)
+        resultsFile="bin_"+str(binNum)+"-"+str(j)+".fit"
         if os.path.exists(resultsFile):
             os.remove(resultsFile)
 
@@ -102,9 +235,8 @@ def getAmplitudesInBin(params):
 
         os.rename(binCfgDest,logDir+"_"+waveset+"/"+binCfgDest)
 
-        if keep_logs_fit_seed:
-            logFile.write("ITERATION: "+str(j)+"\n")
-            logFile.write(output)
+        logFile.write("ITERATION: "+str(j)+"\n")
+        logFile.write(output)
         if "STATUS=CONVERGED" in output:
             status="C" # (C)onverged
         elif "STATUS=FAILED" in output:
@@ -124,8 +256,8 @@ def getAmplitudesInBin(params):
             print("Moving fit results to: "+os.getcwd()+"/"+resultsFilePath)
         if os.path.exists(resultsFile) and os.stat(resultsFile).st_size!=0: # if the fit files is not empty then we will try and use it
             shutil.move(resultsFile,resultsFilePath)
-            if os.path.exists(seedFile) and os.stat(seedFile).st_size!=0: # param_init.cfg only exists if the fit converged
-                shutil.move(seedFile,os.getcwd()+"/"+logDir+"_"+waveset+"/param_init_"+str(j)+".cfg")
+            if os.path.exists(seedFile) and os.stat(seedFile).st_size!=0: # seedFile only exists if the fit converged
+                shutil.move(seedFile,os.getcwd()+"/"+logDir+"_"+waveset+"/"+seedFileTag+"_"+str(j)+".cfg")
             getAmplitudeCmd='getAmpsInBin "'+binCfgDest+'" "'+resultsFilePath+'" "'+pols+'" "'+str(j)+'" "'+doAccCorr+'" "'+str(entries)
             if verbose:
                 print(getAmplitudeCmd)
@@ -150,59 +282,68 @@ def getAmplitudesInBin(params):
             print("  fit file has non-zero size? {}".format(os.stat(resultsFile).st_size!=0))
 
     os.chdir("..")
-    if keep_logs_fit_seed:
-        logFile.close()
 
     return 0
 
-def makeLogFolders(binNum,lmess):
+def makeLogFolders(logDir,binNum,lmess):
     '''
     Remove all the log/ directories in each bin folder
     '''
-    print("Cleaning relevant log folder of bin"+str(binNum))
     for lmes in lmess: 
         waveset=constructOutputFileName(lmes)
         waveset=reorderWaveset(waveset)
-        if not os.path.exists("bin_"+str(binNum)+"/"+logDir+"_"+waveset):
-            print("making directory bin_"+str(binNum)+"/"+logDir+"_"+waveset)
-            os.mkdir("bin_"+str(binNum)+"/"+logDir+"_"+waveset)
+        fname="bin_"+str(binNum)+"/"+logDir+"_"+waveset
+        if not os.path.exists(fname):
+            print("making directory "+fname)
+            os.mkdir(fname)
 
-def gatherResults(binNum,lmess):
+def gatherResults(params):
+    '''
+    Gather all the fit results into one file
+    '''
+    logDir,fitDir,finalAmpsFolder,binNum,lmes=params
+    os.chdir(fitDir)
+    if verbose:
+        print("---------------------------")
+        print("Spawning a process to grab all the amplitudes")
+    waveset=constructOutputFileName(lmes)
+    waveset=reorderWaveset(waveset)
+    if not os.path.exists(workingDir+"/"+finalAmpsFolder+"/"+waveset):
+        print("making directory "+workingDir+"/"+finalAmpsFolder+"/"+waveset)
+        os.system("mkdir -p "+workingDir+"/"+finalAmpsFolder+"/"+waveset)
+    binName="bin_"+str(binNum)
+    os.chdir(binName)
+    files=[]
+    listFiles=os.listdir(logDir+"_"+waveset)
+    # sort the directories by length so names with "ambig" tags are last. They do not have a header for amplitude.txt
+    listFiles=sorted(listFiles, key=lambda x: (len(x), x)) 
+    for afile in listFiles:
+        fileTag=afile.split(".")[0]
+        if "amplitude" in fileTag:
+            if "Fit" not in fileTag:
+                files.append(logDir+"_"+waveset+"/"+afile) 
+                if verbose:
+                    print("READING {}".format(binName+"/"+logDir+"_"+waveset+"/"+afile))
+        if len(files)>0:
+            os.system("cat "+files[0]+" > amplitudes.txt")
+        if len(files)>1:
+            os.system("tail -q -n 1 "+" ".join(files[1:])+" >> amplitudes.txt")
+    os.system("cp amplitudes.txt "+workingDir+"/"+finalAmpsFolder+"/"+waveset+"/amplitudes-binNum"+str(binNum)+".txt")
+    
+    if not bootstrapSettings[0]: # If we are not bootstrapping then we will save the best fit
+        # Include an extra step here to grab the best fit result
+        determineBestFit(logDir+"_"+waveset, binNum) # using logDir as the source directory to load desired cfg
+    os.chdir("..")
+
+def gatherMomentResults(params):
     '''
     Gather all the fit results into one file
     '''
     if verbose:
-        print("Grabbing all the results")
-    for lmes in lmess:
-        waveset=constructOutputFileName(lmes)
-        waveset=reorderWaveset(waveset)
-        if not os.path.exists(workingDir+"/"+"finalAmps/"+waveset):
-            print("making directory "+workingDir+"/"+"finalAmps/"+waveset)
-            os.system("mkdir -p "+workingDir+"/"+"finalAmps/"+waveset)
-        binName="bin_"+str(binNum)
-        os.chdir(binName)
-        files=[]
-        listFiles=os.listdir(logDir+"_"+waveset)
-        # sort the directories by length so names with "ambig" tags are last. They do not have a header for amplitude.txt
-        listFiles=sorted(listFiles, key=lambda x: (len(x), x)) 
-        for afile in listFiles:
-            fileTag=afile.split(".")[0]
-            if "amplitude" in fileTag:
-                if "Fit" not in fileTag:
-                    files.append(logDir+"_"+waveset+"/"+afile) 
-                    if verbose:
-                        print(binName+"/"+logDir+"_"+waveset+"/"+afile)
-            if len(files)>0:
-                os.system("cat "+files[0]+" > amplitudes.txt")
-            if len(files)>1:
-                os.system("tail -q -n 1 "+" ".join(files[1:])+" >> amplitudes.txt")
-        os.system("cp amplitudes.txt "+workingDir+"/finalAmps/"+waveset+"/amplitudes-binNum"+str(binNum)+".txt")
-        os.chdir("..")
-
-def gatherMomentResults(lmes,verbose):
-    '''
-    Gather all the fit results into one file
-    '''
+        print("---------------------------")
+        print("Spawning a process to grab all the moments")
+    logDir,fitDir,finalAmpsFolder,lmes=params
+    os.chdir(fitDir)
     # Need to grab the mass binning to input to project_moments_polarized
     waveset=constructOutputFileName(lmes)
     waveset=reorderWaveset(waveset)
@@ -218,13 +359,12 @@ def gatherMomentResults(lmes,verbose):
                 fitName=line.split("=")[-1].split(";")[0].rstrip().lstrip()
     print("Grabbing all the moments results")
     os.chdir(workingDir)
-    for binNum in range(startBin,endBin):
-        outfile="moments-binNum"+str(binNum)+".txt"
-        cmd="project_moments_polarized -o "+workingDir+"/finalAmps/"+waveset+"/"+outfile+" -w "+waveset+" -imax "+str(numIters)+" -b "+str(binNum)
-        cmd+=" -mmin "+lowMass+" -mmax "+highMass+" -mbins "+nBins+" -fitdir "+fitName+"/bin_"+str(binNum)+"/logs_"+waveset+" -v "+str(verbose)
-        print("running: "+cmd)
-        os.system(cmd)
-        os.chdir("..")
+    outfile="moments-binNum"+str(binNum)+".txt"
+    cmd="project_moments_polarized -o "+workingDir+"/"+finalAmpsFolder+"/"+waveset+"/"+outfile+" -w "+waveset+" -imax "+str(numIters)+" -b "+str(binNum)
+    cmd+=" -mmin "+lowMass+" -mmax "+highMass+" -mbins "+nBins+" -fitdir "+fitName+"/bin_"+str(binNum)+"/"+logDir+"_"+waveset+" -v "+str(verbose)
+    print("running: "+cmd)
+    os.system(cmd)
+    os.chdir("..")
 
 
 def getVectorOfPotentialLMEs(fitDir,startBin,endBin,numIters):
@@ -243,8 +383,7 @@ def getVectorOfPotentialLMEs(fitDir,startBin,endBin,numIters):
     def constructSeed(seed):
         '''
         Is a nested fucntion, will only be used as nested
-        Function to be used for growing waveset
-        seed wavesets will also be our anchors. In most cases it should be the two S-waves, +/- reflectivity
+        seed wavesets are our anchors. In most cases it should be the two S-waves, +/- reflectivity
         '''
         waveset=[]
         for wave in seed:
@@ -329,7 +468,6 @@ def getVectorOfPotentialLMEs(fitDir,startBin,endBin,numIters):
     ###################################
     unused_waves=list(set(all_potential_spect)-set(seed_waveset))
     growIters=len(unused_waves)
-    time.sleep(2)
     potential_vects=[]
     potential_spects=[]
     for growIter in range(growIters):
@@ -346,8 +484,10 @@ def mapYields(startBin,endBin,fitDir):
     FUNCTION TO LOAD THE WEIGHTED YIELDS IN ALL MASS BINS FOR A GIVEN FIT DIRECTORY
     THE RESULT WILL BE USED IN THE CALCULATION OF THE BAYESIAN INFORMATION CRITERIA
     '''
-    print("\nGrabbing yields in each mass bin to be used for BIC calculation...")
-    print("    this surprisingly takes a long time\n")
+    if verbose:
+        print("---------------------------")
+        print("\nGrabbing yields in each mass bin to be used for BIC calculation...")
+        print("    this surprisingly takes a long time\n")
     datareader="ROOTDataReader"
     if os.path.exists(fitDir+"/yields.txt"):
         return 1 
@@ -375,9 +515,9 @@ def mapYields(startBin,endBin,fitDir):
             
             bkgndfiles=mapToFile["bkgnd"] if "bkgnd" in mapToFile else []
             datafiles=mapToFile["data"]
-            print("bkgnd files: {}".format(bkgndfiles))
-            print("data files: {}".format(datafiles))
-            print("")
+            if verbose:
+                print("bkgnd files: {}".format(bkgndfiles))
+                print("data files: {}\n".format(datafiles))
             
             yields=[]
             for files in [datafiles, bkgndfiles]:
@@ -398,20 +538,34 @@ def mapYields(startBin,endBin,fitDir):
 if __name__ == '__main__':
     os.chdir(fitDir)
     startBin=0
-    endBin=19
-    numIters=50 # number of iterations to randomly sample and try to fit. No guarantees any of them will converge
+    endBin=25
+    numIters=30 # number of iterations to randomly sample and try to fit. No guarantees any of them will converge 
+    # (int) number of seeds such that the seed used for iteration j is j%nRollingSeeds. 
+    #     This gives us a way to reinitialize the parameters in a fit but keep the same bootstrap seed
+    nRollingSeeds=numIters 
     # EACH BIN SHARES THE SAME SEED FOR A GIVEN ITERATION
-    seeds=[random.randint(1,100000) for _ in range(numIters)]
+    seeds=[[random.randint(1,999999) for _ in range(nRollingSeeds)] for _ in range(endBin)]
     processes=50 # number of process to spawn to do the fits
-    logDir="logs"
+    
+    finalAmpsFolder="finalAmps"
+    logDir=logDirBaseName
+    if bootstrapSettings[0]:
+        ## Modify logs + finalAmps folders for bootstrapping
+        finalAmpsFolder+=bsFolderTag
+        logDir+=bsFolderTag 
 
-    for i in range(startBin,endBin):
-        os.system("rm -rf bin_{}/logs_*".format(i))
-    os.system("rm -rf "+workingDir+"/finalAmps")
+    ## We have to be careful what we want to delete. Clearly deleting
+    ##   all logs_* folders might be unwanted...
+    #for i in range(startBin,endBin):
+    #    os.system("rm -rf bin_{}/logs_*".format(i))
+    #os.system("rm -rf "+workingDir+"/finalAmps")
 
     ##############################################################
     # DETERMINE ALL THE WAVESETS WE WANT TO RUN OVER
     #      + MAKE SOME FOLDERS
+    # MIGHT BE CONFUSING NOTATION I USE {SPECT, VECT}
+    #   SPECT IS THE WAVE REPRESENTATION AS A STRING, I.E. S0++
+    #   VECT IS A CORRESPONDING VECTOR NOTATION, I.E. [0,0,"+"] = S0+ in [L,M,e] format
     ##############################################################
     #potential_vects=getVectorOfPotentialLMEs(fitDir,startBin,endBin,numIters)
     potential_vects=[
@@ -438,7 +592,7 @@ if __name__ == '__main__':
     ]
     os.chdir(fitDir)
     for ibin in range(startBin,endBin):
-        makeLogFolders(ibin,potential_vects)
+        makeLogFolders(logDir,ibin,potential_vects)
     
     ##############################################################
     ## NEED TO EXTRACT THE WEIGHTED YIELDS (DATA-BKGND) SO WE CAN 
@@ -450,11 +604,11 @@ if __name__ == '__main__':
     ##############################################################
     ## BEGIN FITTING AND GETTING AMPLITUDE RESULTS
     ##############################################################
-    print("Total number jobs to complete: {}".format((endBin-startBin)*numIters*len(potential_vects))
+    print("Total number jobs to complete: {}".format((endBin-startBin)*numIters*len(potential_vects)))
     print("** Beginning in 2 seconds **")
-    print("----------------------------------")
+    print("----------------------------------\n\n")
     os.chdir(fitDir)
-    params=[(i,potential_vect,j) for i in range(startBin,endBin) for potential_vect in potential_vects for j in range(numIters)]
+    params=[(i,potential_vect,j,logDir) for i in range(startBin,endBin) for potential_vect in potential_vects for j in range(numIters)]
     p=Pool(processes)
     p.map(getAmplitudesInBin, params)
     p.terminate()
@@ -462,9 +616,13 @@ if __name__ == '__main__':
     ##############################################################
     ## GATHER ALL THE RESULTS INTO A SINGLE LOCATION
     ##############################################################
-    for ibin in range(startBin,endBin):
-        os.chdir(fitDir)
-        gatherResults(ibin,potential_vects)
+    p=Pool(len(potential_vects)*(endBin-startBin))
+    params=[(logDir,fitDir,finalAmpsFolder,i,potential_vect) for i in range(startBin,endBin) for potential_vect in potential_vects]
+    p.map(gatherResults, params)
+    #p.map(gatherMomentResults, params)
+    #gatherResults(logDir,fitDir,finalAmpsFolder,ibin,potential_vect)
+    #gatherMomentResults(logDir,fitDir,finalAmpsFolder,potential_vect)
+    p.terminate()
         
 
 stop = time.time()

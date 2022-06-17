@@ -13,9 +13,10 @@ def replaceStr(search,replace,fileName):
     #print("replacing: "+search+" with "+replace)
     subprocess.Popen(sedArgs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).wait()
 
-fileName=baseDir+"study_pwa/mass_dependent_fits/config_files/etapi_hybrid.cfg"
 
-filePrefix=fileName.split(".")[0]
+### CFG File name
+fileName=baseDir+"study_pwa/mass_dependent_fits/config_files/etapi_hybrid.cfg"
+filePrefix=fileName.split(".")[0].split("/")[-1]
 fileAffix=fileName.split(".")[1]
 newFileName=filePrefix+"-copy."+fileAffix
 print("copying "+fileName+" to "+newFileName)
@@ -37,12 +38,12 @@ for pol in ["000","045","090","135"]:
     replaceStr(search,replace,newFileName)
 
     search="ACCMCFILE_"+pol
-    fileLoc="polALL_t010020_m104180_FTOT_selected_acc_flat.root"
+    fileLoc="pol"+pol+"_t010020_m104180_FTOT_selected_acc_flat.root"
     replace=baseLoc+fileLoc
     replaceStr(search,replace,newFileName)
 
     search="GENMCFILE_"+pol
-    fileLoc="polALL_t010020_m104180_FTOT_gen_data_flat.root"
+    fileLoc="pol"+pol+"_t010020_m104180_FTOT_gen_data_flat.root"
     replace=baseLoc+fileLoc
     replaceStr(search,replace,newFileName)
     
@@ -59,9 +60,10 @@ def reinitWave(wave,anchor):
     for j,ref in enumerate(refs): 
         for i,part in enumerate(parts):
             refpart=ref+part
+            scale=0 if wave[0]=="p" else 100 # we generally expect smaller amounts of a2 prime
             if i==0:
-                rsample=random.uniform(-500,500)
-                isample=random.uniform(-500,500)
+                rsample=random.uniform(-1*scale,scale)
+                isample=random.uniform(-1*scale,scale)
             search="initialize LOOPREAC::"+refpart+"::"+wave
             if anchor:
                 replace=search+" cartesian "+str(rsample)+" 0 real"
@@ -92,7 +94,7 @@ with open(newFileName) as newFile:
                 sample=0.0
                 replaceStr(line,parType+" "+parName+" "+str(sample)+" fixed",newFileName)
             else:
-                sample=random.uniform(0,1000)
+                sample=random.uniform(0,100)
                 replaceStr(line,parType+" "+parName+" "+str(sample),newFileName)
              
 

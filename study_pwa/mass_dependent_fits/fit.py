@@ -6,13 +6,10 @@ import numpy as np
 import subprocess
 
 nprocesses=9
-cfgFile="./config_files/etapi_hybrid-copy"
+cfgFile="etapi_hybrid-copy"
 fitFileName="etapi_result.fit"
 percent=3.0 # parameters must not be within percent of the defined parameter limits
 workingDir=os.getcwd()
-if os.path.exists("tmp"):
-    os.system("rm -r tmp")
-os.system("mkdir -p tmp")
 
 def checkParLimits(fitFile):
     '''

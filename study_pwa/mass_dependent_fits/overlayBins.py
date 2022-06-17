@@ -22,7 +22,7 @@ def printHelp():
     
 args=sys.argv
 nargs=len(args)
-if nargs!=6:
+if nargs!=7:
     printHelp()
     exit()
 else:

@@ -100,9 +100,9 @@ def initializeWave(l,m,e,anchor):
     outputStr += constructWaveString(l,m,e,c,reactionName)
     outputStr += " cartesian "
     if anchor:
-        outputStr += str(random.uniform(-1000,1000)) + " 0.0 real"
+        outputStr += str(random.uniform(-100,100)) + " 0.0 real"
     else:
-        outputStr += str(random.uniform(-1000,1000)) + " " + str(random.uniform(-1000,1000)); 
+        outputStr += str(random.uniform(-100,100)) + " " + str(random.uniform(-100,100)); 
     return outputStr
 
 def constrainWave(l,m,e,preamble):
@@ -170,16 +170,17 @@ def constructOutputFileName(lmes,i=-1):
     mapLtoSpect={0:"S",1:"P",2:"D"};
     names=[mapLtoSpect[lme[0]]+str(lme[1])+lme[2] for lme in lmes]
     cfgFileName=delimiterForOutFileName.join(names)
+    cfgFileName=cfgFileName.split("_")
+    cfgFileName.sort() # We can apply a sort to order things
+    cfgFileName="_".join(cfgFileName)
     if i==-1:
-        return cfgFileName
+        return cfgFileName # would basically be the waveset
     else:
         return cfgFileName+"("+str(i)+").cfg"
 
-def writeCfg(lmes,reference_file,seed,i):
+def getPreamble(reference_file,i):
     '''
-    lmes: List of lists. Each sublist is in the [l,m,e,anchor] format
     reference_file: we will get our preamble from here
-    seed: set the random seed we will sample from to initialize our waveset
     i: iteration number, we should set this when doing multiple fits with random initializations
     '''
     # First need to update the global variables otherwise we are creating local versions
@@ -240,7 +241,21 @@ def writeCfg(lmes,reference_file,seed,i):
         preamble="".join(preamble)
         preamble=re.sub(r'\n+','\n',preamble).strip()
 
+    return preamble,pols
+
     
+def writeCfg(lmes,reference_file,seed,i):
+    '''
+    lmes: List of lists. Each sublist is in the [l,m,e,anchor] format
+    reference_file: we will get our preamble from here
+    seed: set the random seed we will sample from to initialize our waveset
+    i: iteration number, we should set this when doing multiple fits with random initializations
+    '''
+    if seed!=-1:
+        random.seed(seed)
+        
+    preamble, pols = getPreamble(reference_file,i)
+
     waveStrings=[preamble]
     for lme in lmes:
         waveStrings.append(writeWave(*lme,preamble=preamble))
