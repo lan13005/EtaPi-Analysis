@@ -1,4 +1,1 @@
-We can show our event selections in two ways
-
-1. drawCuts.py simply loads a histogram (from the DSelector) and plots it
-2. We use a jupyter-notebook to load in a flat tree and draw our selections manually. This was used to tell a story, where the selections are applied in turn (over a flat tree that has no selections applied over it). This allows us to show a progression of selections. The downside of doing this is that it takes a ton of memory to actually use. If your computer does not have enough memory it probably would not be able to run the notebook without reducing the stats or loading in batches
+We use a jupyter-notebook to load in a flat tree and draw our selections manually. This was used to tell a story, where the selections are applied in turn (over a flat tree that has no selections applied over it). This allows us to show a progression of selections. The downside of doing this is that it takes a ton of memory to actually use. If your computer does not have enough memory it probably would not be able to run the notebook without reducing the stats or loading in batches

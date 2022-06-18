@@ -64,7 +64,7 @@ def draw(t):
         fitFile="etapi_result.fit"
 
     folder=workingDir+t
-    cmd="python3 ../overlayBins.py 2 '"+waves+"' '"+fitFile+"' '..' '"+Ls+"' '"+doAccCorr+"' '"+folder+"'"
+    cmd="python3 ../overlayBins.py 2 '"+waves+"' '"+fitFile+"' '"+workingDir+"' '"+Ls+"' '"+doAccCorr+"' '"+folder+"'"
     print(cmd)
     os.system(cmd)
     os.chdir("..")

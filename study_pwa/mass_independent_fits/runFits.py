@@ -32,7 +32,7 @@ doAccCorr="false" # has to be a string input
 # [True, ["data", "bkgnd", "accmc"], [1,1,1]] to bootstrap data and acceptance mc together (I think this is the proper final uncertainty) 
 # [True, ["acc", "genmc"], [N,N]] to under or oversample the MC that will be used for acceptance correction. "genmc" needs to be here also or else
 #      the acceptance changes
-bootstrapSettings=[True,["data","bkgnd"],[1,1]] 
+bootstrapSettings=[False,["data","bkgnd"],[1,1]] 
 bsFolderTag="_bs_"+"_".join([sample+str(factor)+"x" for sample,factor in zip(bootstrapSettings[1],bootstrapSettings[2])]) # appends a tag to the logs folder in each bin subfolder
 bsFolderTag+="" # starts with underscore: include another tag for more folder separation
 forceDataBkngdSameSeed=True # data and bkgnd trees can be read with the same seed. If tree same size then it would grab same set of indicies
@@ -539,7 +539,7 @@ if __name__ == '__main__':
     os.chdir(fitDir)
     startBin=0
     endBin=13
-    numIters=500 # number of iterations to randomly sample and try to fit. No guarantees any of them will converge 
+    numIters=50 # number of iterations to randomly sample and try to fit. No guarantees any of them will converge 
     # (int) number of seeds such that the seed used for iteration j is j%nRollingSeeds. 
     #     This gives us a way to reinitialize the parameters in a fit but keep the same bootstrap seed
     nRollingSeeds=numIters 

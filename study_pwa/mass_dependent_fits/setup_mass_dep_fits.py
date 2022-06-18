@@ -23,7 +23,7 @@ print("copying "+fileName+" to "+newFileName)
 os.system("cp "+fileName+" "+newFileName)
 
 
-t="010020"
+t="050075"
 m="104156"
 for pol in ["000","045","090","135"]:
     baseLoc=baseDir+"phase1_selected/t"+t+"_m"+m+"/"

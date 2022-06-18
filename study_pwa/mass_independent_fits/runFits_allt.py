@@ -3,7 +3,7 @@
 import subprocess
 import os
 
-outFolder="results_v3_tbins5"
+outFolder="phase1_m104156_noAccCorr"
 
 if os.path.isdir(outFolder):
     raise ValueError("Output folder already exists! Choose a different name!")
@@ -15,7 +15,7 @@ for i,t in enumerate(ts):
     sedArgs=["sed","-i",'s@'+searchStr+'@'+replaceStr+'@g','divideData.pl']
     subprocess.Popen(sedArgs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).wait()
 
-    if i<len(ts): 
+    if i<len(ts)-1: 
         os.system("./divideData.pl")
         os.system("python runFits.py")
         os.system("mkdir -p "+outFolder+"/"+t)
