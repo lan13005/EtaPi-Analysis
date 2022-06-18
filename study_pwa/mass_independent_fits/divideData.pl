@@ -2,9 +2,9 @@
 
 use Cwd;
 
-$lowMass = 0.80;
-$highMass = 1.80;
-$nBins =  25;
+$lowMass = 1.04;
+$highMass = 1.56;
+$nBins =  13;
 $fitName = "EtaPi_fit";
 
 # put a limit on the number of data events to process
@@ -16,28 +16,28 @@ print "\n\ncurrent working dir: $workingDir";
 print "\n===================================\n";
 
 $t="010020";
-$m="104180";
-#$baseGenDir="/d/grid17/ln16/dselector_v3/phase1_selected/t$t\_m$m/";
-#$baseAccDir="/d/grid17/ln16/dselector_v3/phase1_selected/t$t\_m$m/";
-#$baseBkgDir="/d/grid17/ln16/dselector_v3/phase1_selected/t$t\_m$m/";
-#$baseDatDir="/d/grid17/ln16/dselector_v3/phase1_selected/t$t\_m$m/";
-#$baseGenFileName="_t$t\_m$m\_FTOT_gen_data_flat"; # cannot contain the file extension .root
-#$baseAccFileName="_t$t\_m$m\_FTOT_selected_acc_flat";
-#$baseBkgFileName="_t$t\_m$m\_DTOT_selected_bkgnd_flat";
-#$baseDatFileName="_t$t\_m$m\_DTOT_selected_data_flat";
-$baseAccDir="/d/grid17/ln16/dselector_v3/kmatrix_selected/tall_m080180/";
-$baseGenDir="/d/grid17/ln16/dselector_v3/kmatrix_selected/tall_m080180/";
-$baseDatDir="/d/grid17/ln16/dselector_v3/kmatrix_selected/";
-$baseBkgDir="/d/grid17/ln16/dselector_v3/kmatrix_selected/";
-$baseAccFileName="_tall_m080180_F2018_8_selected_acc_flat";
-$baseGenFileName="_tall_m080180_F2018_8_gen_data_flat";
-$baseDatFileName="_tall_m080180_kmatrix_selected_data_flat";
-$baseBkgFileName="_tall_m080180_kmatrix_selected_bkgnd_flat";
+$m="104156";
+$baseGenDir="/d/grid17/ln16/dselector_v3/phase1_selected/t$t\_m$m/";
+$baseAccDir="/d/grid17/ln16/dselector_v3/phase1_selected/t$t\_m$m/";
+$baseBkgDir="/d/grid17/ln16/dselector_v3/phase1_selected/t$t\_m$m/";
+$baseDatDir="/d/grid17/ln16/dselector_v3/phase1_selected/t$t\_m$m/";
+$baseGenFileName="_t$t\_m$m\_FTOT_gen_data_flat"; # cannot contain the file extension .root
+$baseAccFileName="_t$t\_m$m\_FTOT_selected_acc_flat";
+$baseBkgFileName="_t$t\_m$m\_DTOT_selected_bkgnd_flat";
+$baseDatFileName="_t$t\_m$m\_DTOT_selected_data_flat";
+#$baseAccDir="/d/grid17/ln16/dselector_v3/kmatrix_selected/tall_m080180/";
+#$baseGenDir="/d/grid17/ln16/dselector_v3/kmatrix_selected/tall_m080180/";
+#$baseDatDir="/d/grid17/ln16/dselector_v3/kmatrix_selected/";
+#$baseBkgDir="/d/grid17/ln16/dselector_v3/kmatrix_selected/";
+#$baseAccFileName="_tall_m080180_F2018_8_selected_acc_flat";
+#$baseGenFileName="_tall_m080180_F2018_8_gen_data_flat";
+#$baseDatFileName="_tall_m080180_kmatrix_selected_data_flat";
+#$baseBkgFileName="_tall_m080180_kmatrix_selected_bkgnd_flat";
 
-#@polTags_DB=qw(000 045 090 135); # D/B = data, bkgnd
-#@polTags_AG=qw(000 045 090 135); # A/G = accmc, genmc. i.e. we can choose qw(ALL)
-@polTags_DB=qw(000); # D/B = data, bkgnd
-@polTags_AG=qw(000); # A/G = accmc, genmc. i.e. we can choose qw(ALL)
+@polTags_DB=qw(000 045 090 135); # D/B = data, bkgnd
+@polTags_AG=qw(000 045 090 135); # A/G = accmc, genmc. i.e. we can choose qw(ALL)
+#@polTags_DB=qw(000); # D/B = data, bkgnd
+#@polTags_AG=qw(000); # A/G = accmc, genmc. i.e. we can choose qw(ALL)
 
 print "DATAFILES:\n";
 foreach $polTag (@polTags_DB){
@@ -64,7 +64,7 @@ foreach $polTag (@polTags_AG){
 print "------------------\n";
 
 
-$cfgTempl = "$workingDir/config_files/zlm_etapi_bothReflect_bothM.cfg";
+$cfgTempl = "$workingDir/config_files/zlm_etapi_bothReflect_bothM_loop.cfg";
 
 ### things below here probably don't need to be modified
 

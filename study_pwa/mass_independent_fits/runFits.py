@@ -23,8 +23,8 @@ logDirBaseName="logs" # creates a folder in each bin_x folder with the name logD
 fitName="EtaPi_fit" # location of the folder containing the inputs that were created from divideData.pl
 seedFileTag="param_init" # seedFile name. Should also match the variable from divideData.pl 
 writeCfgSeed=-1 # choose a seed to randomly start to sample from
-verbose=True
-doAccCorr="true" # has to be a string input
+verbose=False
+doAccCorr="false" # has to be a string input
 
 ############################
 # [True, ["data", "bkgnd"], [1, 1]] to bootstrap data 
@@ -32,7 +32,7 @@ doAccCorr="true" # has to be a string input
 # [True, ["data", "bkgnd", "accmc"], [1,1,1]] to bootstrap data and acceptance mc together (I think this is the proper final uncertainty) 
 # [True, ["acc", "genmc"], [N,N]] to under or oversample the MC that will be used for acceptance correction. "genmc" needs to be here also or else
 #      the acceptance changes
-bootstrapSettings=[False,["data","bkgnd"],[1,1]] 
+bootstrapSettings=[True,["data","bkgnd"],[1,1]] 
 bsFolderTag="_bs_"+"_".join([sample+str(factor)+"x" for sample,factor in zip(bootstrapSettings[1],bootstrapSettings[2])]) # appends a tag to the logs folder in each bin subfolder
 bsFolderTag+="" # starts with underscore: include another tag for more folder separation
 forceDataBkngdSameSeed=True # data and bkgnd trees can be read with the same seed. If tree same size then it would grab same set of indicies
@@ -538,8 +538,8 @@ def mapYields(startBin,endBin,fitDir):
 if __name__ == '__main__':
     os.chdir(fitDir)
     startBin=0
-    endBin=25
-    numIters=30 # number of iterations to randomly sample and try to fit. No guarantees any of them will converge 
+    endBin=13
+    numIters=500 # number of iterations to randomly sample and try to fit. No guarantees any of them will converge 
     # (int) number of seeds such that the seed used for iteration j is j%nRollingSeeds. 
     #     This gives us a way to reinitialize the parameters in a fit but keep the same bootstrap seed
     nRollingSeeds=numIters 
@@ -570,25 +570,25 @@ if __name__ == '__main__':
     #potential_vects=getVectorOfPotentialLMEs(fitDir,startBin,endBin,numIters)
     potential_vects=[
             #### S + TMD
-            #[
-            #[0,0,"+",True],
-            #[0,0,"-",True],
-            #[2,-1,"-",False],
-            #[2,0,"+",False],
-            #[2,0,"-",False],
-            #[2,1,"+",False],
-            #[2,1,"-",False],
-            #[2,2,"+",False]
-            #],
-            ### K-MATRIX
             [
             [0,0,"+",True],
             [0,0,"-",True],
+            [2,-1,"-",False],
             [2,0,"+",False],
             [2,0,"-",False],
-            [2,2,"-",False],
+            [2,1,"+",False],
+            [2,1,"-",False],
             [2,2,"+",False]
             ],
+            ### K-MATRIX
+#            [
+#            [0,0,"+",True],
+#            [0,0,"-",True],
+#            [2,0,"+",False],
+#            [2,0,"-",False],
+#            [2,2,"-",False],
+#            [2,2,"+",False]
+#            ],
     ]
     os.chdir(fitDir)
     for ibin in range(startBin,endBin):

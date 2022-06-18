@@ -22,28 +22,31 @@ newFileName=filePrefix+"-copy."+fileAffix
 print("copying "+fileName+" to "+newFileName)
 os.system("cp "+fileName+" "+newFileName)
 
+
+t="010020"
+m="104156"
 for pol in ["000","045","090","135"]:
-    baseLoc=baseDir+"phase1_selected/t010020_m104180/"
+    baseLoc=baseDir+"phase1_selected/t"+t+"_m"+m+"/"
     if not os.path.exists(baseLoc):
         raise ValueError("YOU ARE REQUESTING FOR A FOLDER THAT DOES NOT EXIST! FIX IN SETUP FIT SCRIPT")
 
     search="DATAFILE_"+pol
-    fileLoc="pol"+pol+"_t010020_m104180_DTOT_selected_data_flat.root"
+    fileLoc="pol"+pol+"_t"+t+"_m"+m+"_DTOT_selected_data_flat.root"
     replace=baseLoc+fileLoc
     replaceStr(search,replace,newFileName)
 
     search="BKGNDFILE_"+pol
-    fileLoc="pol"+pol+"_t010020_m104180_DTOT_selected_bkgnd_flat.root"
+    fileLoc="pol"+pol+"_t"+t+"_m"+m+"_DTOT_selected_bkgnd_flat.root"
     replace=baseLoc+fileLoc
     replaceStr(search,replace,newFileName)
 
     search="ACCMCFILE_"+pol
-    fileLoc="pol"+pol+"_t010020_m104180_FTOT_selected_acc_flat.root"
+    fileLoc="pol"+pol+"_t"+t+"_m"+m+"_FTOT_selected_acc_flat.root"
     replace=baseLoc+fileLoc
     replaceStr(search,replace,newFileName)
 
     search="GENMCFILE_"+pol
-    fileLoc="pol"+pol+"_t010020_m104180_FTOT_gen_data_flat.root"
+    fileLoc="pol"+pol+"_t"+t+"_m"+m+"_FTOT_gen_data_flat.root"
     replace=baseLoc+fileLoc
     replaceStr(search,replace,newFileName)
     

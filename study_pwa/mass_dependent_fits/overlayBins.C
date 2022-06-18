@@ -3,10 +3,9 @@ string fitName="EtaPi0";
 //vector<string> pols={"000","045","090","135","allPols"};
 vector<string> pols={"000"};
 
-vector<string> groups={"_S0+-_S0++_D0+-_D0++_D2+-_D2++","_S0+-","_S0++","_D0+-","_D0++","_D2+-","_D2++","_S0+-_S0++","_D0+-_D0++_D2+-_D2++","_S0++_D0++_D2++","_S0+-_D0+-_D2+-"};
-void overlaySingleBin(int iBin,int nBins, vector<string> names1D, vector<TCanvas*> allCanvases, string selectPol){
+vector<string> groups={"_S0+-_S0++_D1--_D0+-_D1+-_D0++_D1++_D2++","_S0+-","_S0++","_D1--","_D0+-","_D1+-","_D0++","_D1++","_D2++","_S0+-_S0++","_D1--_D0+-_D1+-_D0++_D1++_D2++","_S0++_D0++_D1++_D2++","_S0+-_D1--_D0+-_D1+-"};
+void overlaySingleBin(int iBin,int nBins, vector<string> names1D, vector<TCanvas*> allCanvases, string selectPol, string folder){
         gStyle->SetOptStat(kFALSE);
-        string folder="/d/grid17/ln16/dselector_v3/study_pwa/mass_dependent_fits/kmatrix_fit_results";
 
         TH1F *any1DHist_dat;
         TH1F *any1DHist_acc;
@@ -106,7 +105,7 @@ void overlaySingleBin(int iBin,int nBins, vector<string> names1D, vector<TCanvas
         }
 }
 
-void overlayBins(){
+void overlayBins(string folder){
     int ngroups=(int)groups.size();
     int flooredRoot=(int)sqrt(ngroups);
     int nrows, ncols;
@@ -136,7 +135,7 @@ void overlayBins(){
     
     for (auto pol: pols){
         for (int iBin=0; iBin<nBins;++iBin){
-            overlaySingleBin(iBin,nBins,names1D,allCanvases,pol);
+            overlaySingleBin(iBin,nBins,names1D,allCanvases,pol,folder);
         }
     }
 }
