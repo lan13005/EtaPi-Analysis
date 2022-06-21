@@ -65,12 +65,15 @@ def runEtaPiPlotterForAllBins():
                 pass
 
 def gatherPlotResultsIntoPDFs():
-    cmd=["root","-l","-b","-q","'"+cFolder+"/overlayBins.C("+folder+")'"]
-    if verbose:
-        subprocess.check_call(cmd)
-    else:
-        with open(os.devnull, 'wb') as devnull:
-            subprocess.check_call(cmd, stdout=devnull, stderr=subprocess.STDOUT)
+    cmd=["root","-l","-b","-q","\'"+cFolder+'/overlayBins.C("'+folder+'"'+")\'"]
+    print(cmd)
+    print(" ".join(cmd))
+    os.system(" ".join(cmd)+" 1> /dev/null 2> /dev/null")
+    #if verbose:
+    #    subprocess.check_call(cmd)
+    #else:
+    #    with open(os.devnull, 'wb') as devnull:
+    #        subprocess.check_call(cmd, stdout=devnull, stderr=subprocess.STDOUT)
 
 if option==0 or option==2:
     print("RUNNING etapi_plotter FOR ALL BINS...")

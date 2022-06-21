@@ -23,7 +23,7 @@ print("copying "+fileName+" to "+newFileName)
 os.system("cp "+fileName+" "+newFileName)
 
 
-t="050075"
+t="010020"
 m="104156"
 for pol in ["000","045","090","135"]:
     baseLoc=baseDir+"phase1_selected/t"+t+"_m"+m+"/"
@@ -63,7 +63,8 @@ def reinitWave(wave,anchor):
     for j,ref in enumerate(refs): 
         for i,part in enumerate(parts):
             refpart=ref+part
-            scale=0 if wave[0]=="p" else 100 # we generally expect smaller amounts of a2 prime
+            #scale=0 if wave[0]=="p" else 100 # start with null hypothesis where a2p does not exist
+            scale=100
             if i==0:
                 rsample=random.uniform(-1*scale,scale)
                 isample=random.uniform(-1*scale,scale)
@@ -97,7 +98,8 @@ with open(newFileName) as newFile:
                 sample=0.0
                 replaceStr(line,parType+" "+parName+" "+str(sample)+" fixed",newFileName)
             else:
-                sample=random.uniform(0,100)
+                scale=100
+                sample=random.uniform(-1*scale,scale)
                 replaceStr(line,parType+" "+parName+" "+str(sample),newFileName)
              
 
