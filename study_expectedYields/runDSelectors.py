@@ -41,42 +41,68 @@ thrown_cfiles=["DSelector_thrown.C", "runDSelector_thrown.C"]
 reconTreeName="pi0eta__B4_M17_M7_Tree"
 thrownTreeName="Thrown_Tree"
 
+##############################################
+# MAIN STUDY: RUN OVER ALL BACKGROUND SIMULATIONS TO DETERMINE EXPECTED LEAKAGES
+##############################################
+#topologies=[
+#        "6#gammap[2#pi^{0},#eta]",
+#        "6#gammap[2#pi^{0},#eta]",
+#        "6#gammap[3#pi^{0}]",
+#        "6#gammap[2#pi^{0},#eta]",
+#        "3#gammap[#pi^{0}]",
+#        "4#gammap[2#pi^{0}]",
+#        "5#gammap[2#pi^{0}]",
+#        "5#gammap[2#pi^{0}]",
+#        "5#gammap[2#pi^{0}]",
+#        ]
+#ofolders=[
+#        "zDSelectedBkgndSamples/a2pi",
+#        "zDSelectedBkgndSamples/etap_to_etapipi",
+#        "zDSelectedBkgndSamples/eta_to_3pi",
+#        "zDSelectedBkgndSamples/f1_1285_to_etapipi",
+#        "zDSelectedBkgndSamples/omega_pi0g",
+#        "zDSelectedBkgndSamples/pi0pi0",
+#        "zDSelectedBkgndSamples/b1vps_2018_8",
+#        "zDSelectedBkgndSamples/b1vps_2018_1",
+#        "zDSelectedBkgndSamples/b1vps_2017_1",
+#        ]
+#ifolders=[
+#        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/a2pi/tree_',
+#        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/etap_to_etapipi/tree_',
+#        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/eta_to_3pi/tree_',
+#        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/f1_to_etapipi/tree_',
+#        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/omega_pi0g/tree_',
+#        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/pi0pi0/tree_',
+#        '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_08_ver03.0_60M/root/merged/tree_',
+#        '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_01_ver03.0/root/merged/tree_',
+#        '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2017_01_ver03.0/root/merged/tree_',
+#        ]
+
+##############################################
+# SECONDARY STUDY: RUN OVER OMEGA AND FLAT ETAPI MC TO UNDERSTAND THE EFFECTS OF LMAC SELECTION
+# 1. we do not need to run over the thrown - turn it off
+##############################################
 topologies=[
-        "6#gammap[2#pi^{0},#eta]",
-        "6#gammap[2#pi^{0},#eta]",
-        "6#gammap[3#pi^{0}]",
-        "6#gammap[2#pi^{0},#eta]",
         "3#gammap[#pi^{0}]",
-        "4#gammap[2#pi^{0}]",
-        "5#gammap[2#pi^{0}]",
-        "5#gammap[2#pi^{0}]",
-        "5#gammap[2#pi^{0}]",
+        "4#gammap[#pi^{0},#eta]",
         ]
 ofolders=[
-        "zDSelectedBkgndSamples/a2pi",
-        "zDSelectedBkgndSamples/etap_to_etapipi",
-        "zDSelectedBkgndSamples/eta_to_3pi",
-        "zDSelectedBkgndSamples/f1_1285_to_etapipi",
-        "zDSelectedBkgndSamples/omega_pi0g",
-        "zDSelectedBkgndSamples/pi0pi0",
-        "zDSelectedBkgndSamples/b1vps_2018_8",
-        "zDSelectedBkgndSamples/b1vps_2018_1",
-        "zDSelectedBkgndSamples/b1vps_2017_1",
+        "omega_pi0g",
+        "flat_2017_1",
         ]
 ifolders=[
-        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/a2pi/tree_',
-        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/etap_to_etapipi/tree_',
-        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/eta_to_3pi/tree_',
-        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/f1_to_etapipi/tree_',
         '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/omega_pi0g/tree_',
-        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/pi0pi0/tree_',
-        '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_08_ver03.0_60M/root/merged/tree_',
-        '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_01_ver03.0/root/merged/tree_',
-        '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2017_01_ver03.0/root/merged/tree_',
+        '"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_'
         ]
+for run in ["2017_1","2018_1","2018_8"]:
+    replaceTopology("4#gammap[#pi^{0},#eta]")
+    f='"/d/grid17/ln16/dselector_v3/phase1_data_looseChiUE/D'+run+'_loose_tree.root"'
+    runSelector(f,reconTreeName,"bkgndSample_recon",3,proof_Nthreads,recon_cfiles)
+    move("gluex_"+run)
+
+
 
 assert len(ifolders)==len(ofolders) and len(ifolders)==len(topologies)
-
 
 ######## THINGS TO KEEP IN MIND ###########
 # 1. We do not want to select on the any region in Meta vs Mpi so we "choice" 3
@@ -85,11 +111,11 @@ assert len(ifolders)==len(ofolders) and len(ifolders)==len(topologies)
 #   the b1 leakage looks like in Meta 
 ###########################################
 
-for ifolder,ofolder,topology in zip(ifolders,ofolders,topologies):
-    replaceTopology(topology)
-    runSelector(ifolder+'pi0eta*"',reconTreeName,"bkgndSample_recon",3,proof_Nthreads,recon_cfiles)
-    runSelector(ifolder+'thrown*"',thrownTreeName,"bkgndSample_gen",1,proof_Nthreads,thrown_cfiles)
-    move(ofolder)
+#for ifolder,ofolder,topology in zip(ifolders,ofolders,topologies):
+#    replaceTopology(topology)
+#    runSelector(ifolder+'pi0eta*"',reconTreeName,"bkgndSample_recon",3,proof_Nthreads,recon_cfiles)
+#    runSelector(ifolder+'thrown*"',thrownTreeName,"bkgndSample_gen",1,proof_Nthreads,thrown_cfiles)
+#    move(ofolder)
 
 #for run in ["2017_1","2018_1","2018_8"]:
 #    replaceTopology("4#gammap[#pi^{0},#eta]")

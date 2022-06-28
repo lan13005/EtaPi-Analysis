@@ -21,7 +21,7 @@ flocs=[
         "./study_eventSelections/event_selections/*", # Plots for event selections - from jupyter notebook
 
         ########
-        "./study_lmac/lowMassAltComboSelect.png", # low mass alternative cut, comparing flat etapi MC to omega as etapi MC when applying lmac cut
+        "./study_lmac/results/lowMassAltComboSelect.png", # low mass alternative cut, comparing flat etapi MC to omega as etapi MC when applying lmac cut
 
         ########
         "./study_pwa/jupyter_plotting/results/*pdf", # partial wave analysis plots
