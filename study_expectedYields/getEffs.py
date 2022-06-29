@@ -177,8 +177,8 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         binedges=np.linspace(8,9,2)
         binMin=0
         binMax=-1
-        crossSections=np.array([[6.0366596]]) 
-        crossSectionErrs=np.array([[0.93989444]]) 
+        crossSections=np.array([[12.72645681]]) # These new estimates simply come from a BW fit to the f2 mass peak
+        crossSectionErrs=np.array([[1.1274463]]) # These new estimates simply come from a BW fit to the f2 mass peak
         baseFolder="./zDSelectedBkgndSamples/pi0pi0/"
         recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
         throwns=[rp.read_root(baseFolder+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
