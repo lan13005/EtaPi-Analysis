@@ -4,11 +4,15 @@ import os
 import sys
 import numpy as np
 import subprocess
+import uproot3 as uproot
+import pandas as pd
+
 
 nprocesses=9
 cfgFile="etapi_hybrid-copy"
 fitFileName="etapi_result.fit"
 percent=3.0 # parameters must not be within percent of the defined parameter limits
+nPassedCheck=1 # require this many fits that converged
 workingDir=os.getcwd()
 
 def checkParLimits(fitFile):
@@ -78,6 +82,35 @@ def spawnProcessChangeSetting(old,new):
     print(" ".join(sedArgs))
     subprocess.Popen(sedArgs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).wait()
 
+def checkCfgFileProperMassLimits(cfgLoc):
+    searchKeyWord="Mpi0eta"
+    with open(cfgLoc) as cfg:
+        lines=cfg.readlines()
+        lines=[line for line in lines if not line.startswith("#")]
+        isLooping=len([line for line in lines if "loop" in line])>0
+        if isLooping:
+            rootFileLines=[line for line in lines if ".root" in line]
+        piecewise=[line for line in lines if "Piecewise" in line]
+    
+    oneSetOfFiles=rootFileLines[0].rstrip().lstrip().split(" ")[2:]
+    oneFile=oneSetOfFiles[0]
+    df=uproot.open(oneFile)["kin"].arrays(["Mpi0eta"],outputtype=pd.DataFrame)
+    minVal=df.Mpi0eta.min()
+    maxVal=df.Mpi0eta.max()
+    
+    piecewise=piecewise[0].split(" ")
+    minPW=float(piecewise[3])
+    maxPW=float(piecewise[4])
+    
+    if abs(minVal-minPW)>0.1 or abs(maxVal-maxPW)>0.1:
+        print("\n****************************")
+        print("THERE IS A MISMATCH BETWEEN YOUR MASS RANGE IN YOUR ROOT FILE AND THE RANGE SPECIFIED IN YOUR PIECEWISE DEFINITION!")
+        print("Min/Max value in root file: {}/{}".format(minVal,maxVal))
+        print("Min/Max value in piecewise: {}/{}".format(minPW,maxPW))
+        print("TERMINATING THE PROGRAM!")
+        print("****************************\n")
+        exit()
+
 
 
 #ts=["010016", "016021", "021027", "027034", "034042", "042051", "051061", "061072", "072085", "085100","010016"]
@@ -112,14 +145,16 @@ if runFits:
             os.system("rm "+fitFileName)
             os.system("rm fitAttempt*log")
         
+        goodFits=[]
         i=0
         newFitFile="" # initialize fitFile
-        nPassedCheck=0
-        while not checkFit(newFitFile):
-#        while nPassedCheck<1:
-#            if checkFit(newFitFile):
-#                nPassedCheck+=1
+        iPassedCheck=0 
+        while iPassedCheck<nPassedCheck:
+            if checkFit(newFitFile):
+                goodFits.append(i)
+                iPassedCheck+=1
             os.system("python setup_mass_dep_fits.py") # reinitialize
+            checkCfgFileProperMassLimits(cfgFile+".cfg")
             print("Starting a new fit attempt...")
             cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -m 80000 -t 0.1"
             pipeCmd=' > fitAttempt'+str(i)+'.log'
@@ -139,6 +174,9 @@ if runFits:
         os.system("mv -f overlayPlots "+t)
         spawnProcessChangeSetting(ts[j],ts[j+1]) # prepare for new t bin
 
+        with open("iterationsThatConverged.log") as f:
+            [f.write(v) for v in goodFits]
+        os.system("mv -f iterationsThatConverged.log "+t)
 
 ################################################
 ### Write out a summary of the fits
