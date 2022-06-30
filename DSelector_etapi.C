@@ -2,6 +2,7 @@
 
 // "4#gammap[#pi^{0},#eta]"
 string topologyString="4#gammap[#pi^{0},#eta]";
+float radToDeg=180/3.14159;
 
 void DSelector_etapi::Init(TTree *locTree)
 {
@@ -595,7 +596,6 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		// Low energy photons are more likely to be spurious, require a minimum E
 		bool bPhotonE=(locPhoton1P4.E()>0.1)*(locPhoton2P4.E()>0.1)*(locPhoton3P4.E()>0.1)*(locPhoton4P4.E()>0.1); 
 		// Working in degrees instead of radians, we remove photons near the beamline (<~2.5) and near the BCAL/FCAL transition (<~11.9, >~10.3)
-		float radToDeg=180/3.14159;
 		bool bPhotonTheta=
 			((locPhoton1P4.Theta()*radToDeg>=2.5 && locPhoton1P4.Theta()*radToDeg<=10.3) || locPhoton1P4.Theta()*radToDeg>=11.9)*
 			((locPhoton2P4.Theta()*radToDeg>=2.5 && locPhoton2P4.Theta()*radToDeg<=10.3) || locPhoton2P4.Theta()*radToDeg>=11.9)*
@@ -677,7 +677,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                 float mandelstam_tp = mandelstam_t-mandelstam_t0;
                 std::tuple<double, double> vh = dAnalysisUtilities.Calc_vanHoveCoord(recoil_cm,pi0_cm,eta_cm);
                 float q = get<0>(vh);
-                float omega = get<1>(vh);
+                float omega = get<1>(vh)*radToDeg;
                 bool bVH_pi0p = -29.61317407*atan(-0.9877663*(locPi0P4+locEtaP4).M()+2.77936736)+330.46008765 > omega;
                 bool bVH_etap = 45.26878219*atan(-0.88242654*(locPi0P4+locEtaP4).M()+3.14340627)+193.59347205 < omega;
                 bool bVH = bVH_pi0p*bVH_etap;
@@ -794,10 +794,10 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 
                 if (dFlatTreeFileName!=""){
                     // Photon Related 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta1", locPhoton1P4.Theta());	
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta2", locPhoton2P4.Theta());	
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta3", locPhoton3P4.Theta());	
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta4", locPhoton4P4.Theta());	
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta1", locPhoton1P4.Theta()*radToDeg);	
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta2", locPhoton2P4.Theta()*radToDeg);	
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta3", locPhoton3P4.Theta()*radToDeg);	
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta4", locPhoton4P4.Theta()*radToDeg);	
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("photonE1", locPhoton1P4.E());	
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("photonE2", locPhoton2P4.E());	
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("photonE3", locPhoton3P4.E());	
@@ -807,6 +807,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                     // Proton Related
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_momentum", locProtonP4.Vect().Mag());
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_z", locProtonX4.Z());
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_R", TMath::Sqrt(TMath::Power(locXProton,2)+TMath::Power(locYProton,2));
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_dEdxCDC", dProtonWrapper->Get_dEdx_CDC());
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("pMagP3Proton", bProtonMomentum);
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("pzCutmin", bProtonZ);
@@ -836,17 +837,17 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 	            dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_teta",mandelstam_teta);	
 	            dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_tpi0",mandelstam_tpi0);	
                     ////// Angles related
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("Phi",Phi); 
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("Phi",Phi*radToDeg); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_X_cm",(pi0_cm+eta_cm).CosTheta()); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_X_cm",(pi0_cm+eta_cm).Phi()); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_X_lab",(locPi0P4+locEtaP4).Phi()); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_lab",locEtaP4.Phi()); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_pi0_lab",locPi0P4.Phi()); 
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_X_cm",(pi0_cm+eta_cm).Phi()*radToDeg); 
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_X_lab",(locPi0P4+locEtaP4).Phi()*radToDeg); 
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_lab",locEtaP4.Phi()*radToDeg); 
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_pi0_lab",locPi0P4.Phi()*radToDeg); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_gj", cosTheta_gj); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_gj", phi_gj); 
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_gj", phi_gj*radToDeg); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_hel",cosTheta_hel); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_hel",phi_hel); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_omega",omega);
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_hel",phi_hel*radToDeg); 
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_omega",omega*radToDeg);
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("pVH_pi0p", bVH_pi0p);
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("pVH_etap", bVH_etap);
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("pVH", bVH);

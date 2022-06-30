@@ -12,7 +12,7 @@ nprocesses=9
 cfgFile="etapi_hybrid-copy"
 fitFileName="etapi_result.fit"
 percent=3.0 # parameters must not be within percent of the defined parameter limits
-nPassedCheck=1 # require this many fits that converged
+nPassedCheck=2 # require this many fits that converged
 workingDir=os.getcwd()
 
 def checkParLimits(fitFile):
@@ -113,8 +113,8 @@ def checkCfgFileProperMassLimits(cfgLoc):
 
 
 
-#ts=["010016", "016021", "021027", "027034", "034042", "042051", "051061", "061072", "072085", "085100","010016"]
-ts=["010020","0200325","0325050","050075","075100","010020"]
+#ts=["010020","0200325","0325050","050075","075100","010020"]
+ts=["0200325","0325050","050075","075100","010020"]
 #ts=["010020","010020"]
 
 argc=len(sys.argv)
@@ -156,7 +156,8 @@ if runFits:
             os.system("python setup_mass_dep_fits.py") # reinitialize
             checkCfgFileProperMassLimits(cfgFile+".cfg")
             print("Starting a new fit attempt...")
-            cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -m 80000 -t 0.1"
+            #cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -m 80000 -t 0.1"
+            cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -m 100 -t 999999999999"
             pipeCmd=' > fitAttempt'+str(i)+'.log'
             os.system(cmd+pipeCmd)
             newFitFile="etapi_result"+str(i)+".fit"
@@ -174,8 +175,8 @@ if runFits:
         os.system("mv -f overlayPlots "+t)
         spawnProcessChangeSetting(ts[j],ts[j+1]) # prepare for new t bin
 
-        with open("iterationsThatConverged.log") as f:
-            [f.write(v) for v in goodFits]
+        with open("iterationsThatConverged.log","w") as f:
+            [f.write(str(v)) for v in goodFits]
         os.system("mv -f iterationsThatConverged.log "+t)
 
 ################################################
