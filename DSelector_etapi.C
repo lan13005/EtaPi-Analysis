@@ -95,6 +95,8 @@ void DSelector_etapi::Init(TTree *locTree)
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_eta_hel"); 
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_eta_hel"); 
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_omega");
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_x");
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_y");
             dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pVH_pi0p");
             dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pVH_etap");
             dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pVH");
@@ -677,7 +679,9 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                 float mandelstam_tp = mandelstam_t-mandelstam_t0;
                 std::tuple<double, double> vh = dAnalysisUtilities.Calc_vanHoveCoord(recoil_cm,pi0_cm,eta_cm);
                 float q = get<0>(vh);
-                float omega = get<1>(vh)*radToDeg;
+                float omega = get<1>(vh);
+                float vanHove_x=q*cos(omega);
+                float vanHove_y=q*sin(omega);
                 bool bVH_pi0p = -29.61317407*atan(-0.9877663*(locPi0P4+locEtaP4).M()+2.77936736)+330.46008765 > omega;
                 bool bVH_etap = 45.26878219*atan(-0.88242654*(locPi0P4+locEtaP4).M()+3.14340627)+193.59347205 < omega;
                 bool bVH = bVH_pi0p*bVH_etap;
@@ -807,7 +811,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                     // Proton Related
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_momentum", locProtonP4.Vect().Mag());
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_z", locProtonX4.Z());
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_R", TMath::Sqrt(TMath::Power(locXProton,2)+TMath::Power(locYProton,2));
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_R", TMath::Sqrt(TMath::Power(locProtonX4.X(),2)+TMath::Power(locProtonX4.Y(),2)));
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_dEdxCDC", dProtonWrapper->Get_dEdx_CDC());
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("pMagP3Proton", bProtonMomentum);
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("pzCutmin", bProtonZ);
@@ -848,6 +852,8 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_hel",cosTheta_hel); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_hel",phi_hel*radToDeg); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_omega",omega*radToDeg);
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_x",vanHove_x);
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_y",vanHove_y);
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("pVH_pi0p", bVH_pi0p);
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("pVH_etap", bVH_etap);
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("pVH", bVH);

@@ -12,7 +12,7 @@ nprocesses=9
 cfgFile="etapi_hybrid-copy"
 fitFileName="etapi_result.fit"
 percent=3.0 # parameters must not be within percent of the defined parameter limits
-nPassedCheck=2 # require this many fits that converged
+nPassedCheck=3 # require this many fits that converged
 workingDir=os.getcwd()
 
 def checkParLimits(fitFile):
@@ -42,7 +42,7 @@ def checkParLimits(fitFile):
     return parNotAtLimit
 
 
-def checkFit(fitFile):
+def checkFits(folder):
     '''
     Do not care about fit status, only care that the likelihood is reasonable (negative and finite)
     0 Not calculated at all
@@ -60,18 +60,21 @@ def checkFit(fitFile):
     '''
     searchMinimumStr="bestMinimum"
     searchMinuitStatusStr="lastMinuitCommandStatus"
-    if not os.path.exists(fitFile):
-        return False
-    else:
+    
+    files=[f for f in os.listdir(folder) if ".fit" in f]
+    convergenceStatuses=[]
+    for fitFile in files:
         with open(fitFile) as infile:
             for line in infile:
                 if searchMinimumStr in line:
                     NLL=float(line.split(" ")[-1].split("\t")[1].rstrip().lstrip())
                 if searchMinuitStatusStr in line:
                     minuitStatus=float(line.split(" ")[-1].split("\t")[1].rstrip().lstrip())
-        #parNotAtLimit=checkParLimits(fitFile)
-        parNotAtLimit=True # ignore if we wish
-    return NLL<0 and np.isfinite(NLL) and minuitStatus==0 and parNotAtLimit # Require a negative log likelihood and minuit status = 0
+            #parNotAtLimit=checkParLimits(fitFile)
+            parNotAtLimit=True # ignore if we wish
+            convergenceStatus=NLL<0 and np.isfinite(NLL) and minuitStatus==0 and parNotAtLimit # Require a negative log likelihood and minuit status = 0
+            convergenceStatuses.append(convergenceStatus)
+    return sum(convergenceStatuses) # how much results files converged properly
 
 
 def spawnProcessChangeSetting(old,new):
@@ -114,7 +117,7 @@ def checkCfgFileProperMassLimits(cfgLoc):
 
 
 #ts=["010020","0200325","0325050","050075","075100","010020"]
-ts=["0200325","0325050","050075","075100","010020"]
+ts=["0325050","050075","075100","010020"]
 #ts=["010020","010020"]
 
 argc=len(sys.argv)
@@ -148,16 +151,11 @@ if runFits:
         goodFits=[]
         i=0
         newFitFile="" # initialize fitFile
-        iPassedCheck=0 
-        while iPassedCheck<nPassedCheck:
-            if checkFit(newFitFile):
-                goodFits.append(i)
-                iPassedCheck+=1
+        while checkFits("./")<nPassedCheck: 
             os.system("python setup_mass_dep_fits.py") # reinitialize
             checkCfgFileProperMassLimits(cfgFile+".cfg")
             print("Starting a new fit attempt...")
-            #cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -m 80000 -t 0.1"
-            cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -m 100 -t 999999999999"
+            cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -m 80000 -t 0.1"
             pipeCmd=' > fitAttempt'+str(i)+'.log'
             os.system(cmd+pipeCmd)
             newFitFile="etapi_result"+str(i)+".fit"
@@ -176,7 +174,7 @@ if runFits:
         spawnProcessChangeSetting(ts[j],ts[j+1]) # prepare for new t bin
 
         with open("iterationsThatConverged.log","w") as f:
-            [f.write(str(v)) for v in goodFits]
+            [f.write(str(v)+"\n") for v in goodFits]
         os.system("mv -f iterationsThatConverged.log "+t)
 
 ################################################
