@@ -7,14 +7,6 @@ import subprocess
 import uproot3 as uproot
 import pandas as pd
 
-
-nprocesses=9
-cfgFile="etapi_hybrid-copy"
-fitFileName="etapi_result.fit"
-percent=3.0 # parameters must not be within percent of the defined parameter limits
-nPassedCheck=3 # require this many fits that converged
-workingDir=os.getcwd()
-
 def checkParLimits(fitFile):
     '''
     Check to see if the fit parameters are at the limits. If so, the fit did not 
@@ -42,7 +34,7 @@ def checkParLimits(fitFile):
     return parNotAtLimit
 
 
-def checkFits(folder):
+def checkFits(folder,returnGoodFilesInstead=False):
     '''
     Do not care about fit status, only care that the likelihood is reasonable (negative and finite)
     0 Not calculated at all
@@ -61,20 +53,26 @@ def checkFits(folder):
     searchMinimumStr="bestMinimum"
     searchMinuitStatusStr="lastMinuitCommandStatus"
     
-    files=[f for f in os.listdir(folder) if ".fit" in f]
+    files=[folder+"/"+f for f in os.listdir(folder) if ".fit" in f]
     convergenceStatuses=[]
     for fitFile in files:
         with open(fitFile) as infile:
+            NLL=0
             for line in infile:
                 if searchMinimumStr in line:
                     NLL=float(line.split(" ")[-1].split("\t")[1].rstrip().lstrip())
                 if searchMinuitStatusStr in line:
                     minuitStatus=float(line.split(" ")[-1].split("\t")[1].rstrip().lstrip())
+            if NLL==0:
+                raise ValueError("NLL not found in "+fitFile+"! Terminating")
             #parNotAtLimit=checkParLimits(fitFile)
             parNotAtLimit=True # ignore if we wish
             convergenceStatus=NLL<0 and np.isfinite(NLL) and minuitStatus==0 and parNotAtLimit # Require a negative log likelihood and minuit status = 0
             convergenceStatuses.append(convergenceStatus)
-    return sum(convergenceStatuses) # how much results files converged properly
+    if not returnGoodFilesInstead:
+        return sum(convergenceStatuses) # how much results files converged properly
+    else:
+        return np.array(files)[convergenceStatuses]
 
 
 def spawnProcessChangeSetting(old,new):
@@ -115,108 +113,116 @@ def checkCfgFileProperMassLimits(cfgLoc):
         exit()
 
 
+def main(arg):
+    ##########################################
+    # Basic setup
+    ##########################################
+    nprocesses=9
+    cfgFile="etapi_hybrid-copy"
+    fitFileName="etapi_result.fit"
+    percent=3.0 # parameters must not be within percent of the defined parameter limits
+    nPassedCheck=5 # require this many fits that converged
+    workingDir=os.getcwd()
 
-#ts=["010020","0200325","0325050","050075","075100","010020"]
-ts=["0325050","050075","075100","010020"]
-#ts=["010020","010020"]
-
-argc=len(sys.argv)
-if argc!=2:
-    raise ValueError("Argument [0/1/2] to runFit, getSummary or both")
-arg=int(sys.argv[1])
-
-runFits=False
-getSummary=False
-if arg==0:
-    runFits=True
-elif arg==1:
-    getSummary=True
-elif arg==2:
-    runFits=True
-    getSummary=True
-else:
-    raise ValueError("Argument [0/1/2] to runFit, getSummary or both")
-
-if runFits:
-    for j in range(len(ts)-1):
-        t=ts[j]
+    ts=["010020","0200325","0325050","050075","075100","010020"]
+    #ts=["0325050","050075","075100","010020"]
+    #ts=["010020","010020"]
     
-        os.system("mkdir -p overlayPlots")
+    runFits=False
+    getSummary=False
+    if arg==0:
+        runFits=True
+    elif arg==1:
+        getSummary=True
+    elif arg==2:
+        runFits=True
+        getSummary=True
+    else:
+        raise ValueError("Argument [0/1/2] to runFit, getSummary or both")
     
-        if os.path.exists(fitFileName):
-            print("Fit file already exists... Deleting it to reset fitting")
-            os.system("rm "+fitFileName)
-            os.system("rm fitAttempt*log")
+    if runFits:
+        for j in range(len(ts)-1):
+            t=ts[j]
         
-        goodFits=[]
-        i=0
-        newFitFile="" # initialize fitFile
-        while checkFits("./")<nPassedCheck: 
-            os.system("python setup_mass_dep_fits.py") # reinitialize
-            checkCfgFileProperMassLimits(cfgFile+".cfg")
-            print("Starting a new fit attempt...")
-            cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -m 80000 -t 0.1"
-            pipeCmd=' > fitAttempt'+str(i)+'.log'
-            os.system(cmd+pipeCmd)
-            newFitFile="etapi_result"+str(i)+".fit"
-            os.system("mv etapi_result.fit "+newFitFile)
-            os.system("mv "+cfgFile+".cfg "+cfgFile+str(i)+".cfg")
-            i+=1
-    
-        # Move results to the desired folder
-        os.system("mkdir -p "+t)
-        #os.system("mv -f *.root "+t)
-        os.system("mv -f etapi_result*.fit "+t)
-        os.system("mv -f "+cfgFile+"*.cfg "+t)
-        os.system("mv -f *.log "+t)
-        os.system("mv -f *.ni "+t)
-        os.system("mv -f overlayPlots "+t)
-        spawnProcessChangeSetting(ts[j],ts[j+1]) # prepare for new t bin
-
-        with open("iterationsThatConverged.log","w") as f:
-            [f.write(str(v)+"\n") for v in goodFits]
-        os.system("mv -f iterationsThatConverged.log "+t)
-
-################################################
-### Write out a summary of the fits
-################################################
-if getSummary:
-    wall_times_allt=[]
-    for t in ts[:-1]:
-        print("===================================================")
-        print(" ----------------    "+t+"    -----------------")
-        print("===================================================")
-    
-        files=os.listdir(t)
-        iterations=[int(afile.split("fitAttempt")[1].split(".log")[0]) for afile in files if "fitAttempt" in afile]
-        iterations.sort()
+            os.system("mkdir -p overlayPlots")
         
-        interestingLines=["bestMinimum","lastMinuitCommandStatus","eMatrixStatus"]
-        wall_times=[]
-        for iteration in iterations:
-            print("******** ITERATION "+str(iteration)+" *********")
-            with open("./"+t+"/fitAttempt"+str(iteration)+".log") as log:
-                for line in log:
-                    if "time" in line:
-                        print(line.rstrip().lstrip())
-                        if "wall" in line:
-                            wall_time=float(line.split(" ")[-2])
-                            wall_times.append(wall_time)
-            fitFile="./"+t+"/etapi_result"+str(iteration)+".fit"
-            with open(fitFile) as fit:
-                for line in fit:
-                    if any(ele for ele in interestingLines if ele in line):
-                        print(line.rstrip().lstrip())
-            checkParLimits(fitFile)
-        wall_times_allt.append(wall_times)
+            if os.path.exists(fitFileName):
+                print("Fit file already exists... Deleting it to reset fitting")
+                os.system("rm "+fitFileName)
+                os.system("rm fitAttempt*log")
+            
+            goodFits=[]
+            i=0
+            newFitFile="" # initialize fitFile
+            while checkFits("./")<nPassedCheck: 
+                os.system("python setup_mass_dep_fits.py") # reinitialize
+                checkCfgFileProperMassLimits(cfgFile+".cfg")
+                print("Starting a new fit attempt...")
+                cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -m 80000 -t 0.1"
+                pipeCmd=' > fitAttempt'+str(i)+'.log'
+                os.system(cmd+pipeCmd)
+                newFitFile="etapi_result"+str(i)+".fit"
+                os.system("mv etapi_result.fit "+newFitFile)
+                os.system("mv "+cfgFile+".cfg "+cfgFile+str(i)+".cfg")
+                i+=1
+        
+            # Move results to the desired folder
+            os.system("mkdir -p "+t)
+            #os.system("mv -f *.root "+t)
+            os.system("mv -f etapi_result*.fit "+t)
+            os.system("mv -f "+cfgFile+"*.cfg "+t)
+            os.system("mv -f *.log "+t)
+            os.system("mv -f *.ni "+t)
+            os.system("mv -f overlayPlots "+t)
+            spawnProcessChangeSetting(ts[j],ts[j+1]) # prepare for new t bin
     
-    print("\n\n-----------------------------------------------")
-    print("SUMMARY")
-    print("----------------------------------------------")
-    for it,t in enumerate(ts[:-1]):
-        print("tbin {} required {} fits to find one converging".format(t,len(wall_times_allt[it])))
-        print("  Total wall time in t bin: {}s".format(sum(wall_times_allt[it])))
-    total_wall_time=sum([sum(wall_times) for wall_times in wall_times_allt[:-1]])
-    print("Total Wall Time: {}s or {}m or {}h".format(total_wall_time,total_wall_time/60,total_wall_time/3600))
+    ################################################
+    ### Write out a summary of the fits
+    ################################################
+    if getSummary:
+        wall_times_allt=[]
+        for t in ts[:-1]:
+            print("===================================================")
+            print(" ----------------    "+t+"    -----------------")
+            print("===================================================")
+        
+            files=os.listdir(t)
+            iterations=[int(afile.split("fitAttempt")[1].split(".log")[0]) for afile in files if "fitAttempt" in afile]
+            iterations.sort()
+            
+            interestingLines=["bestMinimum","lastMinuitCommandStatus","eMatrixStatus"]
+            wall_times=[]
+            for iteration in iterations:
+                print("******** ITERATION "+str(iteration)+" *********")
+                with open("./"+t+"/fitAttempt"+str(iteration)+".log") as log:
+                    for line in log:
+                        if "time" in line:
+                            print(line.rstrip().lstrip())
+                            if "wall" in line:
+                                wall_time=float(line.split(" ")[-2])
+                                wall_times.append(wall_time)
+                fitFile="./"+t+"/etapi_result"+str(iteration)+".fit"
+                with open(fitFile) as fit:
+                    for line in fit:
+                        if any(ele for ele in interestingLines if ele in line):
+                            print(line.rstrip().lstrip())
+                checkParLimits(fitFile)
+            wall_times_allt.append(wall_times)
+        
+        print("\n\n-----------------------------------------------")
+        print("SUMMARY")
+        print("----------------------------------------------")
+        for it,t in enumerate(ts[:-1]):
+            print("tbin {} required {} fits to find one converging".format(t,len(wall_times_allt[it])))
+            print("  Total wall time in t bin: {}s".format(sum(wall_times_allt[it])))
+        total_wall_time=sum([sum(wall_times) for wall_times in wall_times_allt[:-1]])
+        print("Total Wall Time: {}s or {}m or {}h".format(total_wall_time,total_wall_time/60,total_wall_time/3600))
 
 
+if __name__ == "__main__":
+    argc=len(sys.argv)
+    if argc!=2:
+        raise ValueError("Argument [0/1/2] to runFit, getSummary or both")
+    arg=int(sys.argv[1])
+    main(arg)
+    

@@ -26,6 +26,8 @@ Double_t asymmetry(Double_t *x, Double_t *par){
 // Number of t1 bins to consider, have to manually enter the names
 int nt1bins=5; 
 string mint1s[5] = {"01", "03", "05", "07", "09"};
+//int nt1bins=1; 
+//string mint1s[1] = {"05"};
 
 int minEntriesInPhiHists=50; // set a minimum number entries in each phi histogram
 int minEntriesForAsymPhiHists=30; // set a minimum number entries in each phi histogram
@@ -88,6 +90,9 @@ int main(int argc, char* argv[]){
         return 1;
     }
     int single=stoi(argv[1]);
+
+    std::chrono::steady_clock::time_point begin_time = std::chrono::steady_clock::now();
+    cout << "*************** Running over systematic " << single << " ***************" << endl;
 
     map<string, float> percentages;
     vector< vector<float> > sbRegions = {
@@ -200,8 +205,8 @@ int main(int argc, char* argv[]){
     //   do not select on Mpi0
     //   Can check mass_plots_etaLeft_ASBS.pdf and mass_plots_etaRight_ASBS.pdf to see if the selection is working. It appears so
     /////////////////////
-    vector<string> sbTags={"_etaLeft_ASBS"};  
-    string weightVar="weightASBS";
+//    vector<string> sbTags={"_etaLeft_ASBS"};  
+//    string weightVar="weightASBS";
 
     /////////////////////
     // PHI OFFSET SYSTEMATIC 
@@ -212,6 +217,7 @@ int main(int argc, char* argv[]){
 
     /////////////////////
     // FLUX NORMALIZATION SYSTEMATIC 
+    //  ** CANNOT DO BOTH REGIONS WITH DIFFERENT PROCESSES IN runFitAsymPlots.py SINCE IT SELECTS ON eventSelectSingles ** 
     /////////////////////
 //    vector<string> sbTags={"_fluxNormMinus5Perc_ASBS"};  
 //    string weightVar="weightASBS";
@@ -228,11 +234,20 @@ int main(int argc, char* argv[]){
 //    vector<string> sbTags={"_sb_251520_252540_ASBS", "_sb_350540_351580_ASBS"}; 
 //    string weightVar="weightASBS"; // Will not overwrite AccWeight if "AccWeight" else overwrite weightVar with AccWeight*weightBS
 
+    /////////////////////
+    // CHECK TO SEE IF WE SHOULD SIDEBAND SUBTRACT OR NOT
+    //   Fast eta has less data so we construct only 1 bin for the test
+    //   Only select on eta sidebands, where basically all the background exists
+    /////////////////////
+    vector<string> sbTags={"_sbR"}; // {"_sbR"}, {"_sbL"}, {"_sbR_1bin"}, {"_sbL_1bin"} 
+    string weightVar="AccWeight"; // only subtract accidentals since we are testing sideband subtraction
+
     map<string,vector<pair<int,criteria>>> eventSelectSingles;
     int ikey=0;
     for (auto const& it : eventSelects){
         if (ikey==single)
             eventSelectSingles[it.first] = it.second;
+        ++ikey;
     }
 
     if (eventSelectSingles.size()==0){
@@ -253,12 +268,17 @@ int main(int argc, char* argv[]){
         cout << endl;
         cout << "---------------------------- SUMMARY ---------------------------------" << endl;
         for (auto const& mapElement: percentages){
-            cout << mapElement.first << " has " << std::setprecision(3) << mapElement.second/percentages["_ASBS"]*100 << "%" 
-                << " events compared to standard default selections" << endl;
+            //cout << mapElement.first << " has " << std::setprecision(3) << mapElement.second/percentages["_ASBS"]*100 << "%" 
+            //    << " events compared to standard default selections" << endl;
+            cout << mapElement.first << " has " << std::setprecision(3) << mapElement.second << " percentage of events post-to-pre selection" << endl;
         } 
         cout << "----------------------------------------------------------------------" << endl;
         cout << endl;
     }
+
+    std::chrono::steady_clock::time_point end_time = std::chrono::steady_clock::now();
+    std::cout << "Total run time = " << std::chrono::duration_cast<std::chrono::seconds>(end_time - begin_time).count() << "s" << std::endl;
+
     return 0;
 }
 
@@ -897,7 +917,6 @@ map<string, float> extractAsymmetries(
     float AccWeight;
     float weightASBS;
     int BeamAngle;
-    bool insideEllipse;
     float unusedEnergy;
     float chiSq;
     float mmsq;
@@ -993,9 +1012,7 @@ map<string, float> extractAsymmetries(
             tree->SetBranchAddress(variable.c_str(),variable_map[variable]);
         }
         tree->SetBranchStatus("BeamAngle",1);
-        tree->SetBranchStatus("insideEllipse",1);
         tree->SetBranchAddress("BeamAngle",&BeamAngle);
-        tree->SetBranchAddress("insideEllipse",&insideEllipse);
     
         auto start = std::chrono::system_clock::now();
         for (Long64_t ientry=0; ientry<nentries_all[iData]; ++ientry){
@@ -1166,7 +1183,7 @@ map<string, float> extractAsymmetries(
                 // ******* Select Eta Sidebands
                 //selectEta=(Meta>etasbLL)*(Meta<etasbLR)||(Meta>etasbRL)*(Meta<etasbRR);
                 // ******* Select Eta Right Sideband
-                //selectEta=(Meta>etasbRL)*(Meta<etasbRR);
+                selectEta=(Meta>etasbRL)*(Meta<etasbRR);
                 // ******* Select Eta Left Sideband
                 //selectEta=(Meta>etasbLL)*(Meta<etasbLR);
                 // ******* Select Eta Signal
@@ -1175,12 +1192,12 @@ map<string, float> extractAsymmetries(
                 // ******* Select Eta Right Half Peak
                 //selectEta=(Meta>eta_peak);
                 // ******* Select Eta Left Half Peak
-                selectEta=(Meta<eta_peak);
+                //selectEta=(Meta<eta_peak);
                 
                 // Do not select on Mpi0 nor Meta if we are going to do sideband subtraction also
-                selectPi0=true; 
-                selectEta=true;
-                if(selectPi0*selectEta){ // if(insideEllipse)
+                //selectPi0=true; 
+                //selectEta=true;
+                if(selectPi0*selectEta){ 
                     for(string variable: variables){
                         array_variable_map[dataSetTag[iData]+"_"+variable].push_back(array_variable_map_all[dataSetTag[iData]+"_"+variable][ientry]); 
                     }
@@ -1329,7 +1346,7 @@ map<string, float> extractAsymmetries(
         //float maxMpi0eta[7] = {1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0};
         float minMpi0eta[3] = {1.6, 2.1, 2.6};
         float maxMpi0eta[3] = {2.1, 2.6, 3.1};
-        for(int it=0; it<7; ++it){
+        for(int it=0; it<(int)(sizeof(minMpi0eta)/sizeof(minMpi0eta[0])); ++it){
             vector<criteria> selections={
                 {"Mpi0eta",minMpi0eta[it],maxMpi0eta[it],fltmin,fltmin},
                 {"Mpi0p",1.4,100,fltmin,fltmin} 
