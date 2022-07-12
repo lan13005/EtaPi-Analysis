@@ -3,8 +3,8 @@
 use Cwd;
 
 $lowMass = 1.04;
-$highMass = 1.56;
-$nBins =  13;
+$highMass = 1.80;
+$nBins =  19;
 $fitName = "EtaPi_fit";
 
 # put a limit on the number of data events to process
@@ -16,7 +16,7 @@ print "\n\ncurrent working dir: $workingDir";
 print "\n===================================\n";
 
 $t="010020";
-$m="104156";
+$m="104180";
 $baseGenDir="/d/grid17/ln16/dselector_v3/phase1_selected/t$t\_m$m/";
 $baseAccDir="/d/grid17/ln16/dselector_v3/phase1_selected/t$t\_m$m/";
 $baseBkgDir="/d/grid17/ln16/dselector_v3/phase1_selected/t$t\_m$m/";

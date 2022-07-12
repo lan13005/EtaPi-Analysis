@@ -158,7 +158,7 @@ def main(arg):
                 os.system("python setup_mass_dep_fits.py") # reinitialize
                 checkCfgFileProperMassLimits(cfgFile+".cfg")
                 print("Starting a new fit attempt...")
-                cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -m 80000 -t 0.1"
+                cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -m 150000 -t 0.1" # 80k was not enough for smallest t-bin
                 pipeCmd=' > fitAttempt'+str(i)+'.log'
                 os.system(cmd+pipeCmd)
                 newFitFile="etapi_result"+str(i)+".fit"
