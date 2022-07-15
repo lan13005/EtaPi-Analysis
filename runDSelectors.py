@@ -37,15 +37,16 @@ thrownTreeName="Thrown_Tree"
 #runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_8_260M_130M/merged/tree_pi0eta*"',reconTreeName,"F2018_8_selected",3,proof_Nthreads,recon_cfiles)
 
 ## FILTERED PHASE 1 DATA
-#for i in [3]:
-#    runSelector('"./phase1_data_looseChiUE/D2017_1_loose_tree.root"',reconTreeName,"D2017_1_selected",i,proof_Nthreads,recon_cfiles)
-#    runSelector('"./phase1_data_looseChiUE/D2018_1_loose_tree.root"',reconTreeName,"D2018_1_selected",i,proof_Nthreads,recon_cfiles)
-#    runSelector('"./phase1_data_looseChiUE/D2018_8_loose_tree.root"',reconTreeName,"D2018_8_selected",i,proof_Nthreads,recon_cfiles)
-
 for i in [3]:
-    runSelector('"./study_double_regge/rootFiles/D2017_1_selected_acc_tree.root"',reconTreeName,"D2017_1_selected",i,proof_Nthreads,recon_cfiles)
-    runSelector('"./study_double_regge/rootFiles/D2018_1_selected_acc_tree.root"',reconTreeName,"D2018_1_selected",i,proof_Nthreads,recon_cfiles)
-    runSelector('"./study_double_regge/rootFiles/D2018_8_selected_acc_tree.root"',reconTreeName,"D2018_8_selected",i,proof_Nthreads,recon_cfiles)
+    runSelector('"./phase1_data_looseChiUE/D2017_1_loose_tree.root"',reconTreeName,"D2017_1_selected",i,proof_Nthreads,recon_cfiles)
+    runSelector('"./phase1_data_looseChiUE/D2018_1_loose_tree.root"',reconTreeName,"D2018_1_selected",i,proof_Nthreads,recon_cfiles)
+    runSelector('"./phase1_data_looseChiUE/D2018_8_loose_tree.root"',reconTreeName,"D2018_8_selected",i,proof_Nthreads,recon_cfiles)
+
+## FOR THE DOUBLE REGGE STUDY
+#for i in [3]:
+#    runSelector('"./study_double_regge/rootFiles/D2017_1_selected_acc_tree.root"',reconTreeName,"D2017_1_selected",i,proof_Nthreads,recon_cfiles)
+#    runSelector('"./study_double_regge/rootFiles/D2018_1_selected_acc_tree.root"',reconTreeName,"D2018_1_selected",i,proof_Nthreads,recon_cfiles)
+#    runSelector('"./study_double_regge/rootFiles/D2018_8_selected_acc_tree.root"',reconTreeName,"D2018_8_selected",i,proof_Nthreads,recon_cfiles)
 
 ## UNFILTERED PHASE 1 DATA
 #for i in [3]:

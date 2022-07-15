@@ -19,10 +19,11 @@ void split_flat_kinematics(){
     vector<string> runs={"2017_1","2018_1","2018_8"};
     vector<string> files;
     for (auto run: runs){
-        files.push_back("D"+run+"_selected_data_flat.root");
-        files.push_back("D"+run+"_selected_bkgnd_flat.root");
-        files.push_back("F"+run+"_selected_acc_flat.root");
-        files.push_back("F"+run+"_gen_data_flat.root");
+        //files.push_back("D"+run+"_selected_data_flat.root");
+        //files.push_back("D"+run+"_selected_bkgnd_flat.root");
+        files.push_back("D"+run+"_selected_acc_flat.root");
+        //files.push_back("F"+run+"_selected_acc_flat.root");
+        //files.push_back("F"+run+"_gen_data_flat.root");
     }
     int nFileTypes=((int)files.size())/((int)runs.size());
 
@@ -34,9 +35,9 @@ void split_flat_kinematics(){
     map<string,int> ts={{"010020",0},{"0200325",1},{"0325050",2},{"050075",3},{"075100",4}}; // t
     vector<float> mint={0.1,0.2,0.325,0.5,0.75};
     vector<float> maxt={0.2,0.325,0.5,0.75,1.0};
-    map<string,int> mpi0etas={{"104156",0}}; // m 
+    map<string,int> mpi0etas={{"104180",0}}; // m 
     vector<float> minmpi0eta={1.04};
-    vector<float> maxmpi0eta={1.56};
+    vector<float> maxmpi0eta={1.80};
     //map<string,int> ts={{"all",0}}; // t
     //vector<float> mint={0};
     //vector<float> maxt={100};
