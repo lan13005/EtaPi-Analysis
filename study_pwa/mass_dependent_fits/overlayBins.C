@@ -25,17 +25,17 @@ void overlaySingleBin(int iBin,int nBins, vector<string> names1D, vector<TCanvas
             TFile* infile = TFile::Open((folder+outputFile).c_str());
 
             TCanvas* c2=new TCanvas("","",1400,900); // plot all variables on a canvas for a given waveset
-
-            int ncols=ceil(sqrt(groups.size()));
-            int nrows=floor(sqrt(groups.size()));
-
-            c2->Divide(ncols,nrows);
+            //int ncols=ceil(sqrt(groups.size()));
+            //int nrows=floor(sqrt(groups.size()));
+            c2->Divide(2,4);
             for (int histIdx=0; histIdx<(int)names1D.size(); ++histIdx){
                 vector<string> allPols;
                 if (selectPol=="allPols")
                     allPols={"000","045","090","135"};
                 else
                     allPols={selectPol};
+                if (!(infile->GetListOfKeys()->Contains((fitName+"_"+allPols[0]+"_"+names1D[histIdx]+"dat").c_str())))
+                    continue;
                 for (int ipol=0; ipol<(int)allPols.size(); ++ipol){
                     infile->GetObject((fitName+"_"+allPols[ipol]+"_"+names1D[histIdx]+"dat").c_str(),any1DHist_dat);
                     infile->GetObject((fitName+"_"+allPols[ipol]+"_"+names1D[histIdx]+"acc").c_str(),any1DHist_acc);
@@ -125,7 +125,7 @@ void overlayBins(string folder){
     
     TCanvas* anyCanvas;
     vector<TCanvas*> allCanvases;
-    std::vector<std::string> names1D = {"Metapi","Metapi_40MeVBin","cosTheta","Phi","phi","psi","t"};
+    std::vector<std::string> names1D = {"Metapi","Metapi_40MeVBin","cosTheta","Phi","phi","psi","t","hello"};
     for (auto name: names1D){
         anyCanvas = new TCanvas(("c"+name).c_str(),"",1440,900);
         anyCanvas->Divide(ncols,nrows);

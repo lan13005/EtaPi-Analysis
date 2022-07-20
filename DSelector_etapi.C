@@ -534,7 +534,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		//    genmc = thrown trees created during simulation process
 		bool bSignalRegion;
 		float branchWeight;
-                int choice=3;
+                int choice=2;
 		//---------CHOICE 1 FOR "data" RUN OVER SIGNAL/DATA-------------
                 if (choice==1){
 		    bSignalRegion=(pi0_sbweight==1)*(eta_sbweight==1)*(locHistAccidWeightFactor==1); // Keep combos ONLY in the signal region
@@ -712,18 +712,18 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                 // Choice 1: Do not make any selections
                 //bool selection=true;
                 // Choice 2: Nominal selection for a2 pwa
-		//bool selection=bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bMMsq*bBeamEnergy*
-		//		bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion;
+		bool selection=bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bMMsq*bBeamEnergy*
+				bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion;
                 // Choice 3: Nominal selections for double Regge beam asymmetry systematic studies. Loosen most cuts. 
                 //           MANUALLY COMMENT OUT bWeight FILTERING LINE BELOW
-                bool selection=(Metapi0>1.6)*(Metapi0<3.0)*bBeamEnergy*(dComboWrapper->Get_ChiSq_KinFit("")<50)*(dComboWrapper->Get_Energy_UnusedShowers()<10)*
-                            ((locPhoton1P4.Theta()*radToDeg>=1.5 && locPhoton1P4.Theta()*radToDeg<=11) || locPhoton1P4.Theta()*radToDeg>=11.4)*
-                            ((locPhoton2P4.Theta()*radToDeg>=1.5 && locPhoton2P4.Theta()*radToDeg<=11) || locPhoton2P4.Theta()*radToDeg>=11.4)*
-                            ((locPhoton3P4.Theta()*radToDeg>=1.5 && locPhoton3P4.Theta()*radToDeg<=11) || locPhoton3P4.Theta()*radToDeg>=11.4)*
-                            ((locPhoton4P4.Theta()*radToDeg>=1.5 && locPhoton4P4.Theta()*radToDeg<=11) || locPhoton4P4.Theta()*radToDeg>=11.4)*
-                            (locProtonX4.Z()>50)*(locProtonX4.Z()<80)*  
-                            bPhotonE*bProton_dEdx*bProtonMomentum* // These selections remain unchanged (systematic only going tighter) - MMSq selection removed
-                            ((mandelstam_tpi0<1.0)||(mandelstam_teta<1.0)); // We only care about events where the eta or pion is fast
+                //bool selection=(Metapi0>1.6)*(Metapi0<3.0)*bBeamEnergy*(dComboWrapper->Get_ChiSq_KinFit("")<50)*(dComboWrapper->Get_Energy_UnusedShowers()<10)*
+                //            ((locPhoton1P4.Theta()*radToDeg>=1.5 && locPhoton1P4.Theta()*radToDeg<=11) || locPhoton1P4.Theta()*radToDeg>=11.4)*
+                //            ((locPhoton2P4.Theta()*radToDeg>=1.5 && locPhoton2P4.Theta()*radToDeg<=11) || locPhoton2P4.Theta()*radToDeg>=11.4)*
+                //            ((locPhoton3P4.Theta()*radToDeg>=1.5 && locPhoton3P4.Theta()*radToDeg<=11) || locPhoton3P4.Theta()*radToDeg>=11.4)*
+                //            ((locPhoton4P4.Theta()*radToDeg>=1.5 && locPhoton4P4.Theta()*radToDeg<=11) || locPhoton4P4.Theta()*radToDeg>=11.4)*
+                //            (locProtonX4.Z()>50)*(locProtonX4.Z()<80)*  
+                //            bPhotonE*bProton_dEdx*bProtonMomentum* // These selections remain unchanged (systematic only going tighter) - MMSq selection removed
+                //            ((mandelstam_tpi0<1.0)||(mandelstam_teta<1.0)); // We only care about events where the eta or pion is fast
                 ///////////////////////////////////////////////////////////////////////////////////
                 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -735,10 +735,12 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 			dHist_Mpi0->Fill((locPhoton1P4+locPhoton2P4).M(),locHistAccidWeightFactor);
 			dHist_Meta->Fill((locPhoton3P4+locPhoton4P4).M(),locHistAccidWeightFactor);
 		}
-		//if (!bWeight){ // We do not want to keep any combos with weight 0. Not just a waste of space, can cause problems during fitting
-		//	dComboWrapper->Set_IsComboCut(true);
-		//	continue;
-		//}
+		if (!bWeight){ 
+                        // Turn ON for a2 study: We do not want to keep any combos with weight 0. Not just a waste of space, can cause problems during fitting
+                        // Turn OFF for double regge study since we do sideband subtraction separately there 
+			dComboWrapper->Set_IsComboCut(true);
+			continue;
+		}
 		if(bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bBeamEnergy*bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion){
 			dHist_mmsq->Fill(locMissingMassSquared,weight);}
 		if(bPhotonE*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bMMsq*bBeamEnergy*bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion){

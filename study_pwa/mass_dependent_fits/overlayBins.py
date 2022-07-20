@@ -19,11 +19,12 @@ def printHelp():
     print("where v4 is the folder where overlayBins.C is in")
     print("where v5 is a semicolon separated list to gather fit fractions for (used in the etapi_plotter program)")
     print('where v6 is either "T" or "F" to do or not apply acceptance correction')
-    print('where v7 is the folder to look for the fit file') 
+    print('where v7 is either "T" or "F" to do or not plot all etapi_plotter variables and gen results')
+    print('where v8 is the folder to look for the fit file') 
     
 args=sys.argv
 nargs=len(args)
-if nargs!=8:
+if nargs!=9:
     printHelp()
     exit()
 else:
@@ -33,7 +34,8 @@ else:
     cFolder=str(args[4])
     Ls=str(args[5])
     doAccCorr=str(args[6])
-    folder=str(args[7])
+    plotAllVarsAndGen=str(args[7])
+    folder=str(args[8])
     groupVec=ampString.split(";")
     groups=[tmp if tmp!="" else tmp for tmp in groupVec]
     groupTags=["_"+tmp if tmp!="" else tmp for tmp in groupVec]
@@ -48,7 +50,7 @@ def runEtaPiPlotterForAllBins():
     print("   running etapi_plotter...")
     #for igroup in range(len(groups)):
     #    cmd=["etapi_plotter",fitFile,"-o","etapi_plot"+groupTags[igroup]+".root","-s",groups[igroup]]
-    cmd=["etapi_plotter",fitFile,"-s",ampString,"-a",doAccCorr,"-F",Ls]
+    cmd=["etapi_plotter",fitFile,"-s",ampString,"-a",doAccCorr,"-I",plotAllVarsAndGen,"-F",Ls]
     print("calling: "+" ".join(cmd))
     if verbose:
         try:

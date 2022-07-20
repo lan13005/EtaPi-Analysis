@@ -16,6 +16,7 @@ def replaceStr(search,replace,fileName):
 
 ### CFG File name
 fileName=baseDir+"study_pwa/mass_dependent_fits/config_files/etapi_hybrid.cfg"
+#fileName=baseDir+"study_pwa/mass_dependent_fits/config_files/kmatrix_nonLoop.cfg"
 filePrefix=fileName.split(".")[0].split("/")[-1]
 fileAffix=fileName.split(".")[1]
 newFileName=filePrefix+"-copy."+fileAffix
@@ -41,12 +42,14 @@ for pol in ["000","045","090","135"]:
     replaceStr(search,replace,newFileName)
 
     search="ACCMCFILE_"+pol
-    fileLoc="pol"+pol+"_t"+t+"_m"+m+"_FTOT_selected_acc_flat.root"
+    fileLoc="polALL_t"+t+"_m"+m+"_FTOT_selected_acc_flat.root"
+    #fileLoc="pol"+pol+"_t"+t+"_m"+m+"_FTOT_selected_acc_flat.root"
     replace=baseLoc+fileLoc
     replaceStr(search,replace,newFileName)
 
     search="GENMCFILE_"+pol
-    fileLoc="pol"+pol+"_t"+t+"_m"+m+"_FTOT_gen_data_flat.root"
+    fileLoc="polALL_t"+t+"_m"+m+"_FTOT_gen_data_flat.root"
+    #fileLoc="pol"+pol+"_t"+t+"_m"+m+"_FTOT_gen_data_flat.root"
     replace=baseLoc+fileLoc
     replaceStr(search,replace,newFileName)
     
@@ -55,9 +58,12 @@ waves=[
         "D0+-", "D0++", "D1+-", "D1++", "D2++", "D1--",
         "pD0+-", "pD0++", "pD1+-", "pD1++", "pD2++", "pD1--",
         ] # TMD waveset
-#waves=["D2++","pD2++"]
+#waves=["D2++","D2+-","D0++","D0+-"] # KMATRIX waveset
 refs=["Negative","Positive"]
 parts=["Re","Im"]
+
+reaction="LOOPREAC"
+#reaction="EtaPi0_000"
 
 def reinitWave(wave,anchor):
     for j,ref in enumerate(refs): 
@@ -68,7 +74,7 @@ def reinitWave(wave,anchor):
             if i==0:
                 rsample=random.uniform(-1*scale,scale)
                 isample=random.uniform(-1*scale,scale)
-            search="initialize LOOPREAC::"+refpart+"::"+wave
+            search="initialize "+reaction+"::"+refpart+"::"+wave
             if anchor:
                 replace=search+" cartesian "+str(rsample)+" 0 real"
             else:

@@ -37,10 +37,10 @@ thrownTreeName="Thrown_Tree"
 #runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_8_260M_130M/merged/tree_pi0eta*"',reconTreeName,"F2018_8_selected",3,proof_Nthreads,recon_cfiles)
 
 ## FILTERED PHASE 1 DATA
-for i in [3]:
-    runSelector('"./phase1_data_looseChiUE/D2017_1_loose_tree.root"',reconTreeName,"D2017_1_selected",i,proof_Nthreads,recon_cfiles)
-    runSelector('"./phase1_data_looseChiUE/D2018_1_loose_tree.root"',reconTreeName,"D2018_1_selected",i,proof_Nthreads,recon_cfiles)
-    runSelector('"./phase1_data_looseChiUE/D2018_8_loose_tree.root"',reconTreeName,"D2018_8_selected",i,proof_Nthreads,recon_cfiles)
+#for i in [3]:
+#    runSelector('"./phase1_data_looseChiUE/D2017_1_loose_tree.root"',reconTreeName,"D2017_1_selected",i,proof_Nthreads,recon_cfiles)
+#    runSelector('"./phase1_data_looseChiUE/D2018_1_loose_tree.root"',reconTreeName,"D2018_1_selected",i,proof_Nthreads,recon_cfiles)
+#    runSelector('"./phase1_data_looseChiUE/D2018_8_loose_tree.root"',reconTreeName,"D2018_8_selected",i,proof_Nthreads,recon_cfiles)
 
 ## FOR THE DOUBLE REGGE STUDY
 #for i in [3]:
@@ -60,10 +60,10 @@ for i in [3]:
 #runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_8_260M_130M/merged/tree_thrown*"',thrownTreeName,"F2018_8_gen",1,proof_Nthreads,thrown_cfiles)
 
 #### KMATRIX MC
-#reconTreeName="pi0eta__B4_M7_M17_Tree"
-#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/malte_kmatrix_10M_030322/root/trees_pt0/tree*"',reconTreeName,"kmatrix_selected_halved",1,proof_Nthreads,recon_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/malte_kmatrix_10M_030322/root/trees_pt0/tree*"',reconTreeName,"kmatrix_selected_halved",2,proof_Nthreads,recon_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/malte_kmatrix_10M_030322/root/thrown_pt0/tree*"',thrownTreeName,"kmatrix_gen_halved",1,proof_Nthreads,thrown_cfiles)
+reconTreeName="pi0eta__B4_M7_M17_Tree"
+runSelector('"/d/grid17/ln16/rootFiles/pi0eta/malte_kmatrix_10M_030322/root/trees/tree*"',reconTreeName,"kmatrix_selected",1,proof_Nthreads,recon_cfiles)
+runSelector('"/d/grid17/ln16/rootFiles/pi0eta/malte_kmatrix_10M_030322/root/trees/tree*"',reconTreeName,"kmatrix_selected",2,proof_Nthreads,recon_cfiles)
+runSelector('"/d/grid17/ln16/rootFiles/pi0eta/malte_kmatrix_10M_030322/root/thrown/tree*"',thrownTreeName,"kmatrix_gen",1,proof_Nthreads,thrown_cfiles)
 
 
 

@@ -14,6 +14,7 @@ ts=["010020", "0200325", "0325050", "050075", "075100"]
 
 fitFileName="etapi_result.fit"
 doAccCorr="true" # this should generally be true. AccCorr is chosen during the fit, we just want to extract corrected yields for cs measurements
+plotAllVarsAndGen="false" # should we plot all variables in etapi_plotter and gen results or just plot the mass plots and {dat,bkgnd,accmc} trees
 Ls="S_D_pD"
 #Ls="S_D"
 
@@ -56,7 +57,7 @@ def draw(folder):
 
     os.chdir(folder)
     folder=workingDir+"/"+folder
-    cmd="python3 ../overlayBins.py 2 '"+waves+"' '"+fitFileName+"' '"+workingDir+"' '"+Ls+"' '"+doAccCorr+"' '"+folder+"'"
+    cmd="python3 ../overlayBins.py 2 '"+waves+"' '"+fitFileName+"' '"+workingDir+"' '"+Ls+"' '"+doAccCorr+"' '"+plotAllVarsAndGen+"' '"+folder+"'"
     print(cmd)
     os.system(cmd)
     os.chdir("..")

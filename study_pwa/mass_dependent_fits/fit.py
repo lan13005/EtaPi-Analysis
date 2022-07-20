@@ -119,6 +119,7 @@ def main(arg):
     ##########################################
     nprocesses=9
     cfgFile="etapi_hybrid-copy"
+    #cfgFile="kmatrix_nonLoop-copy"
     fitFileName="etapi_result.fit"
     percent=3.0 # parameters must not be within percent of the defined parameter limits
     nPassedCheck=5 # require this many fits that converged
