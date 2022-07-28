@@ -3,9 +3,22 @@
 import subprocess
 import os
 import random
+import sys
 
+argc=len(sys.argv)
+argv=sys.argv
+print(argv)
+if argc!=2:
+    print("requires 1 argument for the seed! Use -1 to not set a seed")
+    exit()
+seed=int(argv[1])
+if seed!=-1:
+    random.seed(seed)
 
-baseDir="/d/grid17/ln16/dselector_v3/"
+baseDir="/d/grid17/ln16/dselector_v3/phase1_selected/"
+#baseDir="/scratch-fits/"
+
+fileName=os.getcwd()+"/config_files/etapi_hybrid.cfg"
 
 def replaceStr(search,replace,fileName):
     print("replace str: "+replace)
@@ -14,9 +27,6 @@ def replaceStr(search,replace,fileName):
     subprocess.Popen(sedArgs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).wait()
 
 
-### CFG File name
-fileName=baseDir+"study_pwa/mass_dependent_fits/config_files/etapi_hybrid.cfg"
-#fileName=baseDir+"study_pwa/mass_dependent_fits/config_files/kmatrix_nonLoop.cfg"
 filePrefix=fileName.split(".")[0].split("/")[-1]
 fileAffix=fileName.split(".")[1]
 newFileName=filePrefix+"-copy."+fileAffix
@@ -27,7 +37,7 @@ os.system("cp "+fileName+" "+newFileName)
 t="010020"
 m="104156" #"104180"
 for pol in ["000","045","090","135"]:
-    baseLoc=baseDir+"phase1_selected/t"+t+"_m"+m+"/"
+    baseLoc=baseDir+"t"+t+"_m"+m+"/"
     if not os.path.exists(baseLoc):
         raise ValueError("YOU ARE REQUESTING FOR A FOLDER THAT DOES NOT EXIST! FIX IN SETUP FIT SCRIPT")
 

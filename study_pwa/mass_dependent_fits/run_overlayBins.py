@@ -77,7 +77,9 @@ for t in ts:
 [os.system("mkdir -p "+folder) for folder in folders]
 [os.system("cp "+convergedFile+" "+folder+"/"+fitFileName) for convergedFile,folder in zip(convergedFiles,folders)]
 
-with multiprocessing.Pool(len(folders)) as p:
+maxProcesses=15
+nthreads=len(folders) if len(folders)<maxProcesses else maxProcesses
+with multiprocessing.Pool(nthreads) as p:
     ### CHANGING THE WAVESET TO LOOP OVER
     groupVec=waves.split(";")
     groupsWithQuotes=['"_'+tmp+'"' if tmp!="" else '""' for tmp in groupVec]

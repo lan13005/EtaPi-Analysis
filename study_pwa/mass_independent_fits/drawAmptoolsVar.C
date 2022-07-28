@@ -7,7 +7,7 @@ float uppMass=1.56;
 int nbins=13; //25; // THIS IS NOT TO BE CONFUSED WITH NM. THIS IS THE BINNING FOR THE MASS HISTOGRAM
 int nbinsAng=30;
 int nm=1; // NUMBER OF BINNINGS TO MAKE THE HISTOGRAMS IN
-string foutTag="phase1";//"kmatrix"; 
+string foutTag="kmatrix";//"phase1"; 
 bool doAccCorr=true; // SHOULD WE ACCEPTANCE CORRECT THE YIELDS?
 //// THE FILES YOU WANT TO RUN OVER IS IN THE DRAWAMPTOOLSVAR FUNCTION. SINCE WE USE A FOR LOOP FOR 
 //       INITIALIZATION WE CANNOT DO IN GLOBAL SCOPE
@@ -15,6 +15,8 @@ bool doAccCorr=true; // SHOULD WE ACCEPTANCE CORRECT THE YIELDS?
 map<string,TH1*> getHists(string file, string tag){
     map<string,TH1*> hists;
 
+    hists["Mpi0eta_finerBin"]=new TH1F( ("Mpi0eta_finerBin-"+tag).c_str(), 
+            "Invariant Mass of #eta #pi;M(#eta#pi)", 125, 0.8, 1.8 );
     for (int m=0; m<nm; ++m){
         hists[("Mpi0eta_mBin"+to_string(m)).c_str()]=new TH1F( ("Mpi0eta_mBin"+to_string(m)+"-"+tag).c_str(), 
                 "Invariant Mass of #eta #pi;M(#eta#pi)", nbins, lowMass, uppMass );
@@ -170,6 +172,7 @@ map<string,TH1*> getHists(string file, string tag){
             if ( (m<0)||(m>=nm) )
                 continue;
             if (select_a2*select_t*selectEta*selectPi0){
+                hists["Mpi0eta_finerBin"]->Fill(resonance.M(),weight);
                 hists["Mpi0eta_mBin"+to_string(m)]->Fill(resonance.M(),weight);
                 hists["cosThetaGJ_mBin"+to_string(m)]->Fill(cosTheta,weight);
                 hists["cosThetaHel_mBin"+to_string(m)]->Fill(cosTheta_hel,weight);
@@ -211,14 +214,14 @@ void drawAmptoolsVar(){
     vector<string> flatThrownHistFiles;
     vector<string> totHistFiles;
     vector<string> sbHistFiles;
-    vector<string> pols={"000","045","090","135"};
+    vector<string> pols={"000"};//,"045","090","135"};
     string st="010020";
     string sm="104156";
     for (auto pol: pols){
-        flatHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_FTOT_selected_acc_flat.root");
-        flatThrownHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_FTOT_gen_data_flat.root");
-        totHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_DTOT_selected_data_flat.root");
-        sbHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_DTOT_selected_bkgnd_flat.root");
+        //flatHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_FTOT_selected_acc_flat.root");
+        //flatThrownHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_FTOT_gen_data_flat.root");
+        //totHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_DTOT_selected_data_flat.root");
+        //sbHistFiles.push_back("/d/grid17/ln16/dselector_v3/phase1_selected/t"+st+"_m"+sm+"/pol"+pol+"_t"+st+"_m"+sm+"_DTOT_selected_bkgnd_flat.root");
 
         //string base="/d//grid17/ln16/myDSelector/amptools/zPhase1_t0103061_e79828890/baseFiles_v3/010020_malte/";
         //flatHistFiles.push_back(base+"amptools_flat_phase1_t010020_e8288_sig_a2_pVHpi0p_"+pol+".root");
@@ -226,10 +229,11 @@ void drawAmptoolsVar(){
         //totHistFiles.push_back(base+"amptools_data_phase1_t010020_e8288_tot_a2_pVHpi0p_"+pol+".root");
         //sbHistFiles.push_back(base+"amptools_data_phase1_t010020_e8288_sb_a2_pVHpi0p_"+pol+".root");
 
-        //flatHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected/tall_m080180/pol000_tall_m080180_F2018_8_selected_acc_flat.root");
-        //flatThrownHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected/tall_m080180/pol000_tall_m080180_F2018_8_gen_data_flat.root");
-        //totHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected/pol000_tall_m080180_kmatrix_selected_data_flat.root");
-        //sbHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected/pol000_tall_m080180_kmatrix_selected_bkgnd_flat.root");
+        // *** THE FLAT MC IS ALL POLARIZATIONS MERGED INTO THE 000 FILE TAG ***
+        flatHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected_v1/tall_m104156/pol000_tall_m104156_F2018_8_selected_acc_flat.root");
+        flatThrownHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected_v1/tall_m104156/pol000_tall_m104156_F2018_8_gen_data_flat.root");
+        totHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected_v1/tall_m104156/pol000_tall_m104156_kmatrix_selected_data_flat.root");
+        sbHistFiles.push_back("/d/grid17/ln16/dselector_v3/kmatrix_selected_v1/tall_m104156/pol000_tall_m104156_kmatrix_selected_bkgnd_flat.root");
     }
     // genHists need atleast 1 null string if you dont want it draw anything, otherwise it should crash.
     //     We still need getHists to initialize a set of empty histograms
@@ -336,6 +340,16 @@ void drawAmptoolsVar(){
                 else{
                     logFile << sigHist->GetBinLowEdge(i)+sigHist->GetBinWidth(i)/2 << " " << 
                           sigHist->GetBinContent(i) << endl; }
+
+            }
+        }
+        if (var=="Mpi0eta_finerBin"){
+            ofstream effFile;
+            effFile.open("drawAmptoolsVar/efficiency.txt");
+            Int_t n = efficiency->GetNbinsX();
+            for (Int_t i=1; i<=n; i++) {
+                effFile << efficiency->GetBinLowEdge(i)+efficiency->GetBinWidth(i)/2 << " " << 
+                      efficiency->GetBinContent(i) << endl; 
             }
         }
         delete c1;

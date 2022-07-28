@@ -6,6 +6,7 @@ import numpy as np
 import subprocess
 import uproot3 as uproot
 import pandas as pd
+import random
 
 def checkParLimits(fitFile):
     '''
@@ -122,8 +123,14 @@ def main(arg):
     #cfgFile="kmatrix_nonLoop-copy"
     fitFileName="etapi_result.fit"
     percent=3.0 # parameters must not be within percent of the defined parameter limits
-    nPassedCheck=5 # require this many fits that converged
+    nPassedCheck=10 # require this many fits that converged
     workingDir=os.getcwd()
+
+    # create a seed to sample another seed value that is input to setup_mass_dep_fits for reproducible series of fits
+    # Set seed to -1 to not use a seed
+    seed=1992 
+    if seed!=-1:
+        random.seed(seed)
 
     ts=["010020","0200325","0325050","050075","075100","010020"]
     #ts=["0325050","050075","075100","010020"]
@@ -156,7 +163,8 @@ def main(arg):
             i=0
             newFitFile="" # initialize fitFile
             while checkFits("./")<nPassedCheck: 
-                os.system("python setup_mass_dep_fits.py") # reinitialize
+                setup_seed=random.randint(0,99999999) if seed!=-1 else -1
+                os.system("python setup_mass_dep_fits.py "+str(setup_seed)) # reinitialize
                 checkCfgFileProperMassLimits(cfgFile+".cfg")
                 print("Starting a new fit attempt...")
                 cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -m 150000 -t 0.1" # 80k was not enough for smallest t-bin
@@ -175,6 +183,7 @@ def main(arg):
             os.system("mv -f *.log "+t)
             os.system("mv -f *.ni "+t)
             os.system("mv -f overlayPlots "+t)
+
             spawnProcessChangeSetting(ts[j],ts[j+1]) # prepare for new t bin
     
     ################################################

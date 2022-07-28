@@ -24,7 +24,7 @@ fitName="EtaPi_fit" # location of the folder containing the inputs that were cre
 seedFileTag="param_init" # seedFile name. Should also match the variable from divideData.pl 
 writeCfgSeed=-1 # choose a seed to randomly start to sample from
 verbose=False
-doAccCorr="false" # has to be a string input
+doAccCorr="true" # has to be a string input
 
 ############################
 # [True, ["data", "bkgnd"], [1, 1]] to bootstrap data 
@@ -538,7 +538,7 @@ def mapYields(startBin,endBin,fitDir):
 if __name__ == '__main__':
     os.chdir(fitDir)
     startBin=0
-    endBin=19
+    endBin=13
     numIters=500 # number of iterations to randomly sample and try to fit. No guarantees any of them will converge 
     # (int) number of seeds such that the seed used for iteration j is j%nRollingSeeds. 
     #     This gives us a way to reinitialize the parameters in a fit but keep the same bootstrap seed
@@ -570,25 +570,25 @@ if __name__ == '__main__':
     #potential_vects=getVectorOfPotentialLMEs(fitDir,startBin,endBin,numIters)
     potential_vects=[
             #### S + TMD
-            [
-            [0,0,"+",True],
-            [0,0,"-",True],
-            [2,-1,"-",False],
-            [2,0,"+",False],
-            [2,0,"-",False],
-            [2,1,"+",False],
-            [2,1,"-",False],
-            [2,2,"+",False]
-            ],
-            ### K-MATRIX
 #            [
 #            [0,0,"+",True],
 #            [0,0,"-",True],
+#            [2,-1,"-",False],
 #            [2,0,"+",False],
 #            [2,0,"-",False],
-#            [2,2,"-",False],
+#            [2,1,"+",False],
+#            [2,1,"-",False],
 #            [2,2,"+",False]
 #            ],
+            ### K-MATRIX
+            [
+            [0,0,"+",True],
+            [0,0,"-",True],
+            [2,0,"+",False],
+            [2,0,"-",False],
+            [2,2,"-",False],
+            [2,2,"+",False]
+            ],
     ]
     os.chdir(fitDir)
     for ibin in range(startBin,endBin):
