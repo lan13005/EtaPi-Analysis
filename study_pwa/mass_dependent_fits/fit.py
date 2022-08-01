@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import os
 import sys
@@ -7,6 +7,7 @@ import subprocess
 import uproot3 as uproot
 import pandas as pd
 import random
+import time
 
 def checkParLimits(fitFile):
     '''
@@ -123,7 +124,7 @@ def main(arg):
     #cfgFile="kmatrix_nonLoop-copy"
     fitFileName="etapi_result.fit"
     percent=3.0 # parameters must not be within percent of the defined parameter limits
-    nPassedCheck=10 # require this many fits that converged
+    nPassedCheck=20 # require this many fits that converged
     workingDir=os.getcwd()
 
     # create a seed to sample another seed value that is input to setup_mass_dep_fits for reproducible series of fits
@@ -230,9 +231,12 @@ def main(arg):
 
 
 if __name__ == "__main__":
+    start_time=time.time()
     argc=len(sys.argv)
     if argc!=2:
         raise ValueError("Argument [0/1/2] to runFit, getSummary or both")
     arg=int(sys.argv[1])
     main(arg)
+    stop_time=time.time()
+    print(f"Total elapsed time: {stop_time-start_time}s or {(stop_time-start_time)/60}m")
     

@@ -15,8 +15,9 @@ seed=int(argv[1])
 if seed!=-1:
     random.seed(seed)
 
-baseDir="/d/grid17/ln16/dselector_v3/phase1_selected/"
+#baseDir="/d/grid17/ln16/dselector_v3/phase1_selected/"
 #baseDir="/scratch-fits/"
+baseDir="rootFiles/"
 
 fileName=os.getcwd()+"/config_files/etapi_hybrid.cfg"
 
