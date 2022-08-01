@@ -8,10 +8,14 @@ import sys
 argc=len(sys.argv)
 argv=sys.argv
 print(argv)
-if argc!=2:
-    print("requires 1 argument for the seed! Use -1 to not set a seed")
+if argc!=3:
+    print("requires 1 argument for the config file location")
+    print(" + 1 argument for the seed! Use -1 to not set a seed")
     exit()
-seed=int(argv[1])
+
+#fileName=os.getcwd()+"/config_files/etapi_hybrid.cfg"
+fileName=argv[1]
+seed=int(argv[2])
 if seed!=-1:
     random.seed(seed)
 
@@ -19,7 +23,6 @@ if seed!=-1:
 #baseDir="/scratch-fits/"
 baseDir="rootFiles/"
 
-fileName=os.getcwd()+"/config_files/etapi_hybrid.cfg"
 
 def replaceStr(search,replace,fileName):
     print("replace str: "+replace)

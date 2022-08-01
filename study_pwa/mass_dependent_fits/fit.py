@@ -35,6 +35,8 @@ def checkParLimits(fitFile):
                         print(parName+" is within "+str(percent)+"% of limits! "+str(parVal)+" bounded on ["+str(minVal)+","+str(maxVal)+"]")
     return parNotAtLimit
 
+def has_numbers(inputString):
+    return any(char.isdigit() for char in inputString)
 
 def checkFits(folder,returnGoodFilesInstead=False):
     '''
@@ -55,7 +57,7 @@ def checkFits(folder,returnGoodFilesInstead=False):
     searchMinimumStr="bestMinimum"
     searchMinuitStatusStr="lastMinuitCommandStatus"
     
-    files=[folder+"/"+f for f in os.listdir(folder) if ".fit" in f]
+    files=[folder+"/"+f for f in os.listdir(folder) if ".fit" in f and has_numbers(f)]
     convergenceStatuses=[]
     for fitFile in files:
         with open(fitFile) as infile:
@@ -114,6 +116,10 @@ def checkCfgFileProperMassLimits(cfgLoc):
         print("****************************\n")
         exit()
 
+def replaceStr(search,replace,fileName):
+    print("replace str: "+replace)
+    sedArgs=["sed","-i",'s@'+search+'@'+replace+'@g',fileName]
+    subprocess.Popen(sedArgs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).wait()
 
 def main(arg):
     ##########################################
@@ -124,7 +130,7 @@ def main(arg):
     #cfgFile="kmatrix_nonLoop-copy"
     fitFileName="etapi_result.fit"
     percent=3.0 # parameters must not be within percent of the defined parameter limits
-    nPassedCheck=20 # require this many fits that converged
+    niters=20
     workingDir=os.getcwd()
 
     # create a seed to sample another seed value that is input to setup_mass_dep_fits for reproducible series of fits
@@ -136,6 +142,16 @@ def main(arg):
     ts=["010020","0200325","0325050","050075","075100","010020"]
     #ts=["0325050","050075","075100","010020"]
     #ts=["010020","010020"]
+
+    baseCfgFiles=[
+            "config_files/etapi_hybrid_m104156.cfg",
+            "config_files/etapi_hybrid_m104160.cfg",
+            "config_files/etapi_hybrid_m104164.cfg",
+            "config_files/etapi_hybrid_m104168.cfg",
+            "config_files/etapi_hybrid_m104172.cfg",
+            "config_files/etapi_hybrid_m104176.cfg",
+            "config_files/etapi_hybrid_m104180.cfg",
+            ]
     
     runFits=False
     getSummary=False
@@ -153,37 +169,29 @@ def main(arg):
         for j in range(len(ts)-1):
             t=ts[j]
         
-            os.system("mkdir -p overlayPlots")
+            os.system("rm -f "+fitFileName)
+            os.system("rm -f fit*log")
+
+            for ic, baseCfgFile in enumerate(baseCfgFiles):
+                os.system("mkdir -p overlayPlots")
         
-            if os.path.exists(fitFileName):
-                print("Fit file already exists... Deleting it to reset fitting")
-                os.system("rm "+fitFileName)
-                os.system("rm fitAttempt*log")
-            
-            goodFits=[]
-            i=0
-            newFitFile="" # initialize fitFile
-            while checkFits("./")<nPassedCheck: 
                 setup_seed=random.randint(0,99999999) if seed!=-1 else -1
-                os.system("python setup_mass_dep_fits.py "+str(setup_seed)) # reinitialize
+                os.system("python setup_mass_dep_fits.py "+baseCfgFile+" "+str(setup_seed)) # reinitialize
                 checkCfgFileProperMassLimits(cfgFile+".cfg")
-                print("Starting a new fit attempt...")
-                cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -m 150000 -t 0.1" # 80k was not enough for smallest t-bin
-                pipeCmd=' > fitAttempt'+str(i)+'.log'
+
+                print("Starting fits")
+                cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -r "+str(niters)+" -m 150000 -t 0.1 -x 0 -f 0.15" 
+                pipeCmd=' > fit.log'
                 os.system(cmd+pipeCmd)
-                newFitFile="etapi_result"+str(i)+".fit"
-                os.system("mv etapi_result.fit "+newFitFile)
-                os.system("mv "+cfgFile+".cfg "+cfgFile+str(i)+".cfg")
-                i+=1
-        
-            # Move results to the desired folder
-            os.system("mkdir -p "+t)
-            #os.system("mv -f *.root "+t)
-            os.system("mv -f etapi_result*.fit "+t)
-            os.system("mv -f "+cfgFile+"*.cfg "+t)
-            os.system("mv -f *.log "+t)
-            os.system("mv -f *.ni "+t)
-            os.system("mv -f overlayPlots "+t)
+                
+                # Move results to the desired folder
+                ofolder=t+"_cfg"+str(ic)
+                os.system("mkdir -p "+ofolder)
+                os.system("mv -f etapi_result*.fit "+ofolder+" 2>/dev/null")
+                os.system("mv -f "+cfgFile+"*.cfg "+ofolder+" 2>/dev/null")
+                os.system("mv -f *.log "+ofolder+" 2>/dev/null")
+                os.system("mv -f *.ni "+ofolder+" 2>/dev/null")
+                os.system("mv -f overlayPlots "+ofolder)
 
             spawnProcessChangeSetting(ts[j],ts[j+1]) # prepare for new t bin
     
@@ -193,41 +201,47 @@ def main(arg):
     if getSummary:
         wall_times_allt=[]
         for t in ts[:-1]:
-            print("===================================================")
-            print(" ----------------    "+t+"    -----------------")
-            print("===================================================")
+            for ic in range(len(baseCfgFiles)):
+                print("===================================================")
+                print(" -----------   "+t+" setup "+str(ic)+"   ------------")
+                print("===================================================")
         
-            files=os.listdir(t)
-            iterations=[int(afile.split("fitAttempt")[1].split(".log")[0]) for afile in files if "fitAttempt" in afile]
-            iterations.sort()
-            
-            interestingLines=["bestMinimum","lastMinuitCommandStatus","eMatrixStatus"]
-            wall_times=[]
-            for iteration in iterations:
-                print("******** ITERATION "+str(iteration)+" *********")
-                with open("./"+t+"/fitAttempt"+str(iteration)+".log") as log:
+                interestingLines=["bestMinimum","lastMinuitCommandStatus","eMatrixStatus"]
+                wall_times=[]
+                with open("./"+t+"_cfg"+str(ic)+"/fit.log") as log:
                     for line in log:
-                        if "time" in line:
-                            print(line.rstrip().lstrip())
-                            if "wall" in line:
-                                wall_time=float(line.split(" ")[-2])
-                                wall_times.append(wall_time)
-                fitFile="./"+t+"/etapi_result"+str(iteration)+".fit"
-                with open(fitFile) as fit:
-                    for line in fit:
-                        if any(ele for ele in interestingLines if ele in line):
-                            print(line.rstrip().lstrip())
-                checkParLimits(fitFile)
-            wall_times_allt.append(wall_times)
-        
-        print("\n\n-----------------------------------------------")
-        print("SUMMARY")
-        print("----------------------------------------------")
-        for it,t in enumerate(ts[:-1]):
-            print("tbin {} required {} fits to find one converging".format(t,len(wall_times_allt[it])))
-            print("  Total wall time in t bin: {}s".format(sum(wall_times_allt[it])))
-        total_wall_time=sum([sum(wall_times) for wall_times in wall_times_allt[:-1]])
-        print("Total Wall Time: {}s or {}m or {}h".format(total_wall_time,total_wall_time/60,total_wall_time/3600))
+                        if "wall time" in line:
+                            wall_time=float(line.split(" ")[-2])
+                            wall_times.append(wall_time)
+
+                fitFiles=[t+"_cfg"+str(ic)+"/"+f for f in os.listdir(t+"_cfg"+str(ic)) if ".fit" in f]
+                fits=[]
+                bestMins=[]
+                statuses=[]
+                estatuses=[]
+                percConverged=0
+                percApproxConverged=0
+                for fitFile in fitFiles:
+                    with open(fitFile) as fit:
+                        lines = [ line.rstrip() for line in fit if any(ele for ele in interestingLines if ele in line) ]
+                        bestMinimum = [line.split("\t")[-1] for line in lines if "bestMinimum" in line][0]
+                        status = [line.split("\t")[-1] for line in lines if "lastMinuitCommandStatus" in line][0]
+                        estatus = [line.split("\t")[-1] for line in lines if "eMatrixStatus" in line][0]
+                        if status=="0" and estatus=="3":
+                            print(f"{fitFile} minimum: {bestMinimum} status: {status} estatus: {estatus} - converged!")
+                            percConverged+=1
+                            percApproxConverged+=1
+                        if status=="0" and estatus=="1":
+                            print(f"{fitFile} minimum: {bestMinimum} status: {status} estatus: {estatus} - approx. converged!")
+                            percApproxConverged+=1
+                        else:
+                            print(f"{fitFile} minimum: {bestMinimum} status: {status} estatus: {estatus}")
+                        bestMins.append(bestMinimum)
+                        statuses.append(status)
+                        estatuses.append(estatus)
+                percConverged/=len(fitFiles)
+                percApproxConverged/=len(fitFiles)
+                print(f"{percConverged*100:0.2f}({percApproxConverged*100:0.2f}) percent (>approximately) converged...")
 
 
 if __name__ == "__main__":
