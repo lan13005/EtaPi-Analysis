@@ -126,11 +126,9 @@ def main(arg):
     # Basic setup
     ##########################################
     nprocesses=9
-    cfgFile="etapi_hybrid-copy"
-    #cfgFile="kmatrix_nonLoop-copy"
     fitFileName="etapi_result.fit"
     percent=3.0 # parameters must not be within percent of the defined parameter limits
-    niters=20
+    niters=5
     workingDir=os.getcwd()
 
     # create a seed to sample another seed value that is input to setup_mass_dep_fits for reproducible series of fits
@@ -142,6 +140,7 @@ def main(arg):
     ts=["010020","0200325","0325050","050075","075100","010020"]
     #ts=["0325050","050075","075100","010020"]
     #ts=["010020","010020"]
+    #ts=["0325050","0325050"]
 
     baseCfgFiles=[
             "config_files/etapi_hybrid_m104156.cfg",
@@ -152,7 +151,8 @@ def main(arg):
             "config_files/etapi_hybrid_m104176.cfg",
             "config_files/etapi_hybrid_m104180.cfg",
             ]
-    
+    #cfgFile="kmatrix_nonLoop-copy"
+
     runFits=False
     getSummary=False
     if arg==0:
@@ -173,16 +173,18 @@ def main(arg):
             os.system("rm -f fit*log")
 
             for ic, baseCfgFile in enumerate(baseCfgFiles):
+                cfgFile=baseCfgFile.split("/")[-1].split(".")[0]+"-copy"
+    
                 os.system("mkdir -p overlayPlots")
         
                 setup_seed=random.randint(0,99999999) if seed!=-1 else -1
                 os.system("python setup_mass_dep_fits.py "+baseCfgFile+" "+str(setup_seed)) # reinitialize
-                checkCfgFileProperMassLimits(cfgFile+".cfg")
+                # checkCfgFileProperMassLimits(cfgFile+".cfg") ## DO NOT CHECK ANYMORE SINCE WE USE FILTERING DATA READERS
 
                 print("Starting fits")
-                cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -r "+str(niters)+" -m 150000 -t 0.1 -x 0 -f 0.15" 
-                pipeCmd=' > fit.log'
-                os.system(cmd+pipeCmd)
+#                cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -r "+str(niters)+" -m 1000000 -t 1.0 -x 0 -f 0.15" 
+#                pipeCmd=' > fit.log'
+#                os.system(cmd+pipeCmd)
                 
                 # Move results to the desired folder
                 ofolder=t+"_cfg"+str(ic)
@@ -192,6 +194,7 @@ def main(arg):
                 os.system("mv -f *.log "+ofolder+" 2>/dev/null")
                 os.system("mv -f *.ni "+ofolder+" 2>/dev/null")
                 os.system("mv -f overlayPlots "+ofolder)
+                #os.system("ln -snfr rootFiles "+ofolder+"/rootFiles")
 
             spawnProcessChangeSetting(ts[j],ts[j+1]) # prepare for new t bin
     
@@ -207,38 +210,29 @@ def main(arg):
                 print("===================================================")
         
                 interestingLines=["bestMinimum","lastMinuitCommandStatus","eMatrixStatus"]
-                wall_times=[]
-                with open("./"+t+"_cfg"+str(ic)+"/fit.log") as log:
-                    for line in log:
-                        if "wall time" in line:
-                            wall_time=float(line.split(" ")[-2])
-                            wall_times.append(wall_time)
-
-                fitFiles=[t+"_cfg"+str(ic)+"/"+f for f in os.listdir(t+"_cfg"+str(ic)) if ".fit" in f]
+                fitFiles=[t+"_cfg"+str(ic)+"/"+f for f in os.listdir(t+"_cfg"+str(ic)) if ".fit" in f and has_numbers(f)]
+                fitFiles.sort(key=lambda x: int(x.split("_")[-1].split(".")[0]))
                 fits=[]
-                bestMins=[]
-                statuses=[]
-                estatuses=[]
+                firstMin=0
                 percConverged=0
                 percApproxConverged=0
-                for fitFile in fitFiles:
+                for j,fitFile in enumerate(fitFiles):
                     with open(fitFile) as fit:
                         lines = [ line.rstrip() for line in fit if any(ele for ele in interestingLines if ele in line) ]
-                        bestMinimum = [line.split("\t")[-1] for line in lines if "bestMinimum" in line][0]
+                        bestMinimum = [float(line.split("\t")[-1]) for line in lines if "bestMinimum" in line][0]
+                        if j==0:
+                            firstMin=bestMinimum
                         status = [line.split("\t")[-1] for line in lines if "lastMinuitCommandStatus" in line][0]
                         estatus = [line.split("\t")[-1] for line in lines if "eMatrixStatus" in line][0]
                         if status=="0" and estatus=="3":
-                            print(f"{fitFile} minimum: {bestMinimum} status: {status} estatus: {estatus} - converged!")
+                            print(f"{fitFile} shifted minimum: {bestMinimum-firstMin} status: {status} estatus: {estatus} - converged!")
                             percConverged+=1
                             percApproxConverged+=1
-                        if status=="0" and estatus=="1":
-                            print(f"{fitFile} minimum: {bestMinimum} status: {status} estatus: {estatus} - approx. converged!")
+                        elif status=="0" and estatus=="1":
+                            print(f"{fitFile} shifted minimum: {bestMinimum-firstMin} status: {status} estatus: {estatus} - approx. converged!")
                             percApproxConverged+=1
                         else:
-                            print(f"{fitFile} minimum: {bestMinimum} status: {status} estatus: {estatus}")
-                        bestMins.append(bestMinimum)
-                        statuses.append(status)
-                        estatuses.append(estatus)
+                            print(f"{fitFile} shifted minimum: {bestMinimum-firstMin} status: {status} estatus: {estatus} - failed!")
                 percConverged/=len(fitFiles)
                 percApproxConverged/=len(fitFiles)
                 print(f"{percConverged*100:0.2f}({percApproxConverged*100:0.2f}) percent (>approximately) converged...")

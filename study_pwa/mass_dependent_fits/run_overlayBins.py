@@ -11,10 +11,13 @@ workingDir=os.getcwd()
 
 #ts=["010016", "016021", "021027", "027034", "034042", "042051", "051061", "061072", "072085", "085100"]
 ts=["010020", "0200325", "0325050", "050075", "075100"]
+#ts=["010020"]
 
+drawAllGoodFits=False
 fitFileName="etapi_result.fit"
 doAccCorr="true" # this should generally be true. AccCorr is chosen during the fit, we just want to extract corrected yields for cs measurements
-plotAllVarsAndGen="false" # should we plot all variables in etapi_plotter and gen results or just plot the mass plots and {dat,bkgnd,accmc} trees
+plotAllVars="true" # should we plot all variables in etapi_plotter or just plot the mass plot
+plotGenData="false" # should we plot gen mc in etapi_plotter or just plot {dat,bkgnd,accmc} trees
 Ls="S_D_pD"
 #Ls="S_D"
 
@@ -57,7 +60,7 @@ def draw(folder):
 
     os.chdir(folder)
     folder=workingDir+"/"+folder
-    cmd="python3 ../overlayBins.py 2 '"+waves+"' '"+fitFileName+"' '"+workingDir+"' '"+Ls+"' '"+doAccCorr+"' '"+plotAllVarsAndGen+"' '"+folder+"'"
+    cmd="python3 ../overlayBins.py 2 '"+waves+"' '"+fitFileName+"' '"+workingDir+"' '"+Ls+"' '"+doAccCorr+"' '"+plotAllVars+"' '"+plotGenData+"' '"+folder+"'"
     print(cmd)
     os.system(cmd)
     os.chdir("..")
@@ -70,10 +73,17 @@ def draw(folder):
 folders=[]
 convergedFiles=[]
 for t in ts:
-    cf=list(fit.checkFits(t,True))
-    convergedIterations=[f.split(".")[0].split("result")[1] for f in cf]
-    convergedFiles+=cf
-    folders+=[t+"_"+i for i in convergedIterations]
+    fs=[f for f in os.listdir(".") if t in f]
+    for f in fs:
+        if drawAllGoodFits:
+            cf=list(fit.checkFits(f,True))
+            convergedIterations=[c.split(".")[0].split("result_")[1] for c in cf]
+            convergedFiles+=cf
+            # do not overwrite (by rerunning) drawing script if the folders already exist
+            folders+=[f+"_"+i for i in convergedIterations if not os.path.exists(f+"/"+f+"_"+i)]
+        else:
+            convergedFiles+=[f+"/etapi_result.fit"]
+            folders+=[f+"0"]
 [os.system("mkdir -p "+folder) for folder in folders]
 [os.system("cp "+convergedFile+" "+folder+"/"+fitFileName) for convergedFile,folder in zip(convergedFiles,folders)]
 

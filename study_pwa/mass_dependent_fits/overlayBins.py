@@ -19,8 +19,9 @@ def printHelp():
     print("where v4 is the folder where overlayBins.C is in")
     print("where v5 is a semicolon separated list to gather fit fractions for (used in the etapi_plotter program)")
     print('where v6 is either "T" or "F" to do or not apply acceptance correction')
-    print('where v7 is either "T" or "F" to do or not plot all etapi_plotter variables and gen results')
-    print('where v8 is the folder to look for the fit file') 
+    print('where v7 is either "T" or "F" to do or not plot all etapi_plotter variables')
+    print('where v8 is either "T" or "F" to do or not plot gen results')
+    print('where v9 is the folder to look for the fit file') 
     
 args=sys.argv
 nargs=len(args)
@@ -34,8 +35,9 @@ else:
     cFolder=str(args[4])
     Ls=str(args[5])
     doAccCorr=str(args[6])
-    plotAllVarsAndGen=str(args[7])
-    folder=str(args[8])
+    plotAllVars=str(args[7])
+    plotGenData=str(args[8])
+    folder=str(args[9])
     groupVec=ampString.split(";")
     groups=[tmp if tmp!="" else tmp for tmp in groupVec]
     groupTags=["_"+tmp if tmp!="" else tmp for tmp in groupVec]
@@ -47,10 +49,11 @@ baseDir=os.getcwd()
 verbose=True
 
 def runEtaPiPlotterForAllBins():
-    print("   running etapi_plotter...")
+    print("   running etapi_plotter in directory: {}".format(os.getcwd()))
+    os.system("ln -snfr ../rootFiles rootFiles")
     #for igroup in range(len(groups)):
     #    cmd=["etapi_plotter",fitFile,"-o","etapi_plot"+groupTags[igroup]+".root","-s",groups[igroup]]
-    cmd=["etapi_plotter",fitFile,"-s",ampString,"-a",doAccCorr,"-I",plotAllVarsAndGen,"-F",Ls]
+    cmd=["etapi_plotter",fitFile,"-s",ampString,"-a",doAccCorr,"-var",plotAllVars,"-gen",plotGenData,"-F",Ls]
     print("calling: "+" ".join(cmd))
     if verbose:
         try:
@@ -65,6 +68,7 @@ def runEtaPiPlotterForAllBins():
             except:
                 print("  ERROR OCCURED IN ABOVE CALL. Not really sure what the root cause is. Will continue anyways")
                 pass
+    os.system("rm rootFiles")
 
 def gatherPlotResultsIntoPDFs():
     cmd=["root","-l","-b","-q","\'"+cFolder+'/overlayBins.C("'+folder+'"'+")\'"]
