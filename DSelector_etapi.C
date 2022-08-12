@@ -340,7 +340,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
         bool bBeamE_thrown = (locBeamE_thrown<8.8)*(locBeamE_thrown>8.2);
         bool bMpi0eta_thrown = (locMetapi0_thrown<1.80)*(locMetapi0_thrown>0.8);
         bool bTopology = locThrownTopology==topologyString; 
-        bool selection_thrown=bTopology*bBeamE_thrown*bmandelstamt_thrown*bMpi0eta_thrown;
+        bool selection_thrown=bTopology*bBeamE_thrown;//*bmandelstamt_thrown*bMpi0eta_thrown;
         if (dIsMC*!selection_thrown)
             return kTRUE;
 
@@ -534,7 +534,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		//    genmc = thrown trees created during simulation process
 		bool bSignalRegion;
 		float branchWeight;
-                int choice=2;
+                int choice=3;
 		//---------CHOICE 1 FOR "data" RUN OVER SIGNAL/DATA-------------
                 if (choice==1){
 		    bSignalRegion=(pi0_sbweight==1)*(eta_sbweight==1)*(locHistAccidWeightFactor==1); // Keep combos ONLY in the signal region
@@ -682,8 +682,8 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                 float omega = get<1>(vh);
                 float vanHove_x=q*cos(omega);
                 float vanHove_y=q*sin(omega);
-                bool bVH_pi0p = -29.61317407*atan(-0.9877663*(locPi0P4+locEtaP4).M()+2.77936736)+330.46008765 > omega;
-                bool bVH_etap = 45.26878219*atan(-0.88242654*(locPi0P4+locEtaP4).M()+3.14340627)+193.59347205 < omega;
+                bool bVH_pi0p = -29.61317407*atan(-0.9877663*(locPi0P4+locEtaP4).M()+2.77936736)+330.46008765 > omega*radToDeg;
+                bool bVH_etap = 45.26878219*atan(-0.88242654*(locPi0P4+locEtaP4).M()+3.14340627)+193.59347205 < omega*radToDeg;
                 bool bVH = bVH_pi0p*bVH_etap;
 
 		// 5. With the above selections and sidebands stucture, the subtraction near threshold has problems
@@ -701,6 +701,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                 //      split the final flat trees up. This should lower our total run times
 		bMetapi0=true; 
                 bmandelstamt=true; 
+                bMpi0p=true;
 
                 ///////////////////////////////////////////////////////////////////////////////////
                 ///////////////////////////////////////////////////////////////////////////////////

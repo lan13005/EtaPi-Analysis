@@ -25,7 +25,7 @@ def printHelp():
     
 args=sys.argv
 nargs=len(args)
-if nargs!=9:
+if nargs!=10:
     printHelp()
     exit()
 else:
@@ -50,11 +50,14 @@ verbose=True
 
 def runEtaPiPlotterForAllBins():
     print("   running etapi_plotter in directory: {}".format(os.getcwd()))
-    os.system("ln -snfr ../rootFiles rootFiles")
+    cmd="ln -snfr "+cFolder+"/rootFiles rootFiles"
+    print(cmd)
+    os.system(cmd)
     #for igroup in range(len(groups)):
     #    cmd=["etapi_plotter",fitFile,"-o","etapi_plot"+groupTags[igroup]+".root","-s",groups[igroup]]
     cmd=["etapi_plotter",fitFile,"-s",ampString,"-a",doAccCorr,"-var",plotAllVars,"-gen",plotGenData,"-F",Ls]
     print("calling: "+" ".join(cmd))
+#    os.system("touch etapi.root") # just for testing purposes
     if verbose:
         try:
             subprocess.check_call(cmd)

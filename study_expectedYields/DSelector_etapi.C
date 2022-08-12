@@ -707,6 +707,9 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                 bmandelstamt=true; 
                 bLowMassAltCombo=true; // temporarily turn this on to study its performance
 
+                // temporarily turn this off so we can study the qfactors comparison
+                //bMpi0p=true; 
+
 		//// We can finally multiply all of our selections together to define our final selection criteria. 
 		//	Since we have defined SELECTIONS we have to flip the boolean to get a CUT since the 
 		//	FLAG used asks if the combo should be cut

@@ -82,25 +82,48 @@ thrownTreeName="Thrown_Tree"
 # SECONDARY STUDY: RUN OVER OMEGA AND FLAT ETAPI MC TO UNDERSTAND THE EFFECTS OF LMAC SELECTION
 # 1. we do not need to run over the thrown - turn it off
 ##############################################
+#topologies=[
+#        "3#gammap[#pi^{0}]",
+#        "4#gammap[#pi^{0},#eta]",
+#        ]
+#ofolders=[
+#        "omega_pi0g",
+#        "flat_2017_1",
+#        ]
+#ifolders=[
+#        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/omega_pi0g/tree_',
+#        '"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_'
+#        ]
+
+
+##############################################
+# THIRD STUDY:  RUN OVER DATA
+##############################################
+#for run in ["2017_1","2018_1","2018_8"]:
+#    replaceTopology("4#gammap[#pi^{0},#eta]")
+#    f='"/d/grid17/ln16/dselector_v3/phase1_data_looseChiUE/D'+run+'_loose_tree.root"'
+#    runSelector(f,reconTreeName,"bkgndSample_recon",3,proof_Nthreads,recon_cfiles)
+#    move("gluex_"+run)
+
+
+##############################################
+# FOURTH STUDY:  RUN OVER FLAT MC TO HELP STUDY QFACTORS
+##############################################
 topologies=[
-        "3#gammap[#pi^{0}]",
         "4#gammap[#pi^{0},#eta]",
+        "4#gammap[#pi^{0},#eta]",
+        "4#gammap[#pi^{0},#eta]"
         ]
 ofolders=[
-        "omega_pi0g",
         "flat_2017_1",
+        "flat_2018_1",
+        "flat_2018_8"
         ]
 ifolders=[
-        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/omega_pi0g/tree_',
-        '"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_'
+        '"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_',
+        '"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_1_400M/merged/tree_',
+        '"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_8_260M_130M/merged/tree_'
         ]
-for run in ["2017_1","2018_1","2018_8"]:
-    replaceTopology("4#gammap[#pi^{0},#eta]")
-    f='"/d/grid17/ln16/dselector_v3/phase1_data_looseChiUE/D'+run+'_loose_tree.root"'
-    runSelector(f,reconTreeName,"bkgndSample_recon",3,proof_Nthreads,recon_cfiles)
-    move("gluex_"+run)
-
-
 
 assert len(ifolders)==len(ofolders) and len(ifolders)==len(topologies)
 
@@ -111,16 +134,10 @@ assert len(ifolders)==len(ofolders) and len(ifolders)==len(topologies)
 #   the b1 leakage looks like in Meta 
 ###########################################
 
-#for ifolder,ofolder,topology in zip(ifolders,ofolders,topologies):
-#    replaceTopology(topology)
-#    runSelector(ifolder+'pi0eta*"',reconTreeName,"bkgndSample_recon",3,proof_Nthreads,recon_cfiles)
-#    runSelector(ifolder+'thrown*"',thrownTreeName,"bkgndSample_gen",1,proof_Nthreads,thrown_cfiles)
-#    move(ofolder)
-
-#for run in ["2017_1","2018_1","2018_8"]:
-#    replaceTopology("4#gammap[#pi^{0},#eta]")
-#    f='"/d/grid17/ln16/dselector_v2/test/phase1_data_looseChiUE/D'+run+'_loose_tree.root"'
-#    runSelector(f,reconTreeName,"bkgndSample_recon",3,proof_Nthreads,recon_cfiles)
-#    move("zDSelectedBkgndSamples/gluex_"+run)
+for ifolder,ofolder,topology in zip(ifolders,ofolders,topologies):
+    replaceTopology(topology)
+    runSelector(ifolder+'pi0eta*"',reconTreeName,"bkgndSample_recon",3,proof_Nthreads,recon_cfiles)
+    runSelector(ifolder+'thrown*"',thrownTreeName,"bkgndSample_gen",1,proof_Nthreads,thrown_cfiles)
+    move(ofolder)
 
 replaceTopology("4#gammap[#pi^{0},#eta]")

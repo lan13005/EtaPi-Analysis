@@ -48,11 +48,12 @@ def checkFits(folder,returnGoodFilesInstead=False):
     3 Full accurate covariance matrix (After MIGRAD, this is the indication of normal convergence.)
 
     ## Minuit status?
-    status = 1    : Covariance was made pos defined
-    status = 2    : Hesse is invalid
-    status = 3    : Edm is above max 
-    status = 4    : Reached call limit
-    status = 5    : Any other failure 
+    *       -1 = undefined status
+    *        0 = normal
+    *        1 = blank command
+    *        2 = unreadable command
+    *        3 = unkown command
+    *        4 = abnormal termination (e.g., MIGRAD not converged)
     '''
     searchMinimumStr="bestMinimum"
     searchMinuitStatusStr="lastMinuitCommandStatus"
@@ -128,7 +129,7 @@ def main(arg):
     nprocesses=9
     fitFileName="etapi_result.fit"
     percent=3.0 # parameters must not be within percent of the defined parameter limits
-    niters=5
+    niters=1
     workingDir=os.getcwd()
 
     # create a seed to sample another seed value that is input to setup_mass_dep_fits for reproducible series of fits
@@ -137,21 +138,14 @@ def main(arg):
     if seed!=-1:
         random.seed(seed)
 
-    ts=["010020","0200325","0325050","050075","075100","010020"]
-    #ts=["0325050","050075","075100","010020"]
-    #ts=["010020","010020"]
-    #ts=["0325050","0325050"]
+    ts=["010020","0200325","0325050","050075","075100"]
+    tmins=[0.1,0.2,0.325,0.5,0.75]
+    tmaxs=[0.2,0.325,0.5,0.75,1.0]
+    ms=["104156"]
+    mmins=[1.04]
+    mmaxs=[1.56]
 
-    baseCfgFiles=[
-            "config_files/etapi_hybrid_m104156.cfg",
-            "config_files/etapi_hybrid_m104160.cfg",
-            "config_files/etapi_hybrid_m104164.cfg",
-            "config_files/etapi_hybrid_m104168.cfg",
-            "config_files/etapi_hybrid_m104172.cfg",
-            "config_files/etapi_hybrid_m104176.cfg",
-            "config_files/etapi_hybrid_m104180.cfg",
-            ]
-    #cfgFile="kmatrix_nonLoop-copy"
+    baseCfgFile="config_files/etapi_hybrid.cfg"
 
     runFits=False
     getSummary=False
@@ -166,25 +160,36 @@ def main(arg):
         raise ValueError("Argument [0/1/2] to runFit, getSummary or both")
     
     if runFits:
-        for j in range(len(ts)-1):
+        for j, tmin, tmax in zip(range(len(ts)),tmins,tmaxs):
             t=ts[j]
         
             os.system("rm -f "+fitFileName)
             os.system("rm -f fit*log")
 
-            for ic, baseCfgFile in enumerate(baseCfgFiles):
+            for ic,m,mmin,mmax in zip(range(len(ms)),ms,mmins,mmaxs):
                 cfgFile=baseCfgFile.split("/")[-1].split(".")[0]+"-copy"
     
                 os.system("mkdir -p overlayPlots")
         
                 setup_seed=random.randint(0,99999999) if seed!=-1 else -1
-                os.system("python setup_mass_dep_fits.py "+baseCfgFile+" "+str(setup_seed)) # reinitialize
+                cmd="python setup_mass_dep_fits.py "+baseCfgFile+" "+str(setup_seed)
+                print(cmd)
+                os.system(cmd) # reinitialize
                 # checkCfgFileProperMassLimits(cfgFile+".cfg") ## DO NOT CHECK ANYMORE SINCE WE USE FILTERING DATA READERS
 
+                with open(cfgFile+".cfg") as cfg:
+                    lines=[line.rstrip() for line in cfg.readlines() if "ROOTDataReaderFilter" in line]
+                    lines=[line for line in lines if 'mc' in line]
+                    for line in lines:
+                        extraReplace=" Mpi0eta {:0.3f} {:0.3f}".format(mmin,mmax) if "accmc" in line else ""
+                        replace=line+extraReplace+" Mpi0eta_thrown {:0.3f} {:0.3f} mandelstam_t_thrown {:0.3f} {:0.3f}".format(
+                                mmin-0.1,mmax+0.1,tmin-0.1,tmax+0.1) 
+                        replaceStr(line,replace,cfgFile+".cfg")
+
                 print("Starting fits")
-#                cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -r "+str(niters)+" -m 1000000 -t 1.0 -x 0 -f 0.15" 
-#                pipeCmd=' > fit.log'
-#                os.system(cmd+pipeCmd)
+                cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -r "+str(niters)+" -m 1000000 -t 1.0 -x 0 -f 0.15" 
+                pipeCmd=' > fit.log'
+                os.system(cmd+pipeCmd)
                 
                 # Move results to the desired folder
                 ofolder=t+"_cfg"+str(ic)
@@ -196,17 +201,18 @@ def main(arg):
                 os.system("mv -f overlayPlots "+ofolder)
                 #os.system("ln -snfr rootFiles "+ofolder+"/rootFiles")
 
-            spawnProcessChangeSetting(ts[j],ts[j+1]) # prepare for new t bin
+            _j=j+1 if j!=len(ts)-1 else 0
+            spawnProcessChangeSetting(ts[j],ts[_j]) # prepare for new t bin
     
     ################################################
     ### Write out a summary of the fits
     ################################################
     if getSummary:
         wall_times_allt=[]
-        for t in ts[:-1]:
-            for ic in range(len(baseCfgFiles)):
+        for t in ts:
+            for ic,mmin,mmax in zip(range(len(ms)),mmins,mmaxs):
                 print("===================================================")
-                print(" -----------   "+t+" setup "+str(ic)+"   ------------")
+                print(" -----------   "+t+" * mass ["+str(mmin)+","+str(mmax)+"]   ------------")
                 print("===================================================")
         
                 interestingLines=["bestMinimum","lastMinuitCommandStatus","eMatrixStatus"]

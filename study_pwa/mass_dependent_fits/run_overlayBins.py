@@ -13,6 +13,8 @@ workingDir=os.getcwd()
 ts=["010020", "0200325", "0325050", "050075", "075100"]
 #ts=["010020"]
 
+subdir="./"#"m104156/"
+
 drawAllGoodFits=False
 fitFileName="etapi_result.fit"
 doAccCorr="true" # this should generally be true. AccCorr is chosen during the fit, we just want to extract corrected yields for cs measurements
@@ -60,12 +62,13 @@ def draw(folder):
 
     os.chdir(folder)
     folder=workingDir+"/"+folder
-    cmd="python3 ../overlayBins.py 2 '"+waves+"' '"+fitFileName+"' '"+workingDir+"' '"+Ls+"' '"+doAccCorr+"' '"+plotAllVars+"' '"+plotGenData+"' '"+folder+"'"
+    cmd="python3 "+workingDir+"/overlayBins.py 2 '"+waves+"' '"+fitFileName+"' '"+workingDir+"' '"+Ls+"' '"+doAccCorr+"' '"+plotAllVars+"' '"+plotGenData+"' '"+folder+"'"
     print(cmd)
     os.system(cmd)
     os.chdir("..")
-    print("rsync -a "+folder+" "+folder.split("_")[0]+"; rm -r "+folder)
-    os.system("rsync -a "+folder+" "+"_".join(folder.split("_")[:-1])+"; rm -r "+folder)
+    cmd="rsync -a "+folder+" "+"_".join(folder.split("_")[:-1])+"; rm -r "+folder
+    print(cmd)
+    os.system(cmd)
 
     return 0
 
@@ -73,7 +76,8 @@ def draw(folder):
 folders=[]
 convergedFiles=[]
 for t in ts:
-    fs=[f for f in os.listdir(".") if t in f]
+    fs=[subdir+f for f in os.listdir(subdir) if t in f]
+    #fs=[t]
     for f in fs:
         if drawAllGoodFits:
             cf=list(fit.checkFits(f,True))
@@ -83,12 +87,18 @@ for t in ts:
             folders+=[f+"_"+i for i in convergedIterations if not os.path.exists(f+"/"+f+"_"+i)]
         else:
             convergedFiles+=[f+"/etapi_result.fit"]
-            folders+=[f+"0"]
+            folders+=[f+"_0"]
 [os.system("mkdir -p "+folder) for folder in folders]
 [os.system("cp "+convergedFile+" "+folder+"/"+fitFileName) for convergedFile,folder in zip(convergedFiles,folders)]
 
 maxProcesses=15
-nthreads=len(folders) if len(folders)<maxProcesses else maxProcesses
+if len(folders)==1:
+    nthreads=2
+else:
+    if len(folders)<maxProcesses:
+        nthreads=len(folders)
+    else:
+        nthreads=maxProcesses
 with multiprocessing.Pool(nthreads) as p:
     ### CHANGING THE WAVESET TO LOOP OVER
     groupVec=waves.split(";")

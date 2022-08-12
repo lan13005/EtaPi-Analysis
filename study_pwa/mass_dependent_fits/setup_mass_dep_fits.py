@@ -40,29 +40,30 @@ os.system("cp "+fileName+" "+newFileName)
 
 t="010020"
 m="104180" #"104180"
+extraTag="" #"_mpi0pLT194"
 for pol in ["000","045","090","135"]:
-    baseLoc=baseDir+"t"+t+"_m"+m+"/"
+    baseLoc=baseDir+"t"+t+"_m"+m+extraTag+"/"
     if not os.path.exists(baseLoc):
         raise ValueError("YOU ARE REQUESTING FOR A FOLDER THAT DOES NOT EXIST! FIX IN SETUP FIT SCRIPT")
 
     search="DATAFILE_"+pol
-    fileLoc="pol"+pol+"_t"+t+"_m"+m+"_DTOT_selected_data_flat.root"
+    fileLoc="pol"+pol+"_t"+t+"_m"+m+extraTag+"_DTOT_selected_data_flat.root"
     replace=baseLoc+fileLoc
     replaceStr(search,replace,newFileName)
 
     search="BKGNDFILE_"+pol
-    fileLoc="pol"+pol+"_t"+t+"_m"+m+"_DTOT_selected_bkgnd_flat.root"
+    fileLoc="pol"+pol+"_t"+t+"_m"+m+extraTag+"_DTOT_selected_bkgnd_flat.root"
     replace=baseLoc+fileLoc
     replaceStr(search,replace,newFileName)
 
     search="ACCMCFILE_"+pol
-    fileLoc="polALL_t"+t+"_m"+m+"_FTOT_selected_acc_flat.root"
+    fileLoc="polALL_t"+t+"_m"+m+extraTag+"_FTOT_selected_acc_flat.root"
     #fileLoc="pol"+pol+"_t"+t+"_m"+m+"_FTOT_selected_acc_flat.root"
     replace=baseLoc+fileLoc
     replaceStr(search,replace,newFileName)
 
     search="GENMCFILE_"+pol
-    fileLoc="polALL_t"+t+"_m"+m+"_FTOT_gen_data_flat.root"
+    fileLoc="polALL_t"+t+"_m"+m+extraTag+"_FTOT_gen_data_flat.root"
     #fileLoc="pol"+pol+"_t"+t+"_m"+m+"_FTOT_gen_data_flat.root"
     replace=baseLoc+fileLoc
     replaceStr(search,replace,newFileName)
