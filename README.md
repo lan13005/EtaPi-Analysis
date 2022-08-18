@@ -1,5 +1,8 @@
 # EtaPi0 Analysis at GlueX
 
+![Lawrence's GitHub stats](https://github-readme-stats.vercel.app/api?username=lan13005&hide=jupyter%20notebook)
+
+
 ## Reaction of interest
 DSelector_etapi.C/h provide an implementation of a DSelector for the following reaction 
 ![Alt text](images/reaction.png?raw=true)
