@@ -1,12 +1,6 @@
 study_double_regge/fitAsymmetryPlots.ipynb -linguist-vendored
-study_double_regge/.ipynb_checkpoints/fitAsymmetryPlots-checkpoint.ipynb -linguist-vendored
-study_pwa/jupyter_plotting/.ipynb_checkpoints/plotter-checkpoint.ipynb -linguist-vendored
 study_pwa/jupyter_plotting/plotter.ipynb -linguist-vendored
 study_eventSelections/event_selection.ipynb -linguist-vendored
-study_eventSelections/.ipynb_checkpoints/event_selection-checkpoint.ipynb -linguist-vendored
 study_lmac/lowMassAltCombos.ipynb -linguist-vendored
-study_lmac/.ipynb_checkpoints/lowMassAltCombos-checkpoint.ipynb -linguist-vendored
-study_f2toPiPi/.ipynb_checkpoints/extract_xsec-checkpoint.ipynb -linguist-vendored
 study_f2toPiPi/extract_xsec.ipynb -linguist-vendored
 study_vanHove/vanHoveStudy.ipynb -linguist-vendored
-
