@@ -1,6 +1,6 @@
 #include "DSelector_thrown.h"
 
-string topologyString="4#gammap[2#pi^{0}]";
+string topologyString="5#gammap[2#pi^{0}]";
 
 void DSelector_thrown::Init(TTree *locTree)
 {
