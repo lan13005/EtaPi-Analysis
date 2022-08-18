@@ -38,9 +38,9 @@ print("copying "+fileName+" to "+newFileName)
 os.system("cp "+fileName+" "+newFileName)
 
 
-t="010020"
+t="0325050"
 m="104180" #"104180"
-extraTag="" #"_mpi0pLT194"
+extraTag="_vh" 
 for pol in ["000","045","090","135"]:
     baseLoc=baseDir+"t"+t+"_m"+m+extraTag+"/"
     if not os.path.exists(baseLoc):

@@ -8,77 +8,77 @@ import uproot3 as uproot
 import pandas as pd
 import random
 import time
+from checkCfgFile import checkCfgFile
 
-def checkParLimits(fitFile):
-    '''
-    Check to see if the fit parameters are at the limits. If so, the fit did not 
-    converge properly
-    '''
-    boundedPars={}
-    with open(fitFile) as infile:
-        for line in infile:
-            if "parameter" in line and "bounded" in line:
-                _, parName, parVal, _, parMin, parMax = line.split(" ")
-                boundedPars[parName]=[float(parMin),float(parMax.rstrip())]
-    with open(fitFile) as infile:
-        parNotAtLimit=True
-        infile.seek(0)
-        for line in infile:
-            for key in boundedPars.keys():
-                if line.lstrip().startswith(key+"\t"):
-                    parName, parVal=[ele.rstrip().lstrip() for ele in line.split("\t")]
-                    parVal = float(parVal)
-                    minVal, maxVal = boundedPars[parName]
-                    shiftedRatio=(parVal-minVal)/(maxVal-minVal)
-                    if shiftedRatio<percent/100 or shiftedRatio>(1-percent/100):
-                        parNotAtLimit *= False
-                        print(parName+" is within "+str(percent)+"% of limits! "+str(parVal)+" bounded on ["+str(minVal)+","+str(maxVal)+"]")
-    return parNotAtLimit
+#def checkParLimits(fitFile):
+#    '''
+#    Check to see if the fit parameters are at the limits. If so, the fit did not 
+#    converge properly
+#    '''
+#    boundedPars={}
+#    with open(fitFile) as infile:
+#        for line in infile:
+#            if "parameter" in line and "bounded" in line:
+#                _, parName, parVal, _, parMin, parMax = line.split(" ")
+#                boundedPars[parName]=[float(parMin),float(parMax.rstrip())]
+#    with open(fitFile) as infile:
+#        parNotAtLimit=True
+#        infile.seek(0)
+#        for line in infile:
+#            for key in boundedPars.keys():
+#                if line.lstrip().startswith(key+"\t"):
+#                    parName, parVal=[ele.rstrip().lstrip() for ele in line.split("\t")]
+#                    parVal = float(parVal)
+#                    minVal, maxVal = boundedPars[parName]
+#                    shiftedRatio=(parVal-minVal)/(maxVal-minVal)
+#                    if shiftedRatio<percent/100 or shiftedRatio>(1-percent/100):
+#                        parNotAtLimit *= False
+#                        print(parName+" is within "+str(percent)+"% of limits! "+str(parVal)+" bounded on ["+str(minVal)+","+str(maxVal)+"]")
+#    return parNotAtLimit
+#
+#def checkFits(folder,returnGoodFilesInstead=False):
+#    '''
+#    Do not care about fit status, only care that the likelihood is reasonable (negative and finite)
+#    0 Not calculated at all
+#    ## Error matrix status?
+#    1 Diagonal approximation only, not accurate
+#    2 Full matrix, but forced positive-definite
+#    3 Full accurate covariance matrix (After MIGRAD, this is the indication of normal convergence.)
+#
+#    ## Minuit status?
+#    *       -1 = undefined status
+#    *        0 = normal
+#    *        1 = blank command
+#    *        2 = unreadable command
+#    *        3 = unkown command
+#    *        4 = abnormal termination (e.g., MIGRAD not converged)
+#    '''
+#    searchMinimumStr="bestMinimum"
+#    searchMinuitStatusStr="lastMinuitCommandStatus"
+#    
+#    files=[folder+"/"+f for f in os.listdir(folder) if ".fit" in f and has_numbers(f)]
+#    convergenceStatuses=[]
+#    for fitFile in files:
+#        with open(fitFile) as infile:
+#            NLL=0
+#            for line in infile:
+#                if searchMinimumStr in line:
+#                    NLL=float(line.split(" ")[-1].split("\t")[1].rstrip().lstrip())
+#                if searchMinuitStatusStr in line:
+#                    minuitStatus=float(line.split(" ")[-1].split("\t")[1].rstrip().lstrip())
+#            if NLL==0:
+#                raise ValueError("NLL not found in "+fitFile+"! Terminating")
+#            #parNotAtLimit=checkParLimits(fitFile)
+#            parNotAtLimit=True # ignore if we wish
+#            convergenceStatus=NLL<0 and np.isfinite(NLL) and minuitStatus==0 and parNotAtLimit # Require a negative log likelihood and minuit status = 0
+#            convergenceStatuses.append(convergenceStatus)
+#    if not returnGoodFilesInstead:
+#        return sum(convergenceStatuses) # how much results files converged properly
+#    else:
+#        return np.array(files)[convergenceStatuses]
 
 def has_numbers(inputString):
     return any(char.isdigit() for char in inputString)
-
-def checkFits(folder,returnGoodFilesInstead=False):
-    '''
-    Do not care about fit status, only care that the likelihood is reasonable (negative and finite)
-    0 Not calculated at all
-    ## Error matrix status?
-    1 Diagonal approximation only, not accurate
-    2 Full matrix, but forced positive-definite
-    3 Full accurate covariance matrix (After MIGRAD, this is the indication of normal convergence.)
-
-    ## Minuit status?
-    *       -1 = undefined status
-    *        0 = normal
-    *        1 = blank command
-    *        2 = unreadable command
-    *        3 = unkown command
-    *        4 = abnormal termination (e.g., MIGRAD not converged)
-    '''
-    searchMinimumStr="bestMinimum"
-    searchMinuitStatusStr="lastMinuitCommandStatus"
-    
-    files=[folder+"/"+f for f in os.listdir(folder) if ".fit" in f and has_numbers(f)]
-    convergenceStatuses=[]
-    for fitFile in files:
-        with open(fitFile) as infile:
-            NLL=0
-            for line in infile:
-                if searchMinimumStr in line:
-                    NLL=float(line.split(" ")[-1].split("\t")[1].rstrip().lstrip())
-                if searchMinuitStatusStr in line:
-                    minuitStatus=float(line.split(" ")[-1].split("\t")[1].rstrip().lstrip())
-            if NLL==0:
-                raise ValueError("NLL not found in "+fitFile+"! Terminating")
-            #parNotAtLimit=checkParLimits(fitFile)
-            parNotAtLimit=True # ignore if we wish
-            convergenceStatus=NLL<0 and np.isfinite(NLL) and minuitStatus==0 and parNotAtLimit # Require a negative log likelihood and minuit status = 0
-            convergenceStatuses.append(convergenceStatus)
-    if not returnGoodFilesInstead:
-        return sum(convergenceStatuses) # how much results files converged properly
-    else:
-        return np.array(files)[convergenceStatuses]
-
 
 def spawnProcessChangeSetting(old,new):
     '''
@@ -88,34 +88,6 @@ def spawnProcessChangeSetting(old,new):
     print(" ".join(sedArgs))
     subprocess.Popen(sedArgs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).wait()
 
-def checkCfgFileProperMassLimits(cfgLoc):
-    searchKeyWord="Mpi0eta"
-    with open(cfgLoc) as cfg:
-        lines=cfg.readlines()
-        lines=[line for line in lines if not line.startswith("#")]
-        isLooping=len([line for line in lines if "loop" in line])>0
-        if isLooping:
-            rootFileLines=[line for line in lines if ".root" in line]
-        piecewise=[line for line in lines if "Piecewise" in line]
-    
-    oneSetOfFiles=rootFileLines[0].rstrip().lstrip().split(" ")[2:]
-    oneFile=oneSetOfFiles[0]
-    df=uproot.open(oneFile)["kin"].arrays(["Mpi0eta"],outputtype=pd.DataFrame)
-    minVal=df.Mpi0eta.min()
-    maxVal=df.Mpi0eta.max()
-    
-    piecewise=piecewise[0].split(" ")
-    minPW=float(piecewise[3])
-    maxPW=float(piecewise[4])
-    
-    if abs(minVal-minPW)>0.1 or abs(maxVal-maxPW)>0.1:
-        print("\n****************************")
-        print("THERE IS A MISMATCH BETWEEN YOUR MASS RANGE IN YOUR ROOT FILE AND THE RANGE SPECIFIED IN YOUR PIECEWISE DEFINITION!")
-        print("Min/Max value in root file: {}/{}".format(minVal,maxVal))
-        print("Min/Max value in piecewise: {}/{}".format(minPW,maxPW))
-        print("TERMINATING THE PROGRAM!")
-        print("****************************\n")
-        exit()
 
 def replaceStr(search,replace,fileName):
     print("replace str: "+replace)
@@ -129,7 +101,7 @@ def main(arg):
     nprocesses=9
     fitFileName="etapi_result.fit"
     percent=3.0 # parameters must not be within percent of the defined parameter limits
-    niters=1
+    niters=20
     workingDir=os.getcwd()
 
     # create a seed to sample another seed value that is input to setup_mass_dep_fits for reproducible series of fits
@@ -141,9 +113,12 @@ def main(arg):
     ts=["010020","0200325","0325050","050075","075100"]
     tmins=[0.1,0.2,0.325,0.5,0.75]
     tmaxs=[0.2,0.325,0.5,0.75,1.0]
-    ms=["104156"]
+    #ts=["010020"]
+    #tmins=[0.1]
+    #tmaxs=[0.2]
+    ms=["104168"]
     mmins=[1.04]
-    mmaxs=[1.56]
+    mmaxs=[1.68]
 
     baseCfgFile="config_files/etapi_hybrid.cfg"
 
@@ -175,16 +150,20 @@ def main(arg):
                 cmd="python setup_mass_dep_fits.py "+baseCfgFile+" "+str(setup_seed)
                 print(cmd)
                 os.system(cmd) # reinitialize
-                # checkCfgFileProperMassLimits(cfgFile+".cfg") ## DO NOT CHECK ANYMORE SINCE WE USE FILTERING DATA READERS
 
                 with open(cfgFile+".cfg") as cfg:
                     lines=[line.rstrip() for line in cfg.readlines() if "ROOTDataReaderFilter" in line]
-                    lines=[line for line in lines if 'mc' in line]
+                    #lines=[line for line in lines if 'mc' in line]
                     for line in lines:
-                        extraReplace=" Mpi0eta {:0.3f} {:0.3f}".format(mmin,mmax) if "accmc" in line else ""
-                        replace=line+extraReplace+" Mpi0eta_thrown {:0.3f} {:0.3f} mandelstam_t_thrown {:0.3f} {:0.3f}".format(
-                                mmin-0.1,mmax+0.1,tmin-0.1,tmax+0.1) 
+                        accReplace=" Mpi0eta {:0.3f} {:0.3f}".format(mmin,mmax) 
+                        genReplace=" Mpi0eta_thrown {:0.3f} {:0.3f} mandelstam_t_thrown {:0.3f} {:0.3f}".format(mmin,mmax,tmin,tmax)  
+                        #accReplace=accReplace+genReplace if "accmc" in line else accReplace
+                        replace=line+accReplace if any([ftype in line for ftype in ["accmc","data","bkgnd"]]) else line+genReplace
                         replaceStr(line,replace,cfgFile+".cfg")
+
+                if not checkCfgFile(cfgFile+".cfg"): 
+                    print("\n**** SOMETHING WRONG WITH CONFIG! SEE ABOVE. EXITING ****\n")
+                    exit(1)
 
                 print("Starting fits")
                 cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -r "+str(niters)+" -m 1000000 -t 1.0 -x 0 -f 0.15" 

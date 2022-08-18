@@ -1,7 +1,7 @@
 #include "DSelector_etapi.h"
 
 // "4#gammap[#pi^{0},#eta]"
-string topologyString="4#gammap[#pi^{0},#eta]";
+string topologyString="4#gammap[2#pi^{0}]";
 
 void DSelector_etapi::Init(TTree *locTree)
 {
