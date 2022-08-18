@@ -1,6 +1,7 @@
 # EtaPi0 Analysis at GlueX
 
-![Lawrence's GitHub stats](https://github-readme-stats.vercel.app/api?username=lan13005&hide=jupyter%20notebook)
+[![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=lan13005&hide=jupyter%20notebook)](https://github.com/anuraghazra/github-readme-stats)
+
 
 
 ## Reaction of interest
