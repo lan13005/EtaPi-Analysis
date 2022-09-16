@@ -1,7 +1,7 @@
 #include "DSelector_etapi.h"
 
 // "4#gammap[#pi^{0},#eta]"
-string topologyString="5#gammap[2#pi^{0}]";
+string topologyString="4#gammap[#pi^{0},#eta]";
 
 void DSelector_etapi::Init(TTree *locTree)
 {
@@ -705,7 +705,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                 //      split the final flat trees up. This should lower our total run times
 		bMetapi0=true; 
                 bmandelstamt=true; 
-                bLowMassAltCombo=true; // temporarily turn this on to study its performance
+                //bLowMassAltCombo=true; // temporarily turn this on to study its performance
 
                 // temporarily turn this off so we can study the qfactors comparison
                 //bMpi0p=true; 

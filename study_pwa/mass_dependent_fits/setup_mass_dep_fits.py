@@ -1,21 +1,30 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import subprocess
 import os
 import random
 import sys
+import argparse
 
-argc=len(sys.argv)
-argv=sys.argv
-print(argv)
-if argc!=3:
-    print("requires 1 argument for the config file location")
-    print(" + 1 argument for the seed! Use -1 to not set a seed")
-    exit()
+parser = argparse.ArgumentParser(description='Make a config file',formatter_class=argparse.RawDescriptionHelpFormatter)
+parser.add_argument('fname', type=str, help='config file location')
+parser.add_argument('seed', type=int, help='seed to randomize the fits with')
+parser.add_argument('pcwsBins', type=int, help='number of piecewise mass bins')
+parser.add_argument('pcwsMassMin', type=float, help='piecewise mass minimum')
+parser.add_argument('pcwsMassMax', type=float, help='piecewise mass maximum')
+parser.add_argument('tmin', type=float, help='t miniimum')
+parser.add_argument('tmax', type=float, help='t maximum')
 
-#fileName=os.getcwd()+"/config_files/etapi_hybrid.cfg"
-fileName=argv[1]
-seed=int(argv[2])
+args = parser.parse_args()
+
+fileName=args.fname
+seed=args.seed
+pcwsBins=args.pcwsBins
+pcwsMassMin=args.pcwsMassMin
+pcwsMassMax=args.pcwsMassMax
+tmin=args.tmin
+tmax=args.tmax
+
 if seed!=-1:
     random.seed(seed)
 
@@ -27,7 +36,6 @@ baseDir="rootFiles/"
 def replaceStr(search,replace,fileName):
     print("replace str: "+replace)
     sedArgs=["sed","-i",'s@'+search+'@'+replace+'@g',fileName]
-    #print("replacing: "+search+" with "+replace)
     subprocess.Popen(sedArgs, stdout=subprocess.PIPE, stderr=subprocess.STDOUT).wait()
 
 
@@ -38,7 +46,7 @@ print("copying "+fileName+" to "+newFileName)
 os.system("cp "+fileName+" "+newFileName)
 
 
-t="0325050"
+t="010020"
 m="104180" #"104180"
 extraTag="_vh" 
 for pol in ["000","045","090","135"]:
@@ -91,39 +99,88 @@ def reinitWave(wave,anchor):
                 isample=random.uniform(-1*scale,scale)
             search="initialize "+reaction+"::"+refpart+"::"+wave
             if anchor:
-                replace=search+" cartesian "+str(rsample)+" 0 real"
+                replace=search+f" cartesian {rsample:0.5f} 0 real"
             else:
-                replace=search+" cartesian "+str(rsample)+" "+str(isample)
+                replace=search+f" cartesian {rsample:0.5f} {isample:0.5f}"
             replaceStr(search+".*",replace,newFileName)
 
 print("\n------------------------------------------------\n")
 print("reintializing production amplitudes")
 print("------------------------------------------------\n")
-#reinitWave("S0++",True)
-#reinitWave("S0+-",True)
 for wave in waves:
     reinitWave(wave,False)
 
-searchStr="parameter pcwsBin"
-constrainedParMap={}
-print("\n------------------------------------------------\n")
-print("reintializing piecewise production parameters between [-100,100]")
-print("------------------------------------------------\n")
-with open(newFileName) as newFile:
-    for line in newFile:
-        if line.startswith(searchStr):
-            line=line.rstrip()
-            parType , parName, parVal = line.split(" ")
-            #if "SKIP" in parName:
-            if "Bin_4Im" in parName:
-                sample=0.0
-                replaceStr(line,parType+" "+parName+" "+str(sample)+" fixed",newFileName)
-            else:
-                scale=100
-                sample=random.uniform(-1*scale,scale)
-                replaceStr(line,parType+" "+parName+" "+str(sample),newFileName)
-             
 
+print("\n------------------------------------------------\n")
+print("intializing piecewise production parameters")
+print("------------------------------------------------\n")
+with open(newFileName) as cfg:
+    lines=[line.rstrip() for line in cfg.readlines() if "ROOTDataReaderFilter" in line]
+    for line in lines:
+        accReplace=f" Mpi0eta {pcwsMassMin} {pcwsMassMax}" 
+        genReplace=f" Mpi0eta_thrown {pcwsMassMin} {pcwsMassMax} mandelstam_t_thrown {tmin} {tmax}"
+        #accReplace=accReplace+genReplace if "accmc" in line else accReplace
+        replace=line+accReplace if any([ftype in line for ftype in ["accmc","data","bkgnd"]]) else line+genReplace
+        replaceStr(line,replace,newFileName)
+
+
+print("\n------------------------------------------------\n")
+print("intializing piecewise production parameters")
+print("------------------------------------------------\n")
+realBin=4
+pcwsMin=-200
+pcwsMax=200
+searchStrs=['PIECEWISE PARAMETER DEFINITIONS', 'PIECEWISE PARSCAN DEFINITIONS', 'PIECEWISE AMPLITUDE DEFINITIONS']
+with open(newFileName) as cfg:
+    lines=cfg.readlines()
+    lineNums=[i+1 for i,line in enumerate(lines) if any([searchStr in line for searchStr in searchStrs])] 
+
+parLines=''
+for ref in ["Neg","Pos"]:
+    for binNum in range(pcwsBins):
+        for part in ["Re","Im"]:
+            sample=random.uniform(pcwsMin,pcwsMax)
+            if binNum==realBin and part=="Im":
+                sample=0
+            parLines+=f'parameter pcwsBin_{binNum}{part}{ref} {sample:0.5f}\n'
+    if ref=="Neg":
+        parLines+="\n"
+
+parScanLines=""
+parScanLines+=f'define uplimit {pcwsMax}\n'
+parScanLines+=f'define lowlimit {pcwsMin}\n'
+for ref in ["Neg","Pos"]:
+    for binNum in range(pcwsBins):
+        for part in ["Re","Im"]:
+            if binNum==realBin and part=="Im":
+                parScanLines+="#"
+            parScanLines+=f'parRange pcwsBin_{binNum}{part}{ref} lowlimit uplimit\n'
+    if ref=="Neg":
+        parScanLines+="\n"
+
+ampLines=""
+for ref,ref2,ref3 in zip(["Neg","Pos"],["Negative","Positive"],["-","+"]):
+    for ampPart in ["Re","Im"]:
+        ampLines+=f'amplitude {reaction}::{ref2}{ampPart}::S0+{ref3} Piecewise {pcwsMassMin} {pcwsMassMax} {pcwsBins} 23 {ref} ReIm '
+        for binNum in range(pcwsBins):
+            for part in ["Re","Im"]:
+                ampLines+=f'[pcwsBin_{binNum}{part}{ref}] '
+        ampLines=ampLines[:-1]+"\n" # remove the extra space in the end and include a newline
+
+nNewLines=0
+for lineNum, newLines in zip(lineNums, [parLines, parScanLines, ampLines]):
+    lines.insert(lineNum+nNewLines, newLines)
+    nNewLines+=1 # the number of new lines added is not dependent on \n characters. instead the entire string counts as 1 line
+
+with open(newFileName, "w") as f:
+    lines = "".join(lines)
+    f.write(lines)
+
+
+
+print("\n------------------------------------------------\n")
+print("COMMENT OUT WAVES WE ARE NOT USING")
+print("------------------------------------------------\n")
 commentWavesNotInThisList=waves+["S0++","S0+-"]
 listAllWaves=[]
 excludeLines=[]

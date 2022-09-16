@@ -4,14 +4,6 @@ R__LOAD_LIBRARY(/d/grid17/ln16/dselector_v3/study_pwa/simple_fits/RooRelBreitWig
 //#include "/d/grid17/ln16/dselector_v3/study_pwa/simple_fits/RooRelBreitWigner_C.so"
 
 void fit(){
-    map<int,string> minuitStatues={
-        {0,"OK"},
-        {1,"Covariance was made pos defined"},
-        {2,"Hesse is invalid"},
-        {3,"Edm is above max"},
-        {4,"Reached call limit"},
-        {5,"Any other failure"}
-    };
     vector<string> forms={"bw","voigt"};
 
     //gSystem->Load("/d/grid17/ln16/dselector_v3/study_pwa/simple_fits/RooRelBreitWigner_C.so");
@@ -52,11 +44,12 @@ void fit(){
             ////////////////////////
             //  LOAD DATA
             ////////////////////////
-            string floc="/d/grid17/ln16/dselector_v3/phase1_selected/D"+run+"_selected_acc_flat.root";
+            string floc="/d/grid17/ln16/dselector_v3/phase1_selected_v2/D"+run+"_selected_acc_flat.root";
             cout << "loading: " << floc << endl;
             ROOT::RDataFrame d("kin", floc.c_str());
             auto df=d.Filter(Form("mandelstam_t>%f && mandelstam_t<%f",mint,maxt));
             df=df.Filter(Form("Mpi0eta>%f && Mpi0eta<%f",minm,maxm));
+            df=df.Filter(Form("-29.0*atan(-1.05*Mpi0eta+2.78)+328 > vanHove_omega"));
             df=df.Filter("BeamAngle != -1"); // REJECT AMO
             auto df_hist=df.Histo1D({("M4g"+to_string(i)+"_data").c_str(),"M4g",mbins,minm,maxm},"Mpi0eta","Weight");
             if (i==0)
@@ -78,9 +71,10 @@ void fit(){
             ROOT::RDataFrame dacc("kin", floc.c_str());
             auto df=dacc.Filter(Form("mandelstam_t>%f && mandelstam_t<%f",mint,maxt));
             df=df.Filter(Form("Mpi0eta>%f && Mpi0eta<%f",minm,maxm));
-            df=df.Filter(Form("mandelstam_t_thrown>%f && mandelstam_t_thrown<%f",mint,maxt));
-            df=df.Filter(Form("Mpi0eta_thrown>%f && Mpi0eta_thrown<%f",minm,maxm));
-            df=df.Filter("BeamAngle != -1"); // REJECT AMO
+            df=df.Filter(Form("-29.0*atan(-1.05*Mpi0eta+2.78)+328 > vanHove_omega"));
+            //df=df.Filter(Form("mandelstam_t_thrown>%f && mandelstam_t_thrown<%f",mint,maxt));
+            //df=df.Filter(Form("Mpi0eta_thrown>%f && Mpi0eta_thrown<%f",minm,maxm));
+            //df=df.Filter("BeamAngle != -1"); // REJECT AMO; NO NEED TO REJECT SINCE ITS NOT SIMULATED
             auto df_hist=df.Histo1D({("M4g"+to_string(i)+"_acc").c_str(),"M4g",mbins,minm,maxm},"Mpi0eta","Weight");
             if (i==0)
                 hists[1]=(TH1F*)df_hist->Clone();
@@ -101,7 +95,7 @@ void fit(){
             ROOT::RDataFrame dgen("kin", floc.c_str(),{"Weight","mandelstam_t_thrown","Mpi0eta_thrown"});
             auto df=dgen.Filter(Form("mandelstam_t_thrown>%f && mandelstam_t_thrown<%f",mint,maxt));
             df=df.Filter(Form("Mpi0eta_thrown>%f && Mpi0eta_thrown<%f",minm,maxm));
-            df=df.Filter("BeamAngle != -1"); // REJECT AMO
+            //df=df.Filter("BeamAngle != -1"); // REJECT AMO; NO NEED TO REJECT SINCE ITS NOT SIMULATED
             auto df_hist=df.Histo1D({("M4g"+to_string(i)+"_data").c_str(),"M4g",mbins,minm,maxm},"Mpi0eta_thrown","Weight");
             if (i==0)
                 hists[2]=(TH1F*)df_hist->Clone();
@@ -228,7 +222,7 @@ void fit(){
                 << normalization << "\t" 
                 << mean.getVal() << "\t" << mean.getError() << "\t"
                 << width.getVal() << "\t" << width.getError() << "\t" 
-                << minuitStatues[fitter->status()] << endl;
+                << endl;
 
             c->Print(("results/"+forms[iform]+"_plus_poly_t"+t+".pdf").c_str());  
             ++iform;

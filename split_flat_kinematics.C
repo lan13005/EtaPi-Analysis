@@ -19,7 +19,7 @@ void split_flat_kinematics(){
     bool forceSplitting=true; // Should we run the splitting again? Or should we just sum runs if sumRuns=true
     bool remergePols=true; // should we remerge polarizations after splitting? 
     
-    string extraTag="_vh";//"_mpi0pLT194";
+    string extraTag="_selectGenT";//"_mpi0pLT194";
 
     string folder="phase1_selected_v2/";
     bool ignorePolarization=false;
@@ -143,6 +143,10 @@ void split_flat_kinematics(){
             bool has_thrown_branches = (Ebeam_thrown!=0);
             cout << "has proper thrown branches: " << has_thrown_branches << endl;
 
+            bool isData=!has_thrown_branches*has_recon_branches; // does not have thrown but has recon branches
+            bool isAcc=has_recon_branches*has_thrown_branches; // has both recon and thrown branches
+            bool isGen=!has_recon_branches*has_thrown_branches; // does not have recon branches but has thrown branches
+
             // ********************************************
             /////// FILL TREES IN THE CORRECT BINNING
             // ********************************************
@@ -153,13 +157,14 @@ void split_flat_kinematics(){
                      beamAngle=BeamAngle;
                  for (auto const& t: ts){ im=0;
                      for (auto const& m: mpi0etas){
-                         pVH_pi0p2=filterOmega(vanHove_omega,mpi0eta);
-                         if (has_recon_branches*!pVH_pi0p2) continue;
-                         //if (has_recon_branches*!(mpi0p>1.4)) continue;
+                         //pVH_pi0p2=filterOmega(vanHove_omega,mpi0eta);
+                         //if (has_recon_branches*!pVH_pi0p2) continue;
+                         if (has_recon_branches*!(mpi0p>1.4)) continue;
                          if (has_recon_branches*!((mandelstam_t>mint[it])*(mandelstam_t<maxt[it]))) continue;
                          if (has_recon_branches*!((mpi0eta>minmpi0eta[im])*(mpi0eta<maxmpi0eta[im]))) continue;
                          //if (has_thrown_branches*!((mandelstam_t_thrown>mint[it])*(mandelstam_t_thrown<maxt[it]))) continue;
                          //if (has_thrown_branches*!((mpi0eta_thrown>minmpi0eta[im])*(mpi0eta_thrown<maxmpi0eta[im]))) continue;
+                         if (isGen*!((mandelstam_t_thrown>mint[it])*(mandelstam_t_thrown<maxt[it]))) continue;
                             newtree[pols[beamAngle]][it][im]->Fill();
                           ++im;
                      } ++it;

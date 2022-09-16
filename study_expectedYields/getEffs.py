@@ -27,10 +27,11 @@ plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('legend', fontsize=17)    # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
+dselectedFolder="zDSelectedBkgndSamples/"
 baseDir="zExpectedLeakage/"
-os.system("mkdir -p "+baseDir)
-#f=open(baseDir+"tabulate_calculations.csv","w")
-#f.write("Channel,Weight,signalRegion,Ecenter,Ewidth,Yield,YieldErr,XSec,XSecErr,Flux,FluxErr,Eff,EffErr,BR,FR\n")
+os.system("mkdir -p "+baseDir+"/montage")
+f=open(baseDir+"tabulate_calculations.csv","w")
+f.write("Channel,Weight,signalRegion,Ecenter,Ewidth,Yield,YieldErr,XSec,XSecErr,Flux,FluxErr,Eff,EffErr,BR\n")
 simplify={"AccWeight":"AS", "weightASBS":"ASBS"}
 
 
@@ -48,6 +49,8 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
     recons=[] # store all the different runs
     throwns=[] # store all the different runs
 
+    histBinning=100 # number of bins used when making histograms 
+
     # THIS HAS TO BE THE ORDER SINCE MOST SIMULATIONS WERE MADE WITH FA2018
     #   OTHERWISE THE ORDERING OF THE RECONS LIST NEEDS TO BE FIXED
     colors=['blue', 'red', 'black']
@@ -56,14 +59,14 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
     #### Plotting sidebands distributions comparing data to expected b1 background leakage
     def getVal(search):
         val=-1
-        with open("/d/grid17/ln16/dselector_v2/test/study_expectedYields/DSelector_etapi.C") as selector:
+        with open("/d/grid17/ln16/dselector_v3/study_expectedYields/DSelector_etapi.C") as selector:
             for line in selector:
                 if search in line and "float" in line:
                     match=line.split("=")[1].split(";")[0]
                     val=float(match)
         return val
     def getSidebands():
-        with open("/d/grid17/ln16/dselector_v2/test/study_expectedYields/DSelector_etapi.C") as selector:
+        with open("/d/grid17/ln16/dselector_v3/study_expectedYields/DSelector_etapi.C") as selector:
             for line in selector:
                 pi0Mean=getVal("pi0Mean")
                 etaMean=getVal("etaMean")
@@ -91,15 +94,23 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
     columns=[dataEnergy,"AccWeight","weightBSpi0","weightBSeta","weightASBS","Mpi0eta","Mpi0g3","Mpi0g4","Mpi0","Meta","pVH",
             "cosTheta_eta_gj","cosTheta_eta_hel","phi_eta_gj","phi_eta_hel"]
     
+    br_pi0_gg=0.988
+    br_omega_pi0g=0.0835
+    br_eta_3pi0=0.3257
+    br_eta_2g=0.3936
+    br_f1_etapi0pi0=0.522
+    br_f2_pi0pi0=0.842
+    br_etap_etapi0pi0=0.224
+    br_a2_etapi0=0.145
 
     if getB1:
-        BR=1*0.0834*0.988*0.988; # assumed b1->omegapi dominant=1, omega->pi0g is 8.24, 99% decay to 2g for the 2 pi0s 
+        BR=1*br_omega_pi0g*br_pi0_gg*br_pi0_gg; # assumed b1->omegapi dominant=1, omega->pi0g is 8.35, 99% decay to 2g for the 2 pi0s 
         csAxisLabel=r"$b_1$"+" Cross Section (nb)"
         title=r"$b_1\rightarrow\omega\pi^0\rightarrow5\gamma$"
         outputFolder=baseDir+"zB1_efficiency/"
         binedges=np.linspace(6.6,11.4,49)[14:25]
         binMin=2
-        binMax=-3
+        binMax=-2
         sp2017=[1.414,1.430,1.398,1.378,1.372,1.367,1.336,1.341,1.341,1.268]#,1.304] # I think we grabbed an extra bin
         sp2017_err=[0.052,0.047,0.047,0.041,0.042,0.037,0.036,0.037,0.031,0.047]#,0.068]
         sp2018=[1.409,1.383,1.409,1.404,1.388,1.331,1.341,1.320,1.268,1.294]#,1.362]
@@ -108,13 +119,14 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         fa2018_err=[0.052,0.052,0.047,0.047,0.037,0.032,0.037,0.036,0.031,0.047]#,0.053]
         crossSections=np.array([fa2018,sp2018,sp2017])*1000 
         crossSectionErrs=np.array([fa2018_err,sp2018_err,sp2017_err])*1000
-        baseFolder="./zDSelectedBkgndSamples/b1vps_"
+        baseFolder=dselectedFolder+"/b1vps_"
         for run in ["2018_8","2018_1","2017_1"]:
             recons.append(rp.read_root(baseFolder+run+"/bkgndSample_recon_acc_flat.root",columns=columns))
             throwns.append(rp.read_root(baseFolder+run+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy]))
     
+    
     if getEta:
-        BR=1*0.3628*0.988*0.988*0.988; # eta->3pi0 33% of the time and each pi0 decays to 2g 99% of the time
+        BR=1*br_eta_3pi0*br_pi0_gg*br_pi0_gg*br_pi0_gg; # eta->3pi0 32.57% of the time and each pi0 decays to 2g 99% of the time
         csAxisLabel=r"$\eta$"+" Cross Section (nb)"
         title=r"$\eta\rightarrow 3\pi\rightarrow6\gamma$"
         outputFolder=baseDir+"zEta_efficiency/"
@@ -123,12 +135,12 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         binMax=-1
         crossSections=np.array([[37.9,34.5]]) 
         crossSectionErrs=np.array([[0,0]]) 
-        baseFolder="./zDSelectedBkgndSamples/eta_to_3pi/"
+        baseFolder=dselectedFolder+"/eta_to_3pi/"
         recons=[rp.read_root(baseFolder+"bkgndSample_recon_acc_flat.root",columns=columns)]
         throwns=[rp.read_root(baseFolder+"bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
     
     if getF1:
-        BR=0.522*0.394*0.988*0.988; # f1->etapi0pi0 52% of the time, eta->2g ~40% of the time, 2 pi0->2g ~99%
+        BR=br_f1_etapi0pi0*br_eta_2g*br_pi0_gg*br_pi0_gg; # f1->etapi0pi0 52% of the time, eta->2g ~40% of the time, 2 pi0->2g ~99%
         csAxisLabel=r"$f_1(1285)$"+" Cross Section (nb)"
         title=r"$f_1(1285)\rightarrow\eta\pi\pi\rightarrow6\gamma$"
         outputFolder=baseDir+"zF1_efficiency/"
@@ -137,12 +149,12 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         binMax=-1
         crossSections=np.array([[37.9,34.5]])
         crossSectionErrs=np.array([[0,0]]) 
-        baseFolder="./zDSelectedBkgndSamples/f1_1285_to_etapipi/"
+        baseFolder=dselectedFolder+"/f1_1285_to_etapipi/"
         recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
         throwns=[rp.read_root(baseFolder+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
-    
+
     if getEtaPr:
-        BR=0.224*0.394*0.988*0.988; # etapr->etapi0pi0 22.4% of the time, eta->2g ~40% of the time, 2 pi0->2g ~99%
+        BR=br_etap_etapi0pi0*br_eta_2g*br_pi0_gg*br_pi0_gg; # etapr->etapi0pi0 22.4% of the time, eta->2g ~40% of the time, 2 pi0->2g ~99%
         csAxisLabel=r"$\eta'$"+" Cross Section (nb)"
         title=r"$\eta'\rightarrow\eta\pi\pi\rightarrow6\gamma$"
         outputFolder=baseDir+"zEtaPr_efficiency/"
@@ -151,12 +163,12 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         binMax=-1
         crossSections=np.array([[12.2,11]])/0.394 # George did not divide the cross sections by the branching ratio for eta->2g which is ~40%
         crossSectionErrs=np.array([[0.234,0.234]]) 
-        baseFolder="./zDSelectedBkgndSamples/etap_to_etapipi/"
+        baseFolder=dselectedFolder+"/etap_to_etapipi/"
         recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
         throwns=[rp.read_root(baseFolder+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
 
     if getA2Pi:
-        BR=0.145*0.394*0.988*0.988; # a2->etapi 14.5% of the time, eta->2g ~40% of the time, 2 pi0->2g ~99%
+        BR=br_a2_etapi0*br_eta_2g*br_pi0_gg*br_pi0_gg; # a2->etapi 14.5% of the time, eta->2g ~40% of the time, 2 pi0->2g ~99%
         csAxisLabel=r"$a_2\pi$"+" Cross Section (nb)"
         title=r"$a_2\pi\rightarrow\eta\pi\pi\rightarrow6\gamma$"
         outputFolder=baseDir+"zA2Pi_efficiency/"
@@ -165,12 +177,12 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         binMax=-1
         crossSections=np.array([[37.9,34.5]]) 
         crossSectionErrs=np.array([[0,0]]) 
-        baseFolder="./zDSelectedBkgndSamples/a2pi/"
+        baseFolder=dselectedFolder+"/a2pi/"
         recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
         throwns=[rp.read_root(baseFolder+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
 
     if getF2:
-        BR=0.842*0.988*0.988; # a2->etapi 14.5% of the time, eta->2g ~40% of the time, 2 pi0->2g ~99%
+        BR=br_f2_pi0pi0*br_pi0_gg*br_pi0_gg; 
         csAxisLabel=r"$f_2$"+" Cross Section (nb)"
         title=r"$f_2\rightarrow\pi\pi\rightarrow4\gamma$"
         outputFolder=baseDir+"zF2_efficiency/"
@@ -179,22 +191,22 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         binMax=-1
         crossSections=np.array([[12.72645681]]) # These new estimates simply come from a BW fit to the f2 mass peak
         crossSectionErrs=np.array([[1.1274463]]) # These new estimates simply come from a BW fit to the f2 mass peak
-        baseFolder="./zDSelectedBkgndSamples/pi0pi0/"
+        baseFolder=dselectedFolder+"/pi0pi0/"
         recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
         throwns=[rp.read_root(baseFolder+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
     
 
     if getOmega:
-        BR=0.0834*0.988; # a2->etapi 14.5% of the time, eta->2g ~40% of the time, 2 pi0->2g ~99%
+        BR=br_omega_pi0g*br_pi0_gg; 
         csAxisLabel=r"$\omega$"+" Cross Section (nb)"
         title=r"$\omega\rightarrow\pi\gamma\rightarrow3\gamma$"
-        outputFolder=baseDir+"zOmega_efficiency/"
-        binedges=np.linspace(8,9,6)
-        binMin=1
-        binMax=-2
-        crossSections=np.array([[1.356, 1.331, 1.293, 1.275, 1.237]])*1000
-        crossSectionErrs=np.array([[0.08, 0.08, 0.08, 0.08, 0.08]])*1000
-        baseFolder="./zDSelectedBkgndSamples/omega_pi0g/"
+        outputFolder=baseDir+"zOmega_2018_8_v2_efficiency/" # we actually have 3 datasets, just look in baseDir. v2 seems to match data the best
+        binedges=np.linspace(8.2,8.8,4)
+        binMin=0
+        binMax=-1
+        crossSections=np.array([[1.331, 1.293, 1.275]])*1000
+        crossSectionErrs=np.array([[0.08, 0.08, 0.08]])*1000
+        baseFolder=dselectedFolder+"/omega_pi0g_2018_8_v2/"
         recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
         throwns=[rp.read_root(baseFolder+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
 
@@ -235,8 +247,12 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
     # Plot Cross Sections 
     ####################################
     for i,crossSection,crossSectionErr in zip(range(len(crossSections)),crossSections,crossSectionErrs):
-        ax[0].errorbar(bincenters,crossSection,yerr=crossSectionErr,xerr=xerrs,fmt="o",
-                markersize=4,c=colors[i],ecolor=colors[i],label=labels[i])
+        if len(recons)==1:
+            ax[0].errorbar(bincenters,crossSection,yerr=crossSectionErr,xerr=xerrs,fmt="o",
+                    markersize=4,c='black',ecolor='black')
+        else:
+            ax[0].errorbar(bincenters,crossSection,yerr=crossSectionErr,xerr=xerrs,fmt="o",
+                    markersize=4,c=colors[i],ecolor=colors[i],label=labels[i])
         ax[0].set_ylabel(csAxisLabel,size=16)
         ax[0].set_xlabel("Beam Energy (GeV)",size=16)
         ax[0].set_ylim(bottom=0, top=ax[0].get_ylim()[1]*1.2)
@@ -281,8 +297,12 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         print("efficiencies error:")
         print(efficiencyErrors[j])
         
-        ax[1].errorbar(_bincenters,efficiencies[j],yerr=efficiencyErrors[j],xerr=xerrs,fmt="o",c=colors[j],
-                markersize=4,ecolor=colors[j],label=labels[j])
+        if len(recons)==1:
+            ax[1].errorbar(_bincenters,efficiencies[j],yerr=efficiencyErrors[j],xerr=xerrs,fmt="o",c='black',
+                    markersize=4,ecolor='black')
+        else:
+            ax[1].errorbar(_bincenters,efficiencies[j],yerr=efficiencyErrors[j],xerr=xerrs,fmt="o",c=colors[j],
+                    markersize=4,ecolor=colors[j],label=labels[j])
         ax[1].set_ylabel("Efficiency",size=16)
         ax[1].set_xlabel("Beam Energy (GeV)",size=16)
         ax[1].ticklabel_format(style='sci')
@@ -378,12 +398,14 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
 
     ax[2].errorbar(energies,totalExpectedYield,yerr=totalExpectedYieldErr,xerr=xerrs,fmt="o",markersize=4,c='black',ecolor='black')
     ax[2].set_ylabel("Phase 1 Expected Yield",size=16)
+    ax[2].axvspan(8.2,8.8,color='gray',alpha=0.3,label="Integral Region")
     ax[2].set_xlabel("Beam Energy (GeV)",size=16)
     ax[2].set_ylim(0,max(totalExpectedYield)*1.3)
     if max(totalExpectedYield)>0:
         ax[2].set_ylim(0,max(totalExpectedYield)*1.2)
     else:
         ax[2].set_ylim(min(totalExpectedYield)*1.2,0)
+    ax[2].legend()
     #ax[5].set_ylim(bottom=0)
     
     nsigs=3
@@ -406,10 +428,9 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
     # Plotting
     ###################################
     print("Overlaying expected leakage from channel onto phase 1 data")
-    dataBaseFolder="zDSelectedBkgndSamples/gluex_"
     datas=[]
     for i,run in enumerate(["2018_8","2018_1","2017_1"]):
-        tmp=rp.read_root(dataBaseFolder+run+"/bkgndSample_recon_acc_flat.root",columns=columns)
+        tmp=rp.read_root(dselectedFolder+"gluex_"+run+"/bkgndSample_recon_acc_flat.root",columns=columns)
         datas.append(tmp)
         print("{} has {} entries".format(run,datas[i].AccWeight.sum()))
     data=pd.concat(datas)
@@ -422,9 +443,11 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
                 [r"$M(4\gamma)$ GeV",r"$M(\pi\gamma_3)$ GeV",r"$M(\pi\gamma_4)$ GeV",r"$cos\theta_{GJ}$ radians",r"$cos\theta_{hel}$ radians",
                     r"$\phi_{GJ}$i degrees",r"$\phi_{hel}$ degrees"]):
         fig,ax=plt.subplots(1,1,figsize=(8,6))
-        _, edges = np.histogram(dataFull[varx],bins=100)
+        _, edges = np.histogram(dataFull[varx],bins=histBinning)
         centers=edges[:-1]+(edges[1]-edges[0])/2
-        dcount=ax.hist(data[varx],weights=data[weightBranch],bins=edges,histtype='step',color='black',linewidth=2,label="Phase1 Data")[0]
+        dcount=np.histogram(data[varx],weights=data[weightBranch],bins=edges)[0]
+        hep.histplot((dcount,edges),color='black',linewidth=2,label="Phase1 Data")
+        #dcount=ax.hist(data[varx],weights=data[weightBranch],bins=edges,histtype='step',color='black',linewidth=2,label="Phase1 Data")[0]
         if len(recons)==3:
             rcounts=[]
             for recon in recons:
@@ -443,7 +466,8 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
             rcounts=np.histogram(recons[0][varx],weights=recons[0][weightBranch],bins=edges)[0]
             rcounts/=rcounts.sum()
 
-        ax.step(centers,rcounts*upper3SigEstimate,color='red',linewidth=2,label=r"Upper 3$\sigma$ limit"+"\n leakage")
+        hep.histplot((rcounts*upper3SigEstimate,edges),color='red',linewidth=2,label=r"Upper 3$\sigma$ limit"+"\n leakage")
+        #ax.step(centers,rcounts*upper3SigEstimate,color='red',linewidth=2,label=r"Upper 3$\sigma$ limit"+"\n leakage")
         #ax.fill_between(centers,lower3SigEstimate*rcount,upper3SigEstimate*rcount,color='red',alpha=0.5,linewidth=1,label=r"3$\sigma$ limit"+"\n leakage")
         #ax.step(centers,dcount-rcount,color='green',linewidth=2,label="Data-MC") # plot the difference
         ax.set_xlabel(label)
@@ -460,9 +484,11 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         pi0args,etaargs=getSidebands()
         fig,axes=plt.subplots(1,2,figsize=(14,6))
         for varx,args,label,ax in zip(["Mpi0","Meta"],[pi0args,etaargs],[r"$M(\gamma_1\gamma_2)$ GeV",r"$M(\gamma_3\gamma_4)$ GeV"],axes):
-            edges = np.linspace(data[varx].min(), data[varx].max(), 101)
+            edges = np.linspace(data[varx].min(), data[varx].max(), histBinning+1)
             centers=edges[:-1]+(edges[1]-edges[0])/2
-            dcount=ax.hist(data[varx],weights=data["AccWeight"],bins=edges,histtype='step',color='black',linewidth=2,label="Phase1 Data")[0]
+            dcount=np.histogram(data[varx],weights=data["AccWeight"],bins=edges)[0]
+            hep.histplot((dcount,edges),color='black',linewidth=2,label="Phase1 Data")
+            #dcount=ax.hist(data[varx],weights=data["AccWeight"],bins=edges,histtype='step',color='black',linewidth=2,label="Phase1 Data")[0]
             if len(recons)==3:
                 rcounts=[]
                 for recon in recons:
@@ -481,7 +507,8 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
                 rcounts=np.histogram(recons[0][varx],weights=recons[0]["AccWeight"],bins=edges)[0]
                 rcounts/=rcounts.sum()
 
-            ax.step(centers,rcounts*upper3SigEstimate,color='red',linewidth=2,label=r"Upper 3$\sigma$ limit"+"\n leakage")
+            hep.histplot((rcounts*upper3SigEstimate,edges),color='red',linewidth=2,label=r"Upper 3$\sigma$ limit"+"\n leakage")
+            #ax.step(centers,rcounts*upper3SigEstimate,color='red',linewidth=2,label=r"Upper 3$\sigma$ limit"+"\n leakage")
             #ax.fill_between(centers,lower3SigEstimate*rcount,upper3SigEstimate*rcount,color='red',alpha=0.5,linewidth=1,label=r"3$\sigma$ limit"+"\n leakage")
 
             ax.axvspan(args[0]-args[2]*args[1],args[0]+args[2]*args[1],color='green',alpha=0.3)
@@ -495,18 +522,19 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         plt.tight_layout()
         plt.savefig(outputFolder+"sidebands.png")
         
-        # THIS SECTION NEEDS SOME WORK
-#        # - Need to update these terms -
-#        # fluxRatio->fluxRatios
-#    for i in range(len(energies)):
-#        f.write("{},{},{},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e}\n".format(
-#            channel,simplify[weightBranch],selectSignalRegion,
-#            energies[i],binwidth,expectedYields[i],expectedYieldErrs[i],cs[i],cserr[i],fc[i],fcerr[i],eff[i],efferr[i],target,BR,fluxRatio))
+    print(expectedYields)
+    for i in range(len(energies)):
+        #f.write("{},{},{},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e}\n".format(
+        #    channel,simplify[weightBranch],selectSignalRegion,
+        #    energies[i],binwidth,expectedYields[i],expectedYieldErrs[i],cs[i],cserr[i],fc[i],fcerr[i],eff[i],efferr[i],target,BR))
+        f.write("{},{},{},{:0.2e},{:0.2e},{:0.2e},{:0.2e}\n".format(
+            channel,simplify[weightBranch],selectSignalRegion,
+            energies[i],binwidth,totalExpectedYield[i],totalExpectedYieldErr[i]))
 
 def montage(filename, nrows, ncols, baseDir,outputname):
     # search subdirectories for filenames and montage them
     savedHists=[]
-    dirs=os.listdir(baseDir)
+    dirs=sorted(os.listdir(baseDir))
     for dir in dirs:
         if os.path.isdir(baseDir+dir):
             subdir=os.listdir(baseDir+dir)
@@ -522,20 +550,22 @@ def montage(filename, nrows, ncols, baseDir,outputname):
     os.system("mv "+baseDir+"/montage_* "+baseDir+"/montage")
 
 
-###    The first AccWeight does not select the mass signal region whereas the second does. weightASBS also does not select on mass region
-#for weightBranch, selectSignalRegion,signalTag in zip(["AccWeight", "AccWeight", "weightASBS"],[False, True, False],["","_sigRegion",""]):
-#    channels=["b1","omega","eta","etapr","f1","a2pi","f2"]
-#    for channel in channels:
-#        print("\n=================\nRunning analysis for {}\n=================\n".format(channel))
-#        runAnalysis(channel,weightBranch,signalTag,selectSignalRegion)
-#    print("\nMaking montages of the histograms\n")
-#    for varx in ["Mpi0eta","Mpi0g3","Mpi0g4","cosTheta_eta_gj","cosTheta_eta_hel","phi_eta_gj","phi_eta_hel"]:
-#        montage("expectedYield_"+varx+"_"+weightBranch+signalTag+".png",3,3,baseDir,baseDir+"/montage_"+varx+"_"+weightBranch+signalTag+".png")
-#        montage("expectedYield_"+varx+"_"+weightBranch+signalTag+"_log.png",3,3,baseDir,baseDir+"/montage_"+varx+"_"+weightBranch+signalTag+"_log.png")
-#
-#f.close()
+##    The first AccWeight does not select the mass signal region whereas the second does. weightASBS also does not select on mass region
+for weightBranch, selectSignalRegion,signalTag in zip(["AccWeight", "AccWeight", "weightASBS"],[False, True, False],["","_sigRegion",""]):
+    channels=["b1","omega","eta","etapr","f1","a2pi","f2"]
+    #channels=["omega"]
+    for channel in channels:
+        print("\n=================\nRunning analysis for {} with {}{}\n=================\n".format(channel,weightBranch,signalTag))
+        runAnalysis(channel,weightBranch,signalTag,selectSignalRegion)
+    print("\nMaking montages of the histograms\n")
+    for varx in ["Mpi0eta","Mpi0g3","Mpi0g4","cosTheta_eta_gj","cosTheta_eta_hel","phi_eta_gj","phi_eta_hel"]:
+        montage("expectedYield_"+varx+"_"+weightBranch+signalTag+".png",3,3,baseDir,baseDir+"/montage_"+varx+"_"+weightBranch+signalTag+".png")
+        montage("expectedYield_"+varx+"_"+weightBranch+signalTag+"_log.png",3,3,baseDir,baseDir+"/montage_"+varx+"_"+weightBranch+signalTag+"_log.png")
+
+# f.close()
 
 
+print("\n\nCopying over montaged images! If you see this output it already expects images have been generated already")
 # Copy over the montaged images
 os.system("cp -r "+baseDir+"montage /d/home/ln16/notebooks/thesis_cutSelection_results/expected_leakage")
 # Copy over some individual plots related to the b1

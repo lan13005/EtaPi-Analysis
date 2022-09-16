@@ -40,7 +40,7 @@ thrown_cfiles=["DSelector_thrown.C", "runDSelector_thrown.C"]
 
 reconTreeName="pi0eta__B4_M17_M7_Tree"
 thrownTreeName="Thrown_Tree"
-baseOutputFolder="zDSelectedBkgndSamples_no_lmac"
+baseOutputFolder="zDSelectedBkgndSamples"
 
 
 topologies=[]
@@ -56,6 +56,8 @@ topologies+=[
         "6#gammap[3#pi^{0}]",
         "6#gammap[2#pi^{0},#eta]",
         "3#gammap[#pi^{0}]",
+#        "3#gammap[#pi^{0}]",
+#        "3#gammap[#pi^{0}]",
         "4#gammap[2#pi^{0}]",
         "5#gammap[2#pi^{0}]",
         "5#gammap[2#pi^{0}]",
@@ -67,6 +69,8 @@ ofolders+=[
         "eta_to_3pi",
         "f1_1285_to_etapipi",
         "omega_pi0g",
+#        "omega_pi0g_2018_8_v1",
+#        "omega_pi0g_2018_8_v2",
         "pi0pi0",
         "b1vps_2018_8",
         "b1vps_2018_1",
@@ -78,11 +82,14 @@ ifolders+=[
         '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/eta_to_3pi/tree_',
         '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/f1_to_etapipi/tree_',
         '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/omega_pi0g/tree_',
+#        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/omega_pi0g_2018_8/tree_',
+#        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/omega_pi0g_2018_8_v2/tree_',
         '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/pi0pi0/tree_',
         '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_08_ver03.0_60M/root/merged/tree_',
         '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_01_ver03.0/root/merged/tree_',
         '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2017_01_ver03.0/root/merged/tree_',
         ]
+
 
 ##############################################
 # SECONDARY STUDY: RUN OVER OMEGA AND FLAT ETAPI MC TO UNDERSTAND THE EFFECTS OF LMAC SELECTION
@@ -105,11 +112,6 @@ ifolders+=[
 ##############################################
 # THIRD STUDY:  RUN OVER DATA
 ##############################################
-#for run in ["2017_1","2018_1","2018_8"]:
-#    replaceTopology("4#gammap[#pi^{0},#eta]")
-#    f='"/d/grid17/ln16/dselector_v3/phase1_data_looseChiUE/D'+run+'_loose_tree.root"'
-#    runSelector(f,reconTreeName,"bkgndSample_recon",3,proof_Nthreads,recon_cfiles)
-#    move("gluex_"+run)
 
 topologies+=[
         "4#gammap[#pi^{0},#eta]",
@@ -130,21 +132,22 @@ ifolders+=[
 ##############################################
 # FOURTH STUDY:  RUN OVER FLAT MC TO HELP STUDY QFACTORS
 ##############################################
-topologies+=[
-        "4#gammap[#pi^{0},#eta]",
-        "4#gammap[#pi^{0},#eta]",
-        "4#gammap[#pi^{0},#eta]"
-        ]
-ofolders+=[
-        "flat_2017_1",
-        "flat_2018_1",
-        "flat_2018_8"
-        ]
-ifolders+=[
-        '"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_',
-        '"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_1_400M/merged/tree_',
-        '"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_8_260M_130M/merged/tree_'
-        ]
+#topologies+=[
+#        "4#gammap[#pi^{0},#eta]",
+#        "4#gammap[#pi^{0},#eta]",
+#        "4#gammap[#pi^{0},#eta]"
+#        ]
+#ofolders+=[
+#        "flat_2017_1",
+#        "flat_2018_1",
+#        "flat_2018_8"
+#        ]
+#ifolders+=[
+#        '"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_',
+#        '"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_1_400M/merged/tree_',
+#        '"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_8_260M_130M/merged/tree_'
+#        ]
+
 
 assert len(ifolders)==len(ofolders) and len(ifolders)==len(topologies)
 

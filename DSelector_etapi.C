@@ -87,6 +87,8 @@ void DSelector_etapi::Init(TTree *locTree)
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Phi"); 
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_X_cm"); 
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_X_cm"); 
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_eta_cm"); 
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_pi0_cm"); 
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_X_lab"); 
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_eta_lab"); 
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_pi0_lab"); 
@@ -106,6 +108,7 @@ void DSelector_etapi::Init(TTree *locTree)
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("weightBS"); 
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("weightBSpi0"); 
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("weightBSeta"); 
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("rfTime"); 
             // Thrown quantities
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0eta_thrown");
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mandelstam_t_thrown");
@@ -113,6 +116,9 @@ void DSelector_etapi::Init(TTree *locTree)
             dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("isCorrectCombo");
             dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("isCorrectBeam");
             dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("isCorrectSpect");
+            // Event Related
+            dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("run");
+            dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("event");
         }
 	/*********************************** EXAMPLE USER INITIALIZATION: ANALYSIS ACTIONS **********************************/
 
@@ -340,7 +346,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
         bool bBeamE_thrown = (locBeamE_thrown<8.8)*(locBeamE_thrown>8.2);
         bool bMpi0eta_thrown = (locMetapi0_thrown<1.80)*(locMetapi0_thrown>0.8);
         bool bTopology = locThrownTopology==topologyString; 
-        bool selection_thrown=bTopology*bBeamE_thrown;//*bmandelstamt_thrown*bMpi0eta_thrown;
+        bool selection_thrown=bTopology;//*bBeamE_thrown;//*bmandelstamt_thrown*bMpi0eta_thrown;
         if (dIsMC*!selection_thrown)
             return kTRUE;
 
@@ -480,7 +486,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		Int_t locNumOutOfTimeBunchesInTree = 4; //YOU need to specify this number
 		//Number of out-of-time beam bunches in tree (on a single side, so that total number out-of-time bunches accepted is 2 times 
 		//	this number for left + right bunches) 
-		Bool_t locSkipNearestOutOfTimeBunch = true; // True: skip events from nearest out-of-time bunch on either side (recommended).
+		Bool_t locSkipNearestOutOfTimeBunch = false; // True: skip events from nearest out-of-time bunch on either side (recommended).
 		Int_t locNumOutOfTimeBunchesToUse = locSkipNearestOutOfTimeBunch ? locNumOutOfTimeBunchesInTree-1:locNumOutOfTimeBunchesInTree; 
 		// Ideal value would be 1, but deviations require added factor, which is different for data and MC.
 		Double_t locAccidentalScalingFactor = dAnalysisUtilities.Get_AccidentalScalingFactor(Get_RunNumber(), locBeamP4.E(), dIsMC); 
@@ -682,7 +688,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                 float omega = get<1>(vh);
                 float vanHove_x=q*cos(omega);
                 float vanHove_y=q*sin(omega);
-                bool bVH_pi0p = -29.61317407*atan(-0.9877663*(locPi0P4+locEtaP4).M()+2.77936736)+330.46008765 > omega*radToDeg;
+                bool bVH_pi0p = -29.0*atan(-1.05*(locPi0P4+locEtaP4).M()+2.78)+328 > omega*radToDeg;
                 bool bVH_etap = 45.26878219*atan(-0.88242654*(locPi0P4+locEtaP4).M()+3.14340627)+193.59347205 < omega*radToDeg;
                 bool bVH = bVH_pi0p*bVH_etap;
 
@@ -712,10 +718,15 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                 //bool selection=(dComboWrapper->Get_ChiSq_KinFit("")<100)*(dComboWrapper->Get_Energy_UnusedShowers()<0.5); 
                 // Choice 1: Do not make any selections
                 //bool selection=true;
-                // Choice 2: Nominal selection for a2 pwa
-		bool selection=bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bMMsq*bBeamEnergy*
-				bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion;
-                // Choice 3: Nominal selections for double Regge beam asymmetry systematic studies. Loosen most cuts. 
+                // Choice 2: Only make the beam energy selection for event selection showcase for thesis 
+                //bool selection=bBeamEnergy;
+                //         :  For similar study above, for chiSq cut tuning and final thesis event selection plots
+		bool selection=bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*(dComboWrapper->Get_ChiSq_KinFit("")<100)*bUnusedEnergy*bMMsq*bBeamEnergy*
+				bmandelstamt*bMpi0p*bMetapi0*bSignalRegion;
+                // Choice 3: Nominal selection for a2 pwa
+		//bool selection=bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bMMsq*bBeamEnergy*
+		//		bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion;
+                // Choice 4: Nominal selections for double Regge beam asymmetry systematic studies. Loosen most cuts. 
                 //           MANUALLY COMMENT OUT bWeight FILTERING LINE BELOW
                 //bool selection=(Metapi0>1.6)*(Metapi0<3.0)*bBeamEnergy*(dComboWrapper->Get_ChiSq_KinFit("")<50)*(dComboWrapper->Get_Energy_UnusedShowers()<10)*
                 //            ((locPhoton1P4.Theta()*radToDeg>=1.5 && locPhoton1P4.Theta()*radToDeg<=11) || locPhoton1P4.Theta()*radToDeg>=11.4)*
@@ -736,12 +747,12 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 			dHist_Mpi0->Fill((locPhoton1P4+locPhoton2P4).M(),locHistAccidWeightFactor);
 			dHist_Meta->Fill((locPhoton3P4+locPhoton4P4).M(),locHistAccidWeightFactor);
 		}
-		if (!bWeight){ 
-                        // Turn ON for a2 study: We do not want to keep any combos with weight 0. Not just a waste of space, can cause problems during fitting
-                        // Turn OFF for double regge study since we do sideband subtraction separately there 
-			dComboWrapper->Set_IsComboCut(true);
-			continue;
-		}
+		//if (!bWeight){ 
+                //        // Turn ON for a2 study: We do not want to keep any combos with weight 0. Not just a waste of space, can cause problems during fitting
+                //        // Turn OFF for double regge study since we do sideband subtraction separately there 
+		//	dComboWrapper->Set_IsComboCut(true);
+		//	continue;
+		//}
 		if(bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bBeamEnergy*bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion){
 			dHist_mmsq->Fill(locMissingMassSquared,weight);}
 		if(bPhotonE*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bMMsq*bBeamEnergy*bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion){
@@ -847,6 +858,8 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("Phi",Phi*radToDeg); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_X_cm",(pi0_cm+eta_cm).CosTheta()); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_X_cm",(pi0_cm+eta_cm).Phi()*radToDeg); 
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_cm",eta_cm.CosTheta()); 
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_pi0_cm",pi0_cm.CosTheta()); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_X_lab",(locPi0P4+locEtaP4).Phi()*radToDeg); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_lab",locEtaP4.Phi()*radToDeg); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_pi0_lab",locPi0P4.Phi()*radToDeg); 
@@ -866,6 +879,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("weightBS", sbweight); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("weightBSpi0", pi0_sbweight); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("weightBSeta", eta_sbweight); 
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("rfTime", locDeltaT_RF); 
                     // Thrown Variables
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0eta_thrown",locMetapi0_thrown);
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_t_thrown",locT_thrown);
@@ -873,6 +887,10 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectCombo",isCorrectCombo);
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectBeam",isCorrectBeam);
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectSpect",isCorrectSpect);
+                    // Event Related
+                    dFlatTreeInterface->Fill_Fundamental<Int_t>("run",Get_EventNumber());
+                    dFlatTreeInterface->Fill_Fundamental<Int_t>("event",Get_RunNumber());
+
 		    // AmpTools tree output - step 3
 		    // Filling the branches of the flat tree
 		    vector<TLorentzVector> locFinalStateP4; // should be in the same order as PID_FinalState

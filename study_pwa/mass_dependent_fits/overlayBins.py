@@ -53,6 +53,7 @@ def runEtaPiPlotterForAllBins():
     cmd="ln -snfr "+cFolder+"/rootFiles rootFiles"
     print(cmd)
     os.system(cmd)
+    os.system("mkdir -p overlayPlots")
     #for igroup in range(len(groups)):
     #    cmd=["etapi_plotter",fitFile,"-o","etapi_plot"+groupTags[igroup]+".root","-s",groups[igroup]]
     cmd=["etapi_plotter",fitFile,"-s",ampString,"-a",doAccCorr,"-var",plotAllVars,"-gen",plotGenData,"-F",Ls]

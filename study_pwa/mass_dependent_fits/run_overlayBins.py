@@ -1,21 +1,20 @@
 #!/usr/bin/python3
 
-
 import os
 import multiprocessing
 import shutil
 import subprocess
-import fit
+from checkFits import checkFits
 
 workingDir=os.getcwd()
 
 #ts=["010016", "016021", "021027", "027034", "034042", "042051", "051061", "061072", "072085", "085100"]
-ts=["010020", "0200325", "0325050", "050075", "075100"]
-#ts=["010020"]
+#ts=["010020", "0200325", "0325050", "050075", "075100"]
+ts=["010020"]
 
-subdir="./"#"m104156/"
+subdir="./"
 
-drawAllGoodFits=False
+drawAllGoodFits=True
 fitFileName="etapi_result.fit"
 doAccCorr="true" # this should generally be true. AccCorr is chosen during the fit, we just want to extract corrected yields for cs measurements
 plotAllVars="true" # should we plot all variables in etapi_plotter or just plot the mass plot
@@ -80,18 +79,25 @@ for t in ts:
     #fs=[t]
     for f in fs:
         if drawAllGoodFits:
-            cf=list(fit.checkFits(f,True))
-            convergedIterations=[c.split(".")[0].split("result_")[1] for c in cf]
+            cf=list(checkFits(f))
+            dotIdx=1 if f[0]=="." else 0
+            convergedIterations=[c.split(".")[dotIdx].split("result_")[1] for c in cf]
             convergedFiles+=cf
             # do not overwrite (by rerunning) drawing script if the folders already exist
             folders+=[f+"_"+i for i in convergedIterations if not os.path.exists(f+"/"+f+"_"+i)]
         else:
+            if not os.path.exists(f+"/etapi_result.fit"):
+                print(f'The following results file does not exist! {f+"/etapi_result.fit"}. Exiting...')
+                exit(1)
             convergedFiles+=[f+"/etapi_result.fit"]
             folders+=[f+"_0"]
+
+maxProcesses=15 # its about 5GB memory per process if we do not make the genmc plots
+print(f"Running etapi_plotter over {len(folders)} files with {maxProcesses} processes...")
+
 [os.system("mkdir -p "+folder) for folder in folders]
 [os.system("cp "+convergedFile+" "+folder+"/"+fitFileName) for convergedFile,folder in zip(convergedFiles,folders)]
 
-maxProcesses=15
 if len(folders)==1:
     nthreads=2
 else:
