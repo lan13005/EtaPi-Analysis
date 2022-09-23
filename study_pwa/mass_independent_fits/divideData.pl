@@ -22,7 +22,7 @@ print "\n===================================\n";
 
 $t="010020";
 $m="104180";
-$extraTag="_vh_selectGenT";
+$extraTag="_mpipGT2_selectGenT";
 $baseGenDir="/d/grid17/ln16/dselector_v3/phase1_selected_v2/t$t\_m$m$extraTag/";
 $baseAccDir="/d/grid17/ln16/dselector_v3/phase1_selected_v2/t$t\_m$m$extraTag/";
 $baseBkgDir="/d/grid17/ln16/dselector_v3/phase1_selected_v2/t$t\_m$m$extraTag/";

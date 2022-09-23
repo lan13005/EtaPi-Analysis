@@ -7,6 +7,7 @@
 
 #include "TH1I.h"
 #include "TH2I.h"
+#include "TLorentzRotation.h"
 
 class DSelector_thrown : public DSelector
 {

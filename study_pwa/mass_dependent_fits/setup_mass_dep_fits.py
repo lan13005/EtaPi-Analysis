@@ -117,7 +117,7 @@ print("------------------------------------------------\n")
 with open(newFileName) as cfg:
     lines=[line.rstrip() for line in cfg.readlines() if "ROOTDataReaderFilter" in line]
     for line in lines:
-        accReplace=f" Mpi0eta {pcwsMassMin} {pcwsMassMax}" 
+        accReplace=f" Mpi0eta {pcwsMassMin} {pcwsMassMax} Mpi0p 1.04 2.0" 
         genReplace=f" Mpi0eta_thrown {pcwsMassMin} {pcwsMassMax} mandelstam_t_thrown {tmin} {tmax}"
         #accReplace=accReplace+genReplace if "accmc" in line else accReplace
         replace=line+accReplace if any([ftype in line for ftype in ["accmc","data","bkgnd"]]) else line+genReplace

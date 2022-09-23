@@ -19,17 +19,18 @@ void split_flat_kinematics(){
     bool forceSplitting=true; // Should we run the splitting again? Or should we just sum runs if sumRuns=true
     bool remergePols=true; // should we remerge polarizations after splitting? 
     
-    string extraTag="_selectGenT";//"_mpi0pLT194";
+    //string extraTag="_mpipGT20_selectGenT";
+    string extraTag="";
 
     string folder="phase1_selected_v2/";
     bool ignorePolarization=false;
     vector<string> runs={"2017_1","2018_1","2018_8"};
     vector<string> files;
     for (auto run: runs){
-        files.push_back("D"+run+"_selected_data_flat.root");
-        files.push_back("D"+run+"_selected_bkgnd_flat.root");
-        files.push_back("D"+run+"_selected_acc_flat.root");
-        files.push_back("F"+run+"_selected_acc_flat.root");
+        //files.push_back("D"+run+"_selected_data_flat.root");
+        //files.push_back("D"+run+"_selected_bkgnd_flat.root");
+        //files.push_back("D"+run+"_selected_acc_flat.root");
+        //files.push_back("F"+run+"_selected_acc_flat.root");
         files.push_back("F"+run+"_gen_data_flat.root");
     }
 
@@ -159,13 +160,13 @@ void split_flat_kinematics(){
                      for (auto const& m: mpi0etas){
                          //pVH_pi0p2=filterOmega(vanHove_omega,mpi0eta);
                          //if (has_recon_branches*!pVH_pi0p2) continue;
-                         if (has_recon_branches*!(mpi0p>1.4)) continue;
+                         //if (has_recon_branches*!(mpi0p>2.0)) continue;
                          if (has_recon_branches*!((mandelstam_t>mint[it])*(mandelstam_t<maxt[it]))) continue;
                          if (has_recon_branches*!((mpi0eta>minmpi0eta[im])*(mpi0eta<maxmpi0eta[im]))) continue;
                          //if (has_thrown_branches*!((mandelstam_t_thrown>mint[it])*(mandelstam_t_thrown<maxt[it]))) continue;
                          //if (has_thrown_branches*!((mpi0eta_thrown>minmpi0eta[im])*(mpi0eta_thrown<maxmpi0eta[im]))) continue;
-                         if (isGen*!((mandelstam_t_thrown>mint[it])*(mandelstam_t_thrown<maxt[it]))) continue;
-                            newtree[pols[beamAngle]][it][im]->Fill();
+                         //if (isGen*!((mandelstam_t_thrown>mint[it])*(mandelstam_t_thrown<maxt[it]))) continue;
+                          newtree[pols[beamAngle]][it][im]->Fill();
                           ++im;
                      } ++it;
                  }

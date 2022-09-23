@@ -1,6 +1,7 @@
 #include "DSelector_thrown.h"
 
 string topologyString="4#gammap[#pi^{0},#eta]";
+float radToDeg=180/3.14159;
 
 void DSelector_thrown::Init(TTree *locTree)
 {
@@ -42,8 +43,17 @@ void DSelector_thrown::Init(TTree *locTree)
  	    dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("BeamAngle");
  	    //dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Weight"); 
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0eta_thrown"); 
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0p_thrown"); 
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Metap_thrown"); 
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_eta_hel_thrown"); 
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_eta_gj_thrown"); 
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_eta_hel_thrown"); 
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_eta_gj_thrown"); 
  	    dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mandelstam_t_thrown"); 
  	    dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Ebeam_thrown"); 
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_omega_thrown");
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_x_thrown");
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_y_thrown");
         }
 
 	/******************************** EXAMPLE USER INITIALIZATION: STAND-ALONE HISTOGRAMS *******************************/
@@ -154,6 +164,41 @@ Bool_t DSelector_thrown::Process(Long64_t locEntry)
         bool bTopology = locThrownTopology==topologyString; 
         bool selection=bTopology*bBeamE;//*bmandelstamt*bMpi0eta;
 
+	TLorentzRotation cmRestBoost( -(locBeamP4+dTargetP4).BoostVector() );
+	TLorentzVector pi0_cm = cmRestBoost * locPi0P4; 
+	TLorentzVector eta_cm = cmRestBoost * locEtaP4; 
+	TLorentzVector beam_cm = cmRestBoost * locBeamP4;
+	TLorentzVector recoil_cm = cmRestBoost * locProtonP4;
+   	TLorentzVector resonance = pi0_cm + eta_cm;
+	// We boost again, now to the resonances rest frame
+   	TLorentzRotation resRestBoost( -resonance.BoostVector() );
+   	TLorentzVector beam_res   = resRestBoost * beam_cm;
+   	TLorentzVector recoil_res = resRestBoost * recoil_cm;
+   	TLorentzVector eta_res = resRestBoost * eta_cm;
+	//// Redefinition of the axes
+   	TVector3 z = -1. * recoil_res.Vect().Unit(); // CALCULATING FOR Helicity frame
+   	TVector3 y = (beam_cm.Vect().Unit().Cross(-recoil_cm.Vect().Unit())).Unit();
+   	TVector3 x = y.Cross(z);
+   	TVector3 angles( (eta_res.Vect()).Dot(x),
+   	      (eta_res.Vect()).Dot(y),
+   	      (eta_res.Vect()).Dot(z) );
+   	float cosTheta_hel = angles.CosTheta();
+   	float phi_hel = angles.Phi();
+   	z = beam_res.Vect().Unit(); // CALCULATING FOR Gottfried-Jackson frame
+   	x = y.Cross(z);
+   	angles.SetXYZ( (eta_res.Vect()).Dot(x),
+   	      (eta_res.Vect()).Dot(y),
+   	      (eta_res.Vect()).Dot(z) );
+   	float cosTheta_gj = angles.CosTheta();
+   	float phi_gj = angles.Phi();
+        TVector3 eps(TMath::Cos(locPolarizationAngle*TMath::DegToRad()), TMath::Sin(locPolarizationAngle*TMath::DegToRad()), 0.0); // beam polarization vector
+        float Phi = TMath::ATan2(y.Dot(eps), beam_cm.Vect().Unit().Dot(eps.Cross(y)))*radToDeg;
+        std::tuple<double, double> vh = dAnalysisUtilities.Calc_vanHoveCoord(recoil_cm,pi0_cm,eta_cm);
+        float q = get<0>(vh);
+        float omega = get<1>(vh);
+        float vanHove_x=q*cos(omega);
+        float vanHove_y=q*sin(omega);
+
         if ((dFlatTreeFileName!="")*(selection)){
 	    vector<TLorentzVector> locFinalStateP4; // should be in the same order as PID_FinalState
 	    locFinalStateP4.push_back(locProtonP4); 
@@ -167,7 +212,14 @@ Bool_t DSelector_thrown::Process(Long64_t locEntry)
 	    dFlatTreeInterface->Fill_Fundamental<Int_t>("PID_FinalState", 221, 2);  // Eta
  	    dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_t_thrown",mandelstam_t); 
             dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0eta_thrown",Metapi0); 
+            dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_hel_thrown",cosTheta_hel); 
+            dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_gj_thrown",cosTheta_gj); 
+            dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_hel_thrown",phi_hel); 
+            dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_gj_thrown",phi_gj); 
             dFlatTreeInterface->Fill_Fundamental<Float_t>("Ebeam_thrown",beam_e); 
+            dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_omega_thrown",omega*radToDeg);
+            dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_x_thrown",vanHove_x);
+            dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_y_thrown",vanHove_y);
 	    FillAmpTools_FlatTree(locBeamP4, locFinalStateP4);
 	    Fill_FlatTree(); //for the active combo
         }
