@@ -11,8 +11,6 @@ runEnds=[31057,42577,51768]
 rcdbQueries=[""," --rcdb-query='@is_2018production and @status_approved'"," --rcdb-query='@is_2018production and @status_approved and beam_on_current > 49'"]
 fluxCounts=[]
 
-
-
 def getFlux(args):
     pol,i=args
     fluxCounts.append([])

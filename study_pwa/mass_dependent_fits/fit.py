@@ -33,20 +33,20 @@ def main():
     ##########################################
     nprocesses=9
     fitFileName="etapi_result.fit"
-    niters=[5,10] # [n,m] where n is #restarts and m is #iters per restart. In total we should have n*m iterations 
+    niters=[2,10] # [n,m] where n is #restarts and m is #iters per restart. In total we should have n*m iterations 
     workingDir=os.getcwd()
 
     ts=["010020","0200325","0325050","050075","075100"]
     tmins=[0.1,0.2,0.325,0.5,0.75]
     tmaxs=[0.2,0.325,0.5,0.75,1.0]
-    #ts=["010020"]
-    #tmins=[0.1]
-    #tmaxs=[0.2]
-    ms=["104172"]#,"104160","104164","104168","104172","104176","104180"]
-    mmins=[1.04]#,1.04,1.04,1.04,1.04,1.04,1.04]
-    mmaxs=[1.72]#,1.60,1.64,1.68,1.72,1.76,1.80]
-    pcwsBins=[17]#,14,15,16,17,18,19]
-    extraFolderTag="_vh"
+    ms=["104172"]
+    mmins=[1.04]
+    mmaxs=[1.72]
+    pcwsBins=[17]
+    #ms=["104156","104160","104164","104168","104172","104176","104180"]
+    #mmins=[1.04,1.04,1.04,1.04,1.04,1.04,1.04]
+    #mmaxs=[1.56,1.60,1.64,1.68,1.72,1.76,1.80]
+    #pcwsBins=[13,14,15,16,17,18,19]
 
     baseCfgFile="config_files/etapi_hybrid.cfg"
     
@@ -68,14 +68,19 @@ def main():
                 if not checkCfgFile(cfgFile+".cfg"): 
                     print("\n**** SOMETHING WRONG WITH CONFIG! SEE ABOVE. EXITING ****\n")
                     exit(1)
+
+                ### THIS IS USEFUL IF YOU WANT TO WRITE CFG FILES TO THIS DIRECTORY FOR MALTE ###
+#                os.system(f'mv {cfgFile+".cfg"} {"etapi_hybrid_t"+t+"_m"+m+".cfg"}')
+                #################################################################################
         
                 print("Starting fits")
                 cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -r "+str(niters[1])+" -m 1000000 -t 1.0 -x 0 -f 0.15" 
                 pipeCmd=' > fit.log'
+                print(cmd+pipeCmd)
                 os.system(cmd+pipeCmd)
                
                 # Move results to the desired folder
-                ofolder=t+"_"+str(i) #t+"_m"+m+extraFolderTag
+                ofolder=t+"_"+str(i) 
                 os.system("mkdir -p "+ofolder)
                 os.system("mv -f etapi_result*.fit "+ofolder+" 2>/dev/null")
                 os.system("mv -f "+cfgFile+"*.cfg "+ofolder+" 2>/dev/null")

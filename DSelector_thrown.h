@@ -9,6 +9,11 @@
 #include "TH2I.h"
 #include "TLorentzRotation.h"
 
+bool filterOmega(float omega, float Mpi0eta){
+    // omega should be in degrees and mass in GeV
+    return -29.0*atan(-1.05*Mpi0eta+2.78)+328 > omega;
+}
+
 class DSelector_thrown : public DSelector
 {
 	public:

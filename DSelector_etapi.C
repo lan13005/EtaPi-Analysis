@@ -99,9 +99,7 @@ void DSelector_etapi::Init(TTree *locTree)
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_omega");
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_x");
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_y");
-            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pVH_pi0p");
-            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pVH_etap");
-            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pVH");
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("pVH");
             // Weighting Related
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("AccWeight"); 
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("weightASBS"); 
@@ -480,23 +478,24 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 
 		TLorentzVector locBeamX4_Measured = dComboBeamWrapper->Get_X4_Measured();
 		Double_t locBunchPeriod = dAnalysisUtilities.Get_BeamBunchPeriod(Get_RunNumber());
-		Double_t locDeltaT_RF = dAnalysisUtilities.Get_DeltaT_RF(Get_RunNumber(), locBeamX4_Measured, dComboWrapper);
+		float locDeltaT_RF = (float)(dAnalysisUtilities.Get_DeltaT_RF(Get_RunNumber(), locBeamX4_Measured, dComboWrapper));
 		// 0 for in-time events, non-zero integer for out-of-time photons
 		Int_t locRelBeamBucket = dAnalysisUtilities.Get_RelativeBeamBucket(Get_RunNumber(), locBeamX4_Measured, dComboWrapper); 
 		Int_t locNumOutOfTimeBunchesInTree = 4; //YOU need to specify this number
 		//Number of out-of-time beam bunches in tree (on a single side, so that total number out-of-time bunches accepted is 2 times 
 		//	this number for left + right bunches) 
-		Bool_t locSkipNearestOutOfTimeBunch = false; // True: skip events from nearest out-of-time bunch on either side (recommended).
+		Bool_t locSkipNearestOutOfTimeBunch = true; // True: skip events from nearest out-of-time bunch on either side (recommended).
 		Int_t locNumOutOfTimeBunchesToUse = locSkipNearestOutOfTimeBunch ? locNumOutOfTimeBunchesInTree-1:locNumOutOfTimeBunchesInTree; 
 		// Ideal value would be 1, but deviations require added factor, which is different for data and MC.
-		Double_t locAccidentalScalingFactor = dAnalysisUtilities.Get_AccidentalScalingFactor(Get_RunNumber(), locBeamP4.E(), dIsMC); 
-		//locAccidentalScalingFactor=1; // Lawrence - testing something
-		Double_t locAccidentalScalingFactorError = dAnalysisUtilities.Get_AccidentalScalingFactorError(Get_RunNumber(), locBeamP4.E()); 
+		float locAccidentalScalingFactor = (float)(dAnalysisUtilities.Get_AccidentalScalingFactor(Get_RunNumber(), locBeamP4.E(), dIsMC)); 
+		float locAccidentalScalingFactorError = (float)(dAnalysisUtilities.Get_AccidentalScalingFactorError(Get_RunNumber(), locBeamP4.E())); 
 		// Weight by 1 for in-time events, ScalingFactor*(1/NBunches) for out-of-time
-		Double_t locHistAccidWeightFactor = locRelBeamBucket==0 ? 1 : -locAccidentalScalingFactor/(2*locNumOutOfTimeBunchesToUse) ; 
-		if(locSkipNearestOutOfTimeBunch && abs(locRelBeamBucket)==1) { // Skip nearest out-of-time bunch: tails of in-time distribution also leak in
-			dComboWrapper->Set_IsComboCut(true); 
-			continue; 
+		float locHistAccidWeightFactor = (float)(locRelBeamBucket==0 ? 1 : -locAccidentalScalingFactor/(2*locNumOutOfTimeBunchesToUse)) ; 
+		if((locSkipNearestOutOfTimeBunch && abs(locRelBeamBucket)==1) || abs(locDeltaT_RF)>4*(locNumOutOfTimeBunchesInTree+1)) { 
+                    // Skip nearest out-of-time bunch: tails of in-time distribution also leak in
+                    // Sometimes we get RF times that are very large, like O(10^5). Lets just keep times within an extra bunch 
+		    dComboWrapper->Set_IsComboCut(true); 
+		    continue; 
 		} 
 
 		/********************************************* COMBINE FOUR-MOMENTUM ********************************************/
@@ -512,19 +511,33 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		float etaMean=0.548625;
 		float pi0Std=0.0076;
 		float etaStd=0.0191;
-		float pi0_sbweight;
+		float pi0_sbweight; // this will be used to fill the flat trees
 		float eta_sbweight;
+                //        NOMINAL
+                // [x,y,z] where x,y,z is # of sigmas on one side denoting the end of the 
+                //     signal region, the start of the skip region, and the end of the sb region
+                //float nstd_pi0[3] = {3, 4, 5.5};
+                //float nstd_eta[3] = {3, 4, 6};
+                //        TIGHTER
+                //float nstd_pi0[3] = {2.75, 4.25, 5.5};
+                //float nstd_eta[3] = {2.75, 4.25, 6};
+                //        LOOSER
+                float nstd_pi0[3] = {3.25, 3.75, 5.5};
+                float nstd_eta[3] = {3.25, 3.75, 6};
+
+                float weight_pi0=-1*nstd_pi0[0]/(nstd_pi0[2]-nstd_pi0[1]); // this is fixed valued for the weight of the pi0 sidebands
+                float weight_eta=-1*nstd_eta[0]/(nstd_eta[2]-nstd_eta[1]); // this is fixed valued for the weight of the eta sidebands
 		// The signal regions are both +/- 3 sigmas around the peak the left and right sidebands 
 		// 	which are some N sigmas wide with some M sigma skip region included 
 		// 	between the signal and sideband regions. The weight = the ratio the lengths
 		// 	spanned by the signal to that of the sideband times -1. OR you can do a fit to extract the weights
-		if (Mpi0 > pi0Mean-3*pi0Std && Mpi0 < pi0Mean+3*pi0Std){ pi0_sbweight=1; }
-		else if (Mpi0 > pi0Mean+4*pi0Std && Mpi0 < pi0Mean+5.5*pi0Std){ pi0_sbweight=-2; } // new={1.5,-2} old={1,-3.52}
-		else if (Mpi0 > pi0Mean-5.5*pi0Std && Mpi0 < pi0Mean-4*pi0Std){ pi0_sbweight=-2; }
+		if (Mpi0 > pi0Mean-nstd_pi0[0]*pi0Std && Mpi0 < pi0Mean+nstd_pi0[0]*pi0Std){ pi0_sbweight=1; }
+		else if (Mpi0 > pi0Mean+nstd_pi0[1]*pi0Std && Mpi0 < pi0Mean+nstd_pi0[2]*pi0Std){ pi0_sbweight=weight_pi0; } // new={1.5,-2} old={1,-3.52}
+		else if (Mpi0 > pi0Mean-nstd_pi0[2]*pi0Std && Mpi0 < pi0Mean-nstd_pi0[1]*pi0Std){ pi0_sbweight=weight_pi0; }
 		else { pi0_sbweight=0; }
-		if (Meta > etaMean-3*etaStd && Meta < etaMean+3*etaStd){ eta_sbweight=1; }
-		else if (Meta > etaMean+4*etaStd && Meta < etaMean+6*etaStd){ eta_sbweight=-1.5; } // new{2,-1.5} old={1,-2.92}
-		else if (Meta > etaMean-6*etaStd && Meta < etaMean-4*etaStd){ eta_sbweight=-1.5; }
+		if (Meta > etaMean-nstd_eta[0]*etaStd && Meta < etaMean+nstd_eta[0]*etaStd){ eta_sbweight=1; }
+		else if (Meta > etaMean+nstd_eta[1]*etaStd && Meta < etaMean+nstd_eta[2]*etaStd){ eta_sbweight=weight_eta; } // new{2,-1.5} old={1,-2.92}
+		else if (Meta > etaMean-nstd_eta[2]*etaStd && Meta < etaMean-nstd_eta[1]*etaStd){ eta_sbweight=weight_eta; }
 		else { eta_sbweight=0; }
 		float sbweight=pi0_sbweight*eta_sbweight;
 		float weight=sbweight*locHistAccidWeightFactor;
@@ -638,9 +651,9 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		// Select on coherent peak for region of high polarization. The AMPTOOLS fit using Zlm amplitudes will use the polarization
 		// 	for extra separation power (will tell us something about the production mechanism)
 		bool bBeamEnergy=(locBeamP4.E()>8.2)*(locBeamP4.E()<8.8); 
-		bool bMetapi0 = (Metapi0>1.04)*(Metapi0<1.56); // Select the a2(1320) mass region
+		bool bMetapi0 = (Metapi0>1.04)*(Metapi0<1.80); // Select the a2(1320) mass region
 		// Meson production occurs with small-t whereas baryon production occurs with large-t. This analysis cares about mesons
-		bool bmandelstamt=(mandelstam_t<0.3)*(mandelstam_t>0.1); 
+		bool bmandelstamt=(mandelstam_t<1.0)*(mandelstam_t>0.1); 
 		// There are a few baryon resonances, the Delta+(1232) being the largest. We can reject it 
 		bool bMpi0p=Mpi0p>1.4; 
 		// We are interested in the eta+pi0 system where we can see multiple resonances
@@ -689,8 +702,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                 float vanHove_x=q*cos(omega);
                 float vanHove_y=q*sin(omega);
                 bool bVH_pi0p = -29.0*atan(-1.05*(locPi0P4+locEtaP4).M()+2.78)+328 > omega*radToDeg;
-                bool bVH_etap = 45.26878219*atan(-0.88242654*(locPi0P4+locEtaP4).M()+3.14340627)+193.59347205 < omega*radToDeg;
-                bool bVH = bVH_pi0p*bVH_etap;
+                float pVH=(float)filterOmega(omega*radToDeg,(locPi0P4+locEtaP4).M());
 
 		// 5. With the above selections and sidebands stucture, the subtraction near threshold has problems
 		// 	The backgrounds that populate the near threshold region are pi0pi0->4g and omega->3gamma
@@ -703,10 +715,10 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		    !(((Mg1g3<0.15)*(Mg2g4<0.15)) || ((Mg1g4<0.15)*(Mg2g3<0.15)) ||
 		    ((Mg1g3<0.12)*(Mg2g3<0.12)) || ((Mg1g4<0.12)*(Mg2g4<0.12)));
 
-                // Turn off some selections related to M(4g) and t so that we can use another program to
+                // Turn off some selections (if you want) related to M(4g) and t so that we can use another program to
                 //      split the final flat trees up. This should lower our total run times
-		bMetapi0=true; 
-                bmandelstamt=true; 
+		//bMetapi0=true; 
+                //bmandelstamt=true; 
                 bMpi0p=true;
 
                 ///////////////////////////////////////////////////////////////////////////////////
@@ -721,11 +733,21 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                 // Choice 2: Only make the beam energy selection for event selection showcase for thesis 
                 //bool selection=bBeamEnergy;
                 //         :  For similar study above, for chiSq cut tuning and final thesis event selection plots
-		bool selection=bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*(dComboWrapper->Get_ChiSq_KinFit("")<100)*bUnusedEnergy*bMMsq*bBeamEnergy*
-				bmandelstamt*bMpi0p*bMetapi0*bSignalRegion;
+		//bool selection=bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*(dComboWrapper->Get_ChiSq_KinFit("")<100)*bUnusedEnergy*bMMsq*bBeamEnergy*
+		//		bmandelstamt*bMpi0p*bMetapi0*bSignalRegion;
                 // Choice 3: Nominal selection for a2 pwa
 		//bool selection=bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bMMsq*bBeamEnergy*
 		//		bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion;
+                // Choice 3.1: Loose selections for a2 pwa for systematic variations
+                bool selection=bBeamEnergy*(dComboWrapper->Get_ChiSq_KinFit("")<25)*(dComboWrapper->Get_Energy_UnusedShowers()<0.5)*
+                            ((locPhoton1P4.Theta()*radToDeg>=1.5 && locPhoton1P4.Theta()*radToDeg<=11) || locPhoton1P4.Theta()*radToDeg>=11.4)*
+                            ((locPhoton2P4.Theta()*radToDeg>=1.5 && locPhoton2P4.Theta()*radToDeg<=11) || locPhoton2P4.Theta()*radToDeg>=11.4)*
+                            ((locPhoton3P4.Theta()*radToDeg>=1.5 && locPhoton3P4.Theta()*radToDeg<=11) || locPhoton3P4.Theta()*radToDeg>=11.4)*
+                            ((locPhoton4P4.Theta()*radToDeg>=1.5 && locPhoton4P4.Theta()*radToDeg<=11) || locPhoton4P4.Theta()*radToDeg>=11.4)*
+                            (locProtonX4.Z()>50)*(locProtonX4.Z()<80)*  
+                            bPhotonE*bProton_dEdx*bProtonMomentum*bMMsq* // These selections remain unchanged (systematic only going tighter) - MMSq selection removed
+                            bSignalRegion;
+
                 // Choice 4: Nominal selections for double Regge beam asymmetry systematic studies. Loosen most cuts. 
                 //           MANUALLY COMMENT OUT bWeight FILTERING LINE BELOW
                 //bool selection=(Metapi0>1.6)*(Metapi0<3.0)*bBeamEnergy*(dComboWrapper->Get_ChiSq_KinFit("")<50)*(dComboWrapper->Get_Energy_UnusedShowers()<10)*
@@ -747,12 +769,12 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 			dHist_Mpi0->Fill((locPhoton1P4+locPhoton2P4).M(),locHistAccidWeightFactor);
 			dHist_Meta->Fill((locPhoton3P4+locPhoton4P4).M(),locHistAccidWeightFactor);
 		}
-		//if (!bWeight){ 
-                //        // Turn ON for a2 study: We do not want to keep any combos with weight 0. Not just a waste of space, can cause problems during fitting
-                //        // Turn OFF for double regge study since we do sideband subtraction separately there 
-		//	dComboWrapper->Set_IsComboCut(true);
-		//	continue;
-		//}
+		if (!bWeight){ 
+                        // Turn ON for a2 study: We do not want to keep any combos with weight 0. Not just a waste of space, can cause problems during fitting
+                        // Turn OFF for double regge study since we do sideband subtraction separately there 
+			dComboWrapper->Set_IsComboCut(true);
+			continue;
+		}
 		if(bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bBeamEnergy*bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion){
 			dHist_mmsq->Fill(locMissingMassSquared,weight);}
 		if(bPhotonE*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bMMsq*bBeamEnergy*bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion){
@@ -855,7 +877,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 	            dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_teta",mandelstam_teta);	
 	            dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_tpi0",mandelstam_tpi0);	
                     ////// Angles related
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("Phi",Phi*radToDeg); 
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("Phi",Phi); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_X_cm",(pi0_cm+eta_cm).CosTheta()); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_X_cm",(pi0_cm+eta_cm).Phi()*radToDeg); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_cm",eta_cm.CosTheta()); 
@@ -870,9 +892,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_omega",omega*radToDeg);
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_x",vanHove_x);
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_y",vanHove_y);
-                    dFlatTreeInterface->Fill_Fundamental<Bool_t>("pVH_pi0p", bVH_pi0p);
-                    dFlatTreeInterface->Fill_Fundamental<Bool_t>("pVH_etap", bVH_etap);
-                    dFlatTreeInterface->Fill_Fundamental<Bool_t>("pVH", bVH);
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("pVH", pVH);
                     // Weighting Related
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("AccWeight", locHistAccidWeightFactor); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("weightASBS", weight); 

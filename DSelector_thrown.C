@@ -54,6 +54,7 @@ void DSelector_thrown::Init(TTree *locTree)
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_omega_thrown");
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_x_thrown");
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_y_thrown");
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("pVH_thrown");
         }
 
 	/******************************** EXAMPLE USER INITIALIZATION: STAND-ALONE HISTOGRAMS *******************************/
@@ -155,6 +156,8 @@ Bool_t DSelector_thrown::Process(Long64_t locEntry)
 */
 
 	float Metapi0=(locPi0P4+locEtaP4).M();
+	float Metap=(locEtaP4+locProtonP4).M();
+	float Mpi0p=(locPi0P4+locProtonP4).M();
 	float mandelstam_t=-(dTargetP4-locProtonP4).M2();		
         float beam_e=locBeamP4.E();
 	//bool bMetapi0 = (Metapi0>1.04)*(Metapi0<1.56);
@@ -198,6 +201,7 @@ Bool_t DSelector_thrown::Process(Long64_t locEntry)
         float omega = get<1>(vh);
         float vanHove_x=q*cos(omega);
         float vanHove_y=q*sin(omega);
+        float pVH=(float)filterOmega(omega*radToDeg,(locPi0P4+locEtaP4).M());
 
         if ((dFlatTreeFileName!="")*(selection)){
 	    vector<TLorentzVector> locFinalStateP4; // should be in the same order as PID_FinalState
@@ -212,6 +216,8 @@ Bool_t DSelector_thrown::Process(Long64_t locEntry)
 	    dFlatTreeInterface->Fill_Fundamental<Int_t>("PID_FinalState", 221, 2);  // Eta
  	    dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_t_thrown",mandelstam_t); 
             dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0eta_thrown",Metapi0); 
+            dFlatTreeInterface->Fill_Fundamental<Float_t>("Metap_thrown",Metap); 
+            dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0p_thrown",Mpi0p); 
             dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_hel_thrown",cosTheta_hel); 
             dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_gj_thrown",cosTheta_gj); 
             dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_hel_thrown",phi_hel); 
@@ -220,6 +226,7 @@ Bool_t DSelector_thrown::Process(Long64_t locEntry)
             dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_omega_thrown",omega*radToDeg);
             dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_x_thrown",vanHove_x);
             dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_y_thrown",vanHove_y);
+            dFlatTreeInterface->Fill_Fundamental<Float_t>("pVH_thrown",pVH);
 	    FillAmpTools_FlatTree(locBeamP4, locFinalStateP4);
 	    Fill_FlatTree(); //for the active combo
         }

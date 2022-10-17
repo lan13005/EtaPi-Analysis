@@ -9,8 +9,8 @@ from checkFits import checkFits
 workingDir=os.getcwd()
 
 #ts=["010016", "016021", "021027", "027034", "034042", "042051", "051061", "061072", "072085", "085100"]
-#ts=["010020", "0200325", "0325050", "050075", "075100"]
-ts=["010020"]
+ts=["010020", "0200325", "0325050", "050075", "075100"]
+#ts=["010020"]
 
 subdir="./"
 
@@ -81,16 +81,24 @@ for t in ts:
         if drawAllGoodFits:
             cf=list(checkFits(f))
             dotIdx=1 if f[0]=="." else 0
+            # fit files will only contain extra underscore+number if using randomized fits
             convergedIterations=[c.split(".")[dotIdx].split("result_")[1] for c in cf]
             convergedFiles+=cf
             # do not overwrite (by rerunning) drawing script if the folders already exist
-            folders+=[f+"_"+i for i in convergedIterations if not os.path.exists(f+"/"+f+"_"+i)]
+            folders+=[f+"_"+i for i in convergedIterations]# if not os.path.exists(f+"/"+f+"_"+i)]
         else:
             if not os.path.exists(f+"/etapi_result.fit"):
                 print(f'The following results file does not exist! {f+"/etapi_result.fit"}. Exiting...')
                 exit(1)
             convergedFiles+=[f+"/etapi_result.fit"]
             folders+=[f+"_0"]
+
+print()
+if len(convergedFiles)!=len(folders):
+    for c,f in zip(convergedFiles,folders):
+        print(c,f)
+    print("** There appears to be a mismatch in the above lists! Will cause problems... exiting... **")
+    
 
 maxProcesses=15 # its about 5GB memory per process if we do not make the genmc plots
 print(f"Running etapi_plotter over {len(folders)} files with {maxProcesses} processes...")

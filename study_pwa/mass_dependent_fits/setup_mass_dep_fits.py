@@ -46,9 +46,9 @@ print("copying "+fileName+" to "+newFileName)
 os.system("cp "+fileName+" "+newFileName)
 
 
-t="010020"
+t="050075"
 m="104180" #"104180"
-extraTag="_vh" 
+extraTag="_selectGenTandM" 
 for pol in ["000","045","090","135"]:
     baseLoc=baseDir+"t"+t+"_m"+m+extraTag+"/"
     if not os.path.exists(baseLoc):
@@ -114,12 +114,12 @@ for wave in waves:
 print("\n------------------------------------------------\n")
 print("intializing piecewise production parameters")
 print("------------------------------------------------\n")
+condition=' pVH 0.5 999 unusedEnergy -999 0.01 chiSq -999 13.277 !photonTheta1 -999 2.5 !photonTheta1 10.3 11.9 !photonTheta2 -999 2.5 !photonTheta2 10.3 11.9 !photonTheta3 -999 2.5 !photonTheta3 10.3 11.9 !photonTheta4 -999 2.5 !photonTheta4 10.3 11.9 photonE1 0.1 999 photonE2 0.1 999 photonE3 0.1 999 photonE4 0.1 999 proton_momentum 0.3 999 proton_z 52 78 mmsq -0.05 0.05'
 with open(newFileName) as cfg:
     lines=[line.rstrip() for line in cfg.readlines() if "ROOTDataReaderFilter" in line]
     for line in lines:
-        accReplace=f" Mpi0eta {pcwsMassMin} {pcwsMassMax} Mpi0p 1.04 2.0" 
-        genReplace=f" Mpi0eta_thrown {pcwsMassMin} {pcwsMassMax} mandelstam_t_thrown {tmin} {tmax}"
-        #accReplace=accReplace+genReplace if "accmc" in line else accReplace
+        accReplace=f" Mpi0eta {pcwsMassMin} {pcwsMassMax}"+condition 
+        genReplace=f" Mpi0eta_thrown {pcwsMassMin} {pcwsMassMax}"
         replace=line+accReplace if any([ftype in line for ftype in ["accmc","data","bkgnd"]]) else line+genReplace
         replaceStr(line,replace,newFileName)
 
@@ -142,7 +142,9 @@ for ref in ["Neg","Pos"]:
             sample=random.uniform(pcwsMin,pcwsMax)
             if binNum==realBin and part=="Im":
                 sample=0
-            parLines+=f'parameter pcwsBin_{binNum}{part}{ref} {sample:0.5f}\n'
+                parLines+=f'parameter pcwsBin_{binNum}{part}{ref} 0.0 fixed\n'
+            else:
+                parLines+=f'parameter pcwsBin_{binNum}{part}{ref} {sample:0.5f}\n'
     if ref=="Neg":
         parLines+="\n"
 

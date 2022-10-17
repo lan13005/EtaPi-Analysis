@@ -31,22 +31,36 @@ thrown_cfiles=["DSelector_thrown.C", "runDSelector_thrown.C"]
 reconTreeName="pi0eta__B4_M17_M7_Tree"
 thrownTreeName="Thrown_Tree"
 
-#### PHASE 1 MONTE CARLO
-#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_pi0eta*"',reconTreeName,"F2017_1_selected",3,proof_Nthreads,recon_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_1_400M/merged/tree_pi0eta*"',reconTreeName,"F2018_1_selected",3,proof_Nthreads,recon_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_8_260M_130M/merged/tree_pi0eta*"',reconTreeName,"F2018_8_selected",3,proof_Nthreads,recon_cfiles)
+tag="_sbL_accN"
+#tag=""
 
-# FILTERED PHASE 1 DATA
-#for i in [1,2,3]:
+### PHASE 1 MONTE CARLO
+#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_pi0eta*"',reconTreeName,"F2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_1_400M/merged/tree_pi0eta*"',reconTreeName,"F2018_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_8_260M_130M/merged/tree_pi0eta*"',reconTreeName,"F2018_8_selected"+tag,3,proof_Nthreads,recon_cfiles)
+
+for i in [3]:
+    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/F2017_1_selected_sbL_accL_acc_tree.root"',reconTreeName,"F2017_1_selected"+tag,i,proof_Nthreads,recon_cfiles)
+    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/F2018_1_selected_sbL_accL_acc_tree.root"',reconTreeName,"F2018_1_selected"+tag,i,proof_Nthreads,recon_cfiles)
+    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/F2018_8_selected_sbL_accL_acc_tree.root"',reconTreeName,"F2018_8_selected"+tag,i,proof_Nthreads,recon_cfiles)
+for i in [1,2,3]:
+    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/D2017_1_selected_sbL_accL_acc_tree.root"',reconTreeName,"D2017_1_selected"+tag,i,proof_Nthreads,recon_cfiles)
+    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/D2018_1_selected_sbL_accL_acc_tree.root"',reconTreeName,"D2018_1_selected"+tag,i,proof_Nthreads,recon_cfiles)
+    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/D2018_8_selected_sbL_accL_acc_tree.root"',reconTreeName,"D2018_8_selected"+tag,i,proof_Nthreads,recon_cfiles)
+
+
+## FILTERED LOOSE CHI UE PHASE 1 DATA. HAS NEAREST RF BUNCH SKIPPED
+#for i in [3]:
 #    runSelector('"./phase1_data_looseChiUE/D2017_1_loose_tree.root"',reconTreeName,"D2017_1_selected",i,proof_Nthreads,recon_cfiles)
 #    runSelector('"./phase1_data_looseChiUE/D2018_1_loose_tree.root"',reconTreeName,"D2018_1_selected",i,proof_Nthreads,recon_cfiles)
 #    runSelector('"./phase1_data_looseChiUE/D2018_8_loose_tree.root"',reconTreeName,"D2018_8_selected",i,proof_Nthreads,recon_cfiles)
 
-## FOR THE DOUBLE REGGE STUDY
-#for i in [3]:
-#    runSelector('"./study_double_regge/rootFiles/D2017_1_selected_acc_tree.root"',reconTreeName,"D2017_1_selected",i,proof_Nthreads,recon_cfiles)
-#    runSelector('"./study_double_regge/rootFiles/D2018_1_selected_acc_tree.root"',reconTreeName,"D2018_1_selected",i,proof_Nthreads,recon_cfiles)
-#    runSelector('"./study_double_regge/rootFiles/D2018_8_selected_acc_tree.root"',reconTreeName,"D2018_8_selected",i,proof_Nthreads,recon_cfiles)
+### FOR THE DOUBLE REGGE STUDY
+##for i in [3]:
+##    runSelector('"./study_double_regge/rootFiles/D2017_1_selected_acc_tree.root"',reconTreeName,"D2017_1_selected",i,proof_Nthreads,recon_cfiles)
+##    runSelector('"./study_double_regge/rootFiles/D2018_1_selected_acc_tree.root"',reconTreeName,"D2018_1_selected",i,proof_Nthreads,recon_cfiles)
+##    runSelector('"./study_double_regge/rootFiles/D2018_8_selected_acc_tree.root"',reconTreeName,"D2018_8_selected",i,proof_Nthreads,recon_cfiles)
+#
 
 # UNFILTERED PHASE 1 DATA
 #for i in [3]:
@@ -54,10 +68,10 @@ thrownTreeName="Thrown_Tree"
 #    runSelector('"/d/home/sdobbs/GlueX/gluex_data/RunPeriod-2018-01/analysis-ver02/tree_pi0eta__B4_M17_M7/merged/*"',reconTreeName,"D2018_1_selected",i,proof_Nthreads,recon_cfiles)
 #    runSelector('"/d/home/sdobbs/GlueX/gluex_data/RunPeriod-2018-08/analysis-ver02/tree_pi0eta__B4_M17_M7/merged/*"',reconTreeName,"D2018_8_selected",i,proof_Nthreads,recon_cfiles)
 
-### Thrown trees generally need less threads to run over since there isn't much calculation being done
-runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_thrown*"',thrownTreeName,"F2017_1_gen",1,proof_Nthreads,thrown_cfiles)
-runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_1_400M/merged/tree_thrown*"',thrownTreeName,"F2018_1_gen",1,proof_Nthreads,thrown_cfiles)
-runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_8_260M_130M/merged/tree_thrown*"',thrownTreeName,"F2018_8_gen",1,proof_Nthreads,thrown_cfiles)
+#### Thrown trees generally need less threads to run over since there isn't much calculation being done
+#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_thrown*"',thrownTreeName,"F2017_1_gen",1,proof_Nthreads,thrown_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_1_400M/merged/tree_thrown*"',thrownTreeName,"F2018_1_gen",1,proof_Nthreads,thrown_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_8_260M_130M/merged/tree_thrown*"',thrownTreeName,"F2018_8_gen",1,proof_Nthreads,thrown_cfiles)
 
 #### KMATRIX MC
 #reconTreeName="pi0eta__B4_M7_M17_Tree"
