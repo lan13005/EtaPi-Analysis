@@ -81,7 +81,7 @@ def updateProductionAmpsAndRotate(parameterMap,posAngle,negAngle):
 
     return parameterMap
 
-def reconfigure(fname,otag,anchor=0):
+def reconfigure(fname,otag,anchor=-1):
     '''
     This script creates a new configuration file based off the converged fit values in a .fit file
     The intention is to not change the actual values that are fitted for but you can modify the input data
@@ -168,7 +168,8 @@ if __name__ == "__main__":
     otag=args.otag
     anchor=args.anchor
 
-    ts=["010020"]#,"0200325","0325050","050075","075100"]
+    ts=["010020","0200325","0325050","050075","075100"]
+    #ts=["0200325","0325050","050075","075100"]
     cfgs=[
             # choose which config files you want to run over
             f"{t}/etapi_result_src.fit" 
@@ -176,8 +177,7 @@ if __name__ == "__main__":
              for t in ts
             ]
     
-    nprocesses=2
-    #nprocesses=9
+    nprocesses=9
     niters=1
     for t,cfgFile in zip(ts,cfgs):
         newCfgLoc=reconfigure(cfgFile,otag,anchor)
@@ -187,11 +187,11 @@ if __name__ == "__main__":
         ofolder+="_"+otag
     
         print("Starting fits")
-        #cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+newCfgLoc+" -r "+str(niters)+" -m 1000000 -t 1.0 -x 0 -f 0.15" 
-        cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+newCfgLoc+" -m 1000000 -t 1.0" 
+        #cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+newCfgLoc+" -r "+str(niters)+" -m 1000000 -t 1.0 -x 1 -f 0.15" 
+        cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+newCfgLoc+" -m 1000000 -t 1.0 -x 0" 
         pipeCmd=' > fit.log'
         print(cmd+pipeCmd)
-#        os.system(cmd+pipeCmd)
+        os.system(cmd+pipeCmd)
 
         print(f"moving output to {ofolder}")
         os.system(f"mkdir -p {ofolder}")

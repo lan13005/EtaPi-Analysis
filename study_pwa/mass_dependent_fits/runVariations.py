@@ -98,11 +98,13 @@ def setVariation(vs):
 
 ###########################
 #### SET OUTPUT FOLDER ####
-ofolder="shared_results/anchorNone"
+ofolder="shared_results/systematic_v8.1"
 if os.path.exists(ofolder):
-    goAhead=input(f'{ofolder} exists. Do you want to overwrite? (y/n)')
-    if goAhead=='y':
+    option=input(f'{ofolder} exists. Do you want to overwrite yes/no or keep? (y/n/k): ')
+    if option=='y':
         os.system(f'rm -r {ofolder}')
+    elif option=='k':
+        print('continuing...')
     else:
         print('exiting...')
         exit()
@@ -115,7 +117,7 @@ os.system(f'mkdir -p {ofolder}')
 #####  SYSTEMATICALLY VARY FORMAT 1: THE EVENT SELECTIONS IN THE ROOTDataReaderFilter
 ###############################################################
 variations={}
-variations['nominal']=[]
+#variations['nominal']=[]
 #variations['ueL1']=[['unusedEnergy',veryNegNum,0.25]]
 #variations['ueL2']=[['unusedEnergy',veryNegNum,0.40]]
 #variations['chiT']=[['chiSq',veryNegNum,10]]
@@ -150,37 +152,38 @@ variations['nominal']=[]
 #            ['photonE2',0.13,veryPosNum],
 #            ['photonE3',0.13,veryPosNum],
 #            ['photonE4',0.13,veryPosNum]]
-#variations['pMomT1']=[['proton_momentum',0.325,veryPosNum]]
-#variations['pMomT2']=[['proton_momentum',0.35,veryPosNum]] # DR study is 0.35 and 0.40. This is directly related to the t binning. So we have to be careful here
 #variations['pZL']=[['proton_z',50,80]]
 #variations['pZT']=[['proton_z',54,76]]
 #variations['mmsqT1']=[['mmsq',-0.025,0.025]]
 #variations['mmsqT2']=[['mmsq',-0.020,0.020]]
 
 ### SCANS OF OTHER EVENT SELECTIONS ###
-#for s,v in zip(['15','16','17','18','19','20'],[1.5,1.6,1.7,1.8,1.9,2.0]):
-#    variations[f'Mpi0pGT{s}']=[['Mpi0p',v,veryPosNum],['pVH',veryNegNum,veryPosNum]]
+for s,v in zip(['15','16','17','18','19','20'],[1.5,1.6,1.7,1.8,1.9,2.0]):
+    variations[f'Mpi0pGT{s}']=[['Mpi0p',v,veryPosNum],['pVH',veryNegNum,veryPosNum]]
 #for s,v in zip(['00','02','04','06','08'],[0.0,0.2,0.4,0.6,0.8]):
+#for s,v in zip(['00'],[0.0]):
 #    variations[f'cosThetaLower{s}']=[['cosTheta_eta_hel',veryNegNum,v]]#,['pVH',veryNegNum,veryPosNum]]
-#for s,v in zip(['00','02','04','06','08'],[0.0,-0.2,-0.4,-0.6,-0.8]):
+##for s,v in zip(['00','02','04','06','08'],[0.0,-0.2,-0.4,-0.6,-0.8]):
+#for s,v in zip(['00'],[0.0]):
 #    variations[f'cosThetaUpper{s}']=[['cosTheta_eta_hel',v,veryPosNum]]#,['pVH',veryNegNum,veryPosNum]]
 
 
 print('variation: t-bin yields')
-#i=0
-#for k,vs in variations.items():
-#    ofiles=setVariation(vs)
-#    os.system(f"./reconfigureAndFit.py {k}")
-#    os.system(f'mv 0*_{k} {ofolder}') 
-#    yields=np.array([getYield(ofile) for ofile in ofiles])
-#    if i==0:
-#        initial_yields=yields.copy()
-#    yields/=initial_yields
-#    yields=[f'{x:0.2f}' for x in yields]
-#    yields=' '.join(yields)
-#    print(f"{k:<12}: {yields}")
-#    i+=1
-
+showYield=False
+i=0
+for k,vs in variations.items():
+    ofiles=setVariation(vs)
+    if showYield:
+        yields=np.array([getYield(ofile) for ofile in ofiles])
+        if i==0:
+            initial_yields=yields.copy()
+        yields/=initial_yields
+        yields=[f'{x:0.2f}' for x in yields]
+        yields=' '.join(yields)
+        print(f"{k:<12}: {yields}")
+        i+=1
+    os.system(f"./reconfigureAndFit.py {k}")
+    os.system(f'mv 0*_{k} {ofolder}') 
     
 
 ################################################################
@@ -188,70 +191,69 @@ print('variation: t-bin yields')
 ################################################################
 ## [polMag, uncertainty] of the phase1 dataset as calculated in 
 ## /d/grid17/ln16/dselector_v3/getPolMags/makePolValsV9/computeEtaPiPolMags.py 
-#variations={}
-#polmag000=[0.35062,0.00397] 
-#polmag045=[0.34230,0.00412]
-#polmag090=[0.34460,0.00404]
-#polmag135=[0.35582,0.00420]
-#variations['polMagLower']=[
-#        # Tried wordbreak \b and that doesnt really work searching for exact words.
-#        #    we can instead make it select a full word by including the spaces
-#        [f' {polmag000[0]:0.5f}',f' {polmag000[0]-polmag000[1]:0.5f}'],
-#        [f' {polmag045[0]:0.5f}',f' {polmag045[0]-polmag045[1]:0.5f}'],
-#        [f' {polmag090[0]:0.5f}',f' {polmag090[0]-polmag090[1]:0.5f}'],
-#        [f' {polmag135[0]:0.5f}',f' {polmag135[0]-polmag135[1]:0.5f}']]
-#variations['polMagUpper']=[
-#        [f' {polmag000[0]:0.5f}',f' {polmag000[0]+polmag000[1]:0.5f}'],
-#        [f' {polmag045[0]:0.5f}',f' {polmag045[0]+polmag045[1]:0.5f}'],
-#        [f' {polmag090[0]:0.5f}',f' {polmag090[0]+polmag090[1]:0.5f}'],
-#        [f' {polmag135[0]:0.5f}',f' {polmag135[0]+polmag135[1]:0.5f}']]
-#variations['polOffset']=[
-#        # offsets are 1.77, 2.85, 4.50, 3.43 degrees. There are syst and stat errors on them but ignore for now
-#        # found the offsets in Jon Zarlings thesis which is taken from Alex's rho analysis.
-#        # The regex syntax is complicated, it uses capture groups to search for lines that have some basic format
-#        #    the lines that we are interested in start with amplitude and contains a 'polAngle polMag' string 
-#        #    all polMag starts with 0.3 since they are always atleast 30% polarization and never greater than 40% 
-#        #    the first (.*) captures any string between 'amplitude' and ' 0.0' and can be access by \1 
-#        [f'amplitude(.*) 0.0 0.3(.*)',r'amplitude\1 1.77 0.3\2'],
-#        [f'amplitude(.*) 45.0 0.3(.*)',r'amplitude\1 47.85 0.3\2'],
-#        [f'amplitude(.*) 90.0 0.3(.*)',r'amplitude\1 94.50 0.3\2'],
-#        [f'amplitude(.*) 135.0 0.3(.*)',r'amplitude\1 138.43 0.3\2']]
+variations={}
+polmag000=[0.35062,0.00397] 
+polmag045=[0.34230,0.00412]
+polmag090=[0.34460,0.00404]
+polmag135=[0.35582,0.00420]
+variations['polMagLower']=[
+        # Tried wordbreak \b and that doesnt really work searching for exact words.
+        #    we can instead make it select a full word by including the spaces
+        [f' {polmag000[0]:0.5f}',f' {polmag000[0]-polmag000[1]:0.5f}'],
+        [f' {polmag045[0]:0.5f}',f' {polmag045[0]-polmag045[1]:0.5f}'],
+        [f' {polmag090[0]:0.5f}',f' {polmag090[0]-polmag090[1]:0.5f}'],
+        [f' {polmag135[0]:0.5f}',f' {polmag135[0]-polmag135[1]:0.5f}']]
+variations['polMagUpper']=[
+        [f' {polmag000[0]:0.5f}',f' {polmag000[0]+polmag000[1]:0.5f}'],
+        [f' {polmag045[0]:0.5f}',f' {polmag045[0]+polmag045[1]:0.5f}'],
+        [f' {polmag090[0]:0.5f}',f' {polmag090[0]+polmag090[1]:0.5f}'],
+        [f' {polmag135[0]:0.5f}',f' {polmag135[0]+polmag135[1]:0.5f}']]
+variations['polOffset']=[
+        # offsets are 1.77, 2.85, 4.50, 3.43 degrees. There are syst and stat errors on them but ignore for now
+        # found the offsets in Jon Zarlings thesis which is taken from Alex's rho analysis.
+        # The regex syntax is complicated, it uses capture groups to search for lines that have some basic format
+        #    the lines that we are interested in start with amplitude and contains a 'polAngle polMag' string 
+        #    all polMag starts with 0.3 since they are always atleast 30% polarization and never greater than 40% 
+        #    the first (.*) captures any string between 'amplitude' and ' 0.0' and can be access by \1 
+        [f'amplitude(.*) 0.0 0.3(.*)',r'amplitude\1 1.77 0.3\2'],
+        [f'amplitude(.*) 45.0 0.3(.*)',r'amplitude\1 47.85 0.3\2'],
+        [f'amplitude(.*) 90.0 0.3(.*)',r'amplitude\1 94.50 0.3\2'],
+        [f'amplitude(.*) 135.0 0.3(.*)',r'amplitude\1 138.43 0.3\2']]
 
-#max_pcwsbins=18
-#for nbins in [16,15,14,13]:
-#    maxm=f'{1.04+nbins*0.04:0.2f}'
-#    variations[f'pcws{nbins}bins']=[]
-#    for x in range(nbins,max_pcwsbins):
-#        for e in ['Re','Im']:
-#            for p in ['Neg','Pos']:
-#                variations[f'pcws{nbins}bins'].append([f'.*pcwsBin_{x}{e}{p}[ \t].*\n', ''])
-#                # [^ ] matches anything but a space
-#                variations[f'pcws{nbins}bins'].append([
-#                    fr'amplitude ([^ ]*) Piecewise ([^ ]*) [^ ]* [^ ]* (.*) \[pcwsBin_{nbins-1}Im{p}\].*',
-#                    fr'amplitude \1 Piecewise \2 {maxm} {nbins} \3 [pcwsBin_{nbins-1}Im{p}]'])
-#                variations[f'pcws{nbins}bins'].append([fr'Mpi0eta 1.04 ([^ ]*) ',fr'Mpi0eta 1.04 {maxm} '])
-#                variations[f'pcws{nbins}bins'].append([fr'Mpi0eta_thrown 1.04 ([^\n]*)',fr'Mpi0eta_thrown 1.04 {maxm}'])
+max_pcwsbins=18
+for nbins in [16,15,14,13]:
+    maxm=f'{1.04+nbins*0.04:0.2f}'
+    variations[f'pcws{nbins}bins']=[]
+    for x in range(nbins,max_pcwsbins):
+        for e in ['Re','Im']:
+            for p in ['Neg','Pos']:
+                variations[f'pcws{nbins}bins'].append([f'.*pcwsBin_{x}{e}{p}[ \t].*\n', ''])
+                # [^ ] matches anything but a space
+                variations[f'pcws{nbins}bins'].append([
+                    fr'amplitude ([^ ]*) Piecewise ([^ ]*) [^ ]* [^ ]* (.*) \[pcwsBin_{nbins-1}Im{p}\].*',
+                    fr'amplitude \1 Piecewise \2 {maxm} {nbins} \3 [pcwsBin_{nbins-1}Im{p}]'])
+                variations[f'pcws{nbins}bins'].append([fr'Mpi0eta 1.04 ([^ ]*) ',fr'Mpi0eta 1.04 {maxm} '])
+                variations[f'pcws{nbins}bins'].append([fr'Mpi0eta_thrown 1.04 ([^\n]*)',fr'Mpi0eta_thrown 1.04 {maxm}'])
 
-#for k,variation in variations.items():
-#    ofiles=setVariation([])
-#    for ofile in ofiles:
-#        with open(ofile,"r") as out:
-#            lines=out.readlines()
-#        lines=''.join(lines)
-#        with open(ofile,"w") as out:
-#            for search,replace in variation:
-#                lines=re.sub(search,replace,lines)
-#            out.write(lines)
-#
-#    os.system(f"./reconfigureAndFit.py {k}")
-#    os.system(f'mv 0*_{k} {ofolder}') 
+for k,variation in variations.items():
+    ofiles=setVariation([])
+    for ofile in ofiles:
+        with open(ofile,"r") as out:
+            lines=out.readlines()
+        lines=''.join(lines)
+        with open(ofile,"w") as out:
+            for search,replace in variation:
+                lines=re.sub(search,replace,lines)
+            out.write(lines)
+
+    os.system(f"./reconfigureAndFit.py {k}")
+    os.system(f'mv 0*_{k} {ofolder}') 
 
 ################################################################
 ######  SYSTEMATICALLY VARY FORMAT 3: VARY ANCHOR EXPLICITY USING AN ARGUMENT IN RECONFIGEANDFIT.PY
 ################################################################
 variations={}
-#for x in [0,4,6,8,11]:
-for x in [-1]:
+for x in [-1,0,4,6,8,11]:
     variations[f'anchorBin{x}']=x
 for k,variation in variations.items():
     ofiles=setVariation([])

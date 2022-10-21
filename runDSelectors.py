@@ -31,8 +31,8 @@ thrown_cfiles=["DSelector_thrown.C", "runDSelector_thrown.C"]
 reconTreeName="pi0eta__B4_M17_M7_Tree"
 thrownTreeName="Thrown_Tree"
 
-tag="_sbL_accN"
-#tag=""
+#tag="_sbL_accN"
+tag=""
 
 ### PHASE 1 MONTE CARLO
 #runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_pi0eta*"',reconTreeName,"F2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
@@ -43,10 +43,10 @@ for i in [3]:
     runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/F2017_1_selected_sbL_accL_acc_tree.root"',reconTreeName,"F2017_1_selected"+tag,i,proof_Nthreads,recon_cfiles)
     runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/F2018_1_selected_sbL_accL_acc_tree.root"',reconTreeName,"F2018_1_selected"+tag,i,proof_Nthreads,recon_cfiles)
     runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/F2018_8_selected_sbL_accL_acc_tree.root"',reconTreeName,"F2018_8_selected"+tag,i,proof_Nthreads,recon_cfiles)
-for i in [1,2,3]:
-    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/D2017_1_selected_sbL_accL_acc_tree.root"',reconTreeName,"D2017_1_selected"+tag,i,proof_Nthreads,recon_cfiles)
-    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/D2018_1_selected_sbL_accL_acc_tree.root"',reconTreeName,"D2018_1_selected"+tag,i,proof_Nthreads,recon_cfiles)
-    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/D2018_8_selected_sbL_accL_acc_tree.root"',reconTreeName,"D2018_8_selected"+tag,i,proof_Nthreads,recon_cfiles)
+#for i in [1,2,3]:
+#    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/D2017_1_selected_sbL_accL_acc_tree.root"',reconTreeName,"D2017_1_selected"+tag,i,proof_Nthreads,recon_cfiles)
+#    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/D2018_1_selected_sbL_accL_acc_tree.root"',reconTreeName,"D2018_1_selected"+tag,i,proof_Nthreads,recon_cfiles)
+#    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/D2018_8_selected_sbL_accL_acc_tree.root"',reconTreeName,"D2018_8_selected"+tag,i,proof_Nthreads,recon_cfiles)
 
 
 ## FILTERED LOOSE CHI UE PHASE 1 DATA. HAS NEAREST RF BUNCH SKIPPED

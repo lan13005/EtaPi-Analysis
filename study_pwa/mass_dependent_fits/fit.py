@@ -74,7 +74,7 @@ def main():
                 #################################################################################
         
                 print("Starting fits")
-                cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -r "+str(niters[1])+" -m 1000000 -t 1.0 -x 0 -f 0.15" 
+                cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+cfgFile+".cfg -r "+str(niters[1])+" -m 1000000 -t 1.0 -x 1 -f 0.15" 
                 pipeCmd=' > fit.log'
                 print(cmd+pipeCmd)
                 os.system(cmd+pipeCmd)

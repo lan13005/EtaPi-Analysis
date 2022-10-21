@@ -20,18 +20,18 @@ void split_flat_kinematics(){
     bool remergePols=true; // should we remerge polarizations after splitting? 
     
     string otag="_selectGenTandM";
-    string itag="_sbN_accL";
+    string itag="_nominal";
 
     string folder="phase1_selected_v4/";
     bool ignorePolarization=false;
     vector<string> runs={"2017_1","2018_1","2018_8"};
     vector<string> files;
     for (auto run: runs){
-        files.push_back("D"+run+"_selected"+itag+"_data_flat.root");
-        files.push_back("D"+run+"_selected"+itag+"_bkgnd_flat.root");
-        files.push_back("D"+run+"_selected"+itag+"_acc_flat.root");
+        //files.push_back("D"+run+"_selected"+itag+"_data_flat.root");
+        //files.push_back("D"+run+"_selected"+itag+"_bkgnd_flat.root");
+        //files.push_back("D"+run+"_selected"+itag+"_acc_flat.root");
         files.push_back("F"+run+"_selected"+itag+"_acc_flat.root");
-        files.push_back("F"+run+"_gen_data"+itag+"_flat.root");
+        //files.push_back("F"+run+"_gen_data_flat.root");
     }
 
 //    string folder="kmatrix_selected_v1/";
@@ -57,15 +57,15 @@ void split_flat_kinematics(){
     map<string,int> ts={{"010020",0},{"0200325",1},{"0325050",2},{"050075",3},{"075100",4}}; // t
     vector<float> mint={0.1,0.2,0.325,0.5,0.75};
     vector<float> maxt={0.2,0.325,0.5,0.75,1.0};
-    map<string,int> mpi0etas={{"104180",0}}; // m 
-    vector<float> minmpi0eta={1.04};
-    vector<float> maxmpi0eta={1.80};
+    //map<string,int> mpi0etas={{"104180",0}}; // m 
+    //vector<float> minmpi0eta={1.04};
+    //vector<float> maxmpi0eta={1.80};
     //map<string,int> ts={{"all",0}}; // t
     //vector<float> mint={0};
     //vector<float> maxt={100};
-    //map<string,int> mpi0etas={{"104156",0}}; // m 
-    //vector<float> minmpi0eta={1.04};
-    //vector<float> maxmpi0eta={1.56};
+    map<string,int> mpi0etas={{"104156",0},{"104160",1},{"104164",2},{"104168",3},{"104172",4},{"104176",5},{"104180",6}}; // m 
+    vector<float> minmpi0eta={1.04,1.04,1.04,1.04,1.04,1.04,1.04};
+    vector<float> maxmpi0eta={1.56,1.60,1.64,1.68,1.72,1.76,1.80};
 
     const int nts=(const int)mint.size();
     const int nms=(const int)minmpi0eta.size();
@@ -158,10 +158,12 @@ void split_flat_kinematics(){
                  it=0;
                  if (!ignorePolarization)
                      beamAngle=BeamAngle;
-                 for (auto const& t: ts){ im=0;
+                 for (auto const& t: ts){ im=-1;
                      for (auto const& m: mpi0etas){
-                         pVH2=filterOmega(vanHove_omega,mpi0eta);
+                         ++im; // this has to be first otherwise it might never increment
+                         //pVH2=filterOmega(vanHove_omega,mpi0eta);
                          //if (has_recon_branches*!pVH2) continue;
+                         if (has_recon_branches*!pVH) continue;
                          //if (has_recon_branches*!(mpi0p>2.0)) continue;
                          if (has_recon_branches*!((mandelstam_t>mint[it])*(mandelstam_t<maxt[it]))) continue;
                          if (has_recon_branches*!((mpi0eta>minmpi0eta[im])*(mpi0eta<maxmpi0eta[im]))) continue;
@@ -170,7 +172,6 @@ void split_flat_kinematics(){
                          if (isGen*!((mandelstam_t_thrown>mint[it])*(mandelstam_t_thrown<maxt[it]))) continue;
                          if (isGen*!((mpi0eta_thrown>minmpi0eta[im])*(mpi0eta_thrown<maxmpi0eta[im]))) continue;
                          newtree[pols[beamAngle]][it][im]->Fill();
-                         ++im;
                      } ++it;
                  }
             }
