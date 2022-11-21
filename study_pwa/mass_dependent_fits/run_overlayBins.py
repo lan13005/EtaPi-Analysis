@@ -100,7 +100,7 @@ if len(convergedFiles)!=len(folders):
     print("** There appears to be a mismatch in the above lists! Will cause problems... exiting... **")
     
 
-maxProcesses=15 # its about 5GB memory per process if we do not make the genmc plots
+maxProcesses=30 # its about 5GB memory per process if we do not make the genmc plots
 print(f"Running etapi_plotter over {len(folders)} files with {maxProcesses} processes...")
 
 [os.system("mkdir -p "+folder) for folder in folders]

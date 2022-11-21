@@ -1,7 +1,11 @@
 #include "DSelector_etapi.h"
 
-// "4#gammap[#pi^{0},#eta]"
 string topologyString="4#gammap[#pi^{0},#eta]";
+//string topologyString="5#gammap[2#pi^{0}]";
+//string topologyString="4#gammap[2#pi^{0}]";
+//string topologyString="6#gammap[2#pi^{0},#eta]";
+//string topologyString="6#gammap[3#pi^{0}]";
+
 float radToDeg=180/3.14159;
 
 void DSelector_etapi::Init(TTree *locTree)
@@ -441,7 +445,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 
                     // Finally, the true combo is when we have the true spectroscopic combination and the true beam photon
                     isCorrectCombo=isCorrectSpect*isCorrectBeam;
-                    cout << "correct beam/spect/combo: " << isCorrectBeam << "/" << isCorrectSpect << "/" << isCorrectCombo <<endl;
+                    //cout << "correct beam/spect/combo: " << isCorrectBeam << "/" << isCorrectSpect << "/" << isCorrectCombo <<endl;
 	        }
 
 
@@ -737,17 +741,17 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		//bool selection=bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*(dComboWrapper->Get_ChiSq_KinFit("")<100)*bUnusedEnergy*bMMsq*bBeamEnergy*
 		//		bmandelstamt*bMpi0p*bMetapi0*bSignalRegion;
                 // Choice 3: Nominal selection for a2 pwa
-		bool selection=bBeamEnergy*bChiSq*bUnusedEnergy*bPhotonTheta*bProtonZ*bPhotonE*bProton_dEdx*bProtonMomentum*bMMsq*
-				bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion;
+		//bool selection=bBeamEnergy*bChiSq*bUnusedEnergy*bPhotonTheta*bProtonZ*bPhotonE*bProton_dEdx*bProtonMomentum*bMMsq*
+		//		bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion;
                 // Choice 3.1: Loose selections for a2 pwa for systematic variations
-                //bool selection=bBeamEnergy*(dComboWrapper->Get_ChiSq_KinFit("")<25)*(dComboWrapper->Get_Energy_UnusedShowers()<0.5)*
-                //            ((locPhoton1P4.Theta()*radToDeg>=1.5 && locPhoton1P4.Theta()*radToDeg<=11) || locPhoton1P4.Theta()*radToDeg>=11.4)*
-                //            ((locPhoton2P4.Theta()*radToDeg>=1.5 && locPhoton2P4.Theta()*radToDeg<=11) || locPhoton2P4.Theta()*radToDeg>=11.4)*
-                //            ((locPhoton3P4.Theta()*radToDeg>=1.5 && locPhoton3P4.Theta()*radToDeg<=11) || locPhoton3P4.Theta()*radToDeg>=11.4)*
-                //            ((locPhoton4P4.Theta()*radToDeg>=1.5 && locPhoton4P4.Theta()*radToDeg<=11) || locPhoton4P4.Theta()*radToDeg>=11.4)*
-                //            (locProtonX4.Z()>50)*(locProtonX4.Z()<80)*  
-                //            bPhotonE*bProton_dEdx*bProtonMomentum*bMMsq* // These selections remain unchanged (systematic only going tighter) - MMSq selection removed
-                //            bSignalRegion;
+                bool selection=bBeamEnergy*(dComboWrapper->Get_ChiSq_KinFit("")<25)*(dComboWrapper->Get_Energy_UnusedShowers()<0.5)*
+                            ((locPhoton1P4.Theta()*radToDeg>=1.5 && locPhoton1P4.Theta()*radToDeg<=11) || locPhoton1P4.Theta()*radToDeg>=11.4)*
+                            ((locPhoton2P4.Theta()*radToDeg>=1.5 && locPhoton2P4.Theta()*radToDeg<=11) || locPhoton2P4.Theta()*radToDeg>=11.4)*
+                            ((locPhoton3P4.Theta()*radToDeg>=1.5 && locPhoton3P4.Theta()*radToDeg<=11) || locPhoton3P4.Theta()*radToDeg>=11.4)*
+                            ((locPhoton4P4.Theta()*radToDeg>=1.5 && locPhoton4P4.Theta()*radToDeg<=11) || locPhoton4P4.Theta()*radToDeg>=11.4)*
+                            (locProtonX4.Z()>50)*(locProtonX4.Z()<80)*  
+                            bPhotonE*bProton_dEdx*bProtonMomentum*bMMsq* // These selections remain unchanged (systematic only going tighter) - MMSq selection removed
+                            bSignalRegion;
                 // Choice 4: Nominal selections for double Regge beam asymmetry systematic studies. Loosen most cuts. 
                 //           MANUALLY COMMENT OUT bWeight FILTERING LINE BELOW
                 //bool selection=(Metapi0>1.6)*(Metapi0<3.0)*bBeamEnergy*(dComboWrapper->Get_ChiSq_KinFit("")<50)*(dComboWrapper->Get_Energy_UnusedShowers()<10)*
@@ -769,12 +773,12 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 			dHist_Mpi0->Fill((locPhoton1P4+locPhoton2P4).M(),locHistAccidWeightFactor);
 			dHist_Meta->Fill((locPhoton3P4+locPhoton4P4).M(),locHistAccidWeightFactor);
 		}
-		if (!bWeight){ 
-                        // Turn ON for a2 study: We do not want to keep any combos with weight 0. Not just a waste of space, can cause problems during fitting
-                        // Turn OFF for double regge study since we do sideband subtraction separately there 
-			dComboWrapper->Set_IsComboCut(true);
-			continue;
-		}
+//		if (!bWeight){ 
+//                        // Turn ON for a2 study: We do not want to keep any combos with weight 0. Not just a waste of space, can cause problems during fitting
+//                        // Turn OFF for double regge study since we do sideband subtraction separately there 
+//			dComboWrapper->Set_IsComboCut(true);
+//			continue;
+//		}
 		if(bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bBeamEnergy*bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion){
 			dHist_mmsq->Fill(locMissingMassSquared,weight);}
 		if(bPhotonE*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bMMsq*bBeamEnergy*bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion){

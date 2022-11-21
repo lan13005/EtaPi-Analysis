@@ -47,7 +47,7 @@ os.system("cp "+fileName+" "+newFileName)
 
 
 t="010020"
-m="104180" #"104180"
+m="104180" 
 extraTag="_selectGenTandM" 
 for pol in ["000","045","090","135"]:
     baseLoc=baseDir+"t"+t+"_m"+m+extraTag+"/"
@@ -80,6 +80,7 @@ for pol in ["000","045","090","135"]:
 waves=[
         "D0+-", "D0++", "D1+-", "D1++", "D2++", "D1--",
         "pD0+-", "pD0++", "pD1+-", "pD1++", "pD2++", "pD1--",
+        "P0+-", "P0++", "P1+-", "P1++",
         ] # TMD waveset
 #waves=["D2++","D2+-","D0++","D0+-"] # KMATRIX waveset
 refs=["Negative","Positive"]
@@ -120,7 +121,8 @@ with open(newFileName) as cfg:
     for line in lines:
         accReplace=f" Mpi0eta {pcwsMassMin} {pcwsMassMax}"+condition 
         genReplace=f" Mpi0eta_thrown {pcwsMassMin} {pcwsMassMax}"
-        replace=line+accReplace if any([ftype in line for ftype in ["accmc","data","bkgnd"]]) else line+genReplace
+        replace=line+accReplace if any([line.startswith(ftype) for ftype in ["accmc","data","bkgnd"]]) else line+genReplace
+        #replace=line+accReplace if any([ftype in line for ftype in ["accmc","data","bkgnd"]]) else line+genReplace
         replaceStr(line,replace,newFileName)
 
 

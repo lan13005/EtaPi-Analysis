@@ -33,7 +33,7 @@ def main():
     ##########################################
     nprocesses=9
     fitFileName="etapi_result.fit"
-    niters=[2,10] # [n,m] where n is #restarts and m is #iters per restart. In total we should have n*m iterations 
+    niters=[1,3] # [n,m] where n is #restarts and m is #iters per restart. In total we should have n*m iterations 
     workingDir=os.getcwd()
 
     ts=["010020","0200325","0325050","050075","075100"]
@@ -48,7 +48,7 @@ def main():
     #mmaxs=[1.56,1.60,1.64,1.68,1.72,1.76,1.80]
     #pcwsBins=[13,14,15,16,17,18,19]
 
-    baseCfgFile="config_files/etapi_hybrid.cfg"
+    baseCfgFile="config_files/etapi_hybrid_pwave.cfg"
     
     for i in range(niters[0]):
         for j, tmin, tmax in zip(range(len(ts)),tmins,tmaxs):

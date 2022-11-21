@@ -1,6 +1,7 @@
 #include "DSelector_thrown.h"
 
 string topologyString="4#gammap[#pi^{0},#eta]";
+//string topologyString="5#gammap[2#pi^{0}]";
 float radToDeg=180/3.14159;
 
 void DSelector_thrown::Init(TTree *locTree)

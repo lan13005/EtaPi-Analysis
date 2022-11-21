@@ -164,12 +164,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('otag', type=str, nargs="?", default='vary',  help='output tag to append to file names')
     parser.add_argument('anchor', type=int, nargs="?", default=-1, help='piecewise anchor bin')
+    parser.add_argument('--tbins', type=int, nargs="+")
     args = parser.parse_args()
     otag=args.otag
     anchor=args.anchor
+    tbinsChosen=args.tbins
 
     ts=["010020","0200325","0325050","050075","075100"]
-    #ts=["0200325","0325050","050075","075100"]
+    if tbinsChosen==None:
+        tbinsChosen=[0,1,2,3,4]
+    ts=list(np.array(ts)[tbinsChosen])
+
     cfgs=[
             # choose which config files you want to run over
             f"{t}/etapi_result_src.fit" 
@@ -188,7 +193,7 @@ if __name__ == "__main__":
     
         print("Starting fits")
         #cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+newCfgLoc+" -r "+str(niters)+" -m 1000000 -t 1.0 -x 1 -f 0.15" 
-        cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+newCfgLoc+" -m 1000000 -t 1.0 -x 0" 
+        cmd="mpirun -np "+str(nprocesses)+" fitMPI -c "+newCfgLoc+" -m 1000000 -t 0.1 -x 1" 
         pipeCmd=' > fit.log'
         print(cmd+pipeCmd)
         os.system(cmd+pipeCmd)
