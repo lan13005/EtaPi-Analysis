@@ -24,7 +24,7 @@ def runSelector(inFileLoc, treeName, outFileName, choice, proof_Nthreads, cfiles
     os.system("root -l -b -q '"+crun+"("+inFileLoc+","+'"'+treeName+'","'+outFileName+"_"+choiceToType[choice]+'",'+str(proof_Nthreads)+")'")
     os.system("mv output_flat.root "+outFileName+"_"+choiceToType[choice]+"_flat.root")
 
-proof_Nthreads=36
+proof_Nthreads=32
 recon_cfiles=["DSelector_etapi.C", "runDSelector.C"]
 thrown_cfiles=["DSelector_thrown.C", "runDSelector_thrown.C"]
 
@@ -32,74 +32,24 @@ reconTreeName="pi0eta__B4_M17_M7_Tree"
 thrownTreeName="Thrown_Tree"
 
 #tag="_sbL_accN"
-tag="_sidebandStudy"
-#tag=""
+#tag="_sidebandStudy"
+#tag="_wUnusedShowers_sbN_accT"
+tag="_bggen_2018_8"
 
 ### PHASE 1 MONTE CARLO
 #runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_pi0eta*"',reconTreeName,"F2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
-runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_1_400M/merged/tree_pi0eta*"',reconTreeName,"F2018_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
-runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_8_260M_130M/merged/tree_pi0eta*"',reconTreeName,"F2018_8_selected"+tag,3,proof_Nthreads,recon_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_1_400M/merged/tree_pi0eta*"',reconTreeName,"F2018_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_8_260M_130M/merged/tree_pi0eta*"',reconTreeName,"F2018_8_selected"+tag,3,proof_Nthreads,recon_cfiles)
 
-### PHASE 1 b1 MC
-#runSelector('"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2017_01_ver03.0/root/merged/tree_pi0eta*"',
-#        reconTreeName,"BOne2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_01_ver03.0/root/merged/tree_pi0eta*"',
-#        reconTreeName,"BOne2018_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_08_ver03.0_60M/root/merged/tree_pi0eta*"',
-#        reconTreeName,"BOne2018_8_selected"+tag,3,proof_Nthreads,recon_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2017_01_ver03.0/root/merged/tree_thrown*"',
-#        thrownTreeName,"BOne2017_1_gen"+tag,1,proof_Nthreads,thrown_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_01_ver03.0/root/merged/tree_thrown*"',
-#        thrownTreeName,"BOne2018_1_gen"+tag,1,proof_Nthreads,thrown_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_08_ver03.0_60M/root/merged/tree_thrown*"',
-#        thrownTreeName,"BOne2018_8_gen"+tag,1,proof_Nthreads,thrown_cfiles)
-
-### f2 to pi0pi0 MC
-#runSelector('"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/pi0pi0/tree_pi0eta*"',
-#        reconTreeName,"FTwo2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
-### etaprime to etapi0pi0 MC
-#runSelector('"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/etap_to_etapipi/tree_pi0eta*"',
-#        reconTreeName,"etap6g2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
-### eta to 3pi0 MC
-#runSelector('"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/eta_to_3pi/tree_pi0eta*"',
-#        reconTreeName,"eta6g2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
-### a2pi to etapi0pi0 MC
-#runSelector('"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/a2pi/tree_pi0eta*"',
-#        reconTreeName,"a2pi6g2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
-### f1 to etapi0pi0 MC
-#runSelector('"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/f1_to_etapipi/tree_pi0eta*"',
-#        reconTreeName,"f16g2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
-
+### Another set of prefiltered datasets with loose sb and acc regions
+#for i in [1,2,3]:
+#    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/D2017_1_selected_wUnusedShowers_sbL_accN_acc_tree.root"',reconTreeName,"D2017_1_selected"+tag,i,proof_Nthreads,recon_cfiles)
+#    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/D2018_1_selected_wUnusedShowers_sbL_accN_acc_tree.root"',reconTreeName,"D2018_1_selected"+tag,i,proof_Nthreads,recon_cfiles)
+#    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/D2018_8_selected_wUnusedShowers_sbL_accN_acc_tree.root"',reconTreeName,"D2018_8_selected"+tag,i,proof_Nthreads,recon_cfiles)
 #for i in [3]:
-#    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/D2017_1_selected_sbL_accL_acc_tree.root"',reconTreeName,"D2017_1_selected"+tag,i,proof_Nthreads,recon_cfiles)
-#    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/D2018_1_selected_sbL_accL_acc_tree.root"',reconTreeName,"D2018_1_selected"+tag,i,proof_Nthreads,recon_cfiles)
-#    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/D2018_8_selected_sbL_accL_acc_tree.root"',reconTreeName,"D2018_8_selected"+tag,i,proof_Nthreads,recon_cfiles)
-
-## Exotic review 2022
-#    runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_A2_EtaPi0_Spring2017_20221021063447pm/root/trees/tree_pi0eta*"',
-#            reconTreeName,"ExoticReviewA2_2017_1_selected",3,proof_Nthreads,recon_cfiles)
-#    runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_PI1_EtaPi0_Spring2017_20221020103256am/root/trees/tree_pi0eta*"',
-#            reconTreeName,"ExoticReview_2017_1_selected",3,proof_Nthreads,recon_cfiles)
-#    runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_A2_EtaPi0_Spring2018_20221021063729pm/root/trees/tree_pi0eta*"',
-#            reconTreeName,"ExoticReviewA2_2018_1_selected",3,proof_Nthreads,recon_cfiles)
-#    runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_PI1_EtaPi0_Spring2018_20221020102347am/root/trees/tree_pi0eta*"',
-#            reconTreeName,"ExoticReview_2018_1_selected",3,proof_Nthreads,recon_cfiles)
-#    runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_A2_EtaPi0_Fall2018_20221021064015pm/root/trees/tree_pi0eta*"',
-#            reconTreeName,"ExoticReviewA2_2018_8_selected",3,proof_Nthreads,recon_cfiles)
-#    runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_PI1_EtaPi0_Fall2018_20221020095551am/root/trees/tree_pi0eta*"',
-#            reconTreeName,"ExoticReview_2018_8_selected",3,proof_Nthreads,recon_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_A2_EtaPi0_Spring2017_20221021063447pm/root/thrown/tree_thrown*"',thrownTreeName,
-#        "ExoticReviewA2_2017_1_gen",1,proof_Nthreads,thrown_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_PI1_EtaPi0_Spring2017_20221020103256am/root/thrown/tree_thrown*"',thrownTreeName,
-#        "ExoticReview_2017_1_gen",1,proof_Nthreads,thrown_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_A2_EtaPi0_Spring2018_20221021063729pm/root/thrown/tree_thrown*"',thrownTreeName,
-#        "ExoticReviewA2_2018_1_gen",1,proof_Nthreads,thrown_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_PI1_EtaPi0_Spring2018_20221020102347am/root/thrown/tree_thrown*"',thrownTreeName,
-#        "ExoticReview_2018_1_gen",1,proof_Nthreads,thrown_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_A2_EtaPi0_Fall2018_20221021064015pm/root/thrown/tree_thrown*"',thrownTreeName,
-#        "ExoticReviewA2_2018_8_gen",1,proof_Nthreads,thrown_cfiles)
-#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_PI1_EtaPi0_Fall2018_20221020095551am/root/thrown/tree_thrown*"',thrownTreeName,
-#        "ExoticReview_2018_8_gen",1,proof_Nthreads,thrown_cfiles)
+#    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/F2017_1_selected_wUnusedShowers_sbL_accN_acc_tree.root"',reconTreeName,"F2017_1_selected"+tag,i,proof_Nthreads,recon_cfiles)
+#    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/F2018_1_selected_wUnusedShowers_sbL_accN_acc_tree.root"',reconTreeName,"F2018_1_selected"+tag,i,proof_Nthreads,recon_cfiles)
+#    runSelector('"/d/grid17/ln16/dselector_v3/phase1_selected_v4/F2018_8_selected_wUnusedShowers_sbL_accN_acc_tree.root"',reconTreeName,"F2018_8_selected"+tag,i,proof_Nthreads,recon_cfiles)
 
 
 # FILTERED LOOSE CHI UE PHASE 1 DATA. HAS NEAREST RF BUNCH SKIPPED
@@ -132,6 +82,65 @@ runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_8_260M_130M/merged/tre
 #    runSelector('"/d/grid17/ln16/rootFiles/pi0eta/malte_kmatrix_10M_030322/root/trees/tree*"',reconTreeName,"kmatrix_selected",i,proof_Nthreads,recon_cfiles)
 #runSelector('"/d/grid17/ln16/rootFiles/pi0eta/malte_kmatrix_10M_030322/root/thrown/tree*"',thrownTreeName,"kmatrix_gen",1,proof_Nthreads,thrown_cfiles)
 
+### PHASE 1 b1 MC
+#runSelector('"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2017_01_ver03.0/root/merged/tree_pi0eta*"',
+#        reconTreeName,"BOne2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_01_ver03.0/root/merged/tree_pi0eta*"',
+#        reconTreeName,"BOne2018_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_08_ver03.0_60M/root/merged/tree_pi0eta*"',
+#        reconTreeName,"BOne2018_8_selected"+tag,3,proof_Nthreads,recon_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2017_01_ver03.0/root/merged/tree_thrown*"',
+#        thrownTreeName,"BOne2017_1_gen"+tag,1,proof_Nthreads,thrown_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_01_ver03.0/root/merged/tree_thrown*"',
+#        thrownTreeName,"BOne2018_1_gen"+tag,1,proof_Nthreads,thrown_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_08_ver03.0_60M/root/merged/tree_thrown*"',
+#        thrownTreeName,"BOne2018_8_gen"+tag,1,proof_Nthreads,thrown_cfiles)
+
+### f2 to pi0pi0 MC
+#runSelector('"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/pi0pi0/tree_pi0eta*"',
+#        reconTreeName,"FTwo2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
+### etaprime to etapi0pi0 MC
+#runSelector('"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/etap_to_etapipi/tree_pi0eta*"',
+#        reconTreeName,"etap6g2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
+### eta to 3pi0 MC
+#runSelector('"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/eta_to_3pi/tree_pi0eta*"',
+#        reconTreeName,"eta6g2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
+### a2pi to etapi0pi0 MC
+#runSelector('"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/a2pi/tree_pi0eta*"',
+#        reconTreeName,"a2pi6g2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
+### f1 to etapi0pi0 MC
+#runSelector('"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/f1_to_etapipi/tree_pi0eta*"',
+#        reconTreeName,"f16g2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
+
+## Exotic review 2022
+#    runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_A2_EtaPi0_Spring2017_20221021063447pm/root/trees/tree_pi0eta*"',
+#            reconTreeName,"ExoticReviewA2_2017_1_selected",3,proof_Nthreads,recon_cfiles)
+#    runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_PI1_EtaPi0_Spring2017_20221020103256am/root/trees/tree_pi0eta*"',
+#            reconTreeName,"ExoticReview_2017_1_selected",3,proof_Nthreads,recon_cfiles)
+#    runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_A2_EtaPi0_Spring2018_20221021063729pm/root/trees/tree_pi0eta*"',
+#            reconTreeName,"ExoticReviewA2_2018_1_selected",3,proof_Nthreads,recon_cfiles)
+#    runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_PI1_EtaPi0_Spring2018_20221020102347am/root/trees/tree_pi0eta*"',
+#            reconTreeName,"ExoticReview_2018_1_selected",3,proof_Nthreads,recon_cfiles)
+#    runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_A2_EtaPi0_Fall2018_20221021064015pm/root/trees/tree_pi0eta*"',
+#            reconTreeName,"ExoticReviewA2_2018_8_selected",3,proof_Nthreads,recon_cfiles)
+#    runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_PI1_EtaPi0_Fall2018_20221020095551am/root/trees/tree_pi0eta*"',
+#            reconTreeName,"ExoticReview_2018_8_selected",3,proof_Nthreads,recon_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_A2_EtaPi0_Spring2017_20221021063447pm/root/thrown/tree_thrown*"',thrownTreeName,
+#        "ExoticReviewA2_2017_1_gen",1,proof_Nthreads,thrown_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_PI1_EtaPi0_Spring2017_20221020103256am/root/thrown/tree_thrown*"',thrownTreeName,
+#        "ExoticReview_2017_1_gen",1,proof_Nthreads,thrown_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_A2_EtaPi0_Spring2018_20221021063729pm/root/thrown/tree_thrown*"',thrownTreeName,
+#        "ExoticReviewA2_2018_1_gen",1,proof_Nthreads,thrown_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_PI1_EtaPi0_Spring2018_20221020102347am/root/thrown/tree_thrown*"',thrownTreeName,
+#        "ExoticReview_2018_1_gen",1,proof_Nthreads,thrown_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_A2_EtaPi0_Fall2018_20221021064015pm/root/thrown/tree_thrown*"',thrownTreeName,
+#        "ExoticReviewA2_2018_8_gen",1,proof_Nthreads,thrown_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/exoticReview2022/ExoticReview2022_PI1_EtaPi0_Fall2018_20221020095551am/root/thrown/tree_thrown*"',thrownTreeName,
+#        "ExoticReview_2018_8_gen",1,proof_Nthreads,thrown_cfiles)
+
+## BGGEN 2018_8
+runSelector('"/d/grid17/ln16/rootFiles/pi0eta/bggen_2018_8/symlinked_trees/tree_pi0eta__B4_M17_M7_*"',
+        reconTreeName,"BGGEN2018_8_selected",3,proof_Nthreads,recon_cfiles)
 
 
 

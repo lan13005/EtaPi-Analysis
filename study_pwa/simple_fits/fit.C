@@ -10,7 +10,7 @@ void fit(){
     using namespace RooFit;
     ofstream ofile;
     ofile.open("yields.txt");
-    ofile << "t\tform\tnsig\tnsig_err\tnormalization\tpeak\tpeak_err\twidth\twidth_err\tfitstatus" << endl;
+    ofile << "t\tform\tnsig\tnsig_err\tnormalization\tpeak\tpeak_err\twidth\twidth_err" << endl;
     
     TCanvas* c = new TCanvas("c1","",1200,900);
     gStyle->SetOptFit(1);
@@ -44,7 +44,7 @@ void fit(){
             ////////////////////////
             //  LOAD DATA
             ////////////////////////
-            string floc="/d/grid17/ln16/dselector_v3/phase1_selected_v2/D"+run+"_selected_acc_flat.root";
+            string floc="/d/grid17/ln16/dselector_v3/phase1_selected_v4/D"+run+"_selected_nominal_acc_flat.root";
             cout << "loading: " << floc << endl;
             ROOT::RDataFrame d("kin", floc.c_str());
             auto df=d.Filter(Form("mandelstam_t>%f && mandelstam_t<%f",mint,maxt));
@@ -66,7 +66,7 @@ void fit(){
             ////////////////////////
             //  LOAD ACC
             ////////////////////////
-            string floc="/d/grid17/ln16/dselector_v3/phase1_selected/F"+run+"_selected_acc_flat.root";
+            string floc="/d/grid17/ln16/dselector_v3/phase1_selected_v4/F"+run+"_selected_nominal_acc_flat.root";
             cout << "loading: " << floc << endl;
             ROOT::RDataFrame dacc("kin", floc.c_str());
             auto df=dacc.Filter(Form("mandelstam_t>%f && mandelstam_t<%f",mint,maxt));
@@ -90,7 +90,7 @@ void fit(){
             ////////////////////////
             //  LOAD GEN
             ////////////////////////
-            string floc="/d/grid17/ln16/dselector_v3/phase1_selected/F"+run+"_gen_data_flat.root";
+            string floc="/d/grid17/ln16/dselector_v3/phase1_selected_v4/F"+run+"_gen_data_flat.root";
             cout << "loading: " << floc << endl;
             ROOT::RDataFrame dgen("kin", floc.c_str(),{"Weight","mandelstam_t_thrown","Mpi0eta_thrown"});
             auto df=dgen.Filter(Form("mandelstam_t_thrown>%f && mandelstam_t_thrown<%f",mint,maxt));
@@ -221,10 +221,11 @@ void fit(){
             ofile << mint+(maxt-mint)/2 << "\t" << form << "\t" << nsig.getVal()*normalization  << "\t" << nsig.getError()*normalization << "\t"
                 << normalization << "\t" 
                 << mean.getVal() << "\t" << mean.getError() << "\t"
-                << width.getVal() << "\t" << width.getError() << "\t" 
+                << width.getVal() << "\t" << width.getError() 
                 << endl;
 
             c->Print(("results/"+forms[iform]+"_plus_poly_t"+t+".pdf").c_str());  
+            c->Print(("results/"+forms[iform]+"_plus_poly_t"+t+".png").c_str());  
             ++iform;
         }
     }

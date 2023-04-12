@@ -703,8 +703,9 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 
                 // Turn off some selections related to M(4g) and t so that we can use another program to
                 //      split the final flat trees up. This should lower our total run times
-		bMetapi0=true; 
-                bmandelstamt=true; 
+		bMetapi0 = (Metapi0>1.04)*(Metapi0<1.72); // Select the a2(1320) mass region
+                bmandelstamt=(mandelstam_t<1)*(mandelstam_t>0.1); 
+		bUnusedEnergy=dComboWrapper->Get_Energy_UnusedShowers()<0.4;
                 //bLowMassAltCombo=true; // temporarily turn this on to study its performance
 
                 // temporarily turn this off so we can study the qfactors comparison

@@ -3,7 +3,7 @@ string fitName="EtaPi0";
 //vector<string> pols={"000","045","090","135","allPols"};
 vector<string> pols={"000"};
 
-vector<string> groups={"_S0+-_S0++_D1--_D0+-_D1+-_D0++_D1++_D2++_pD1--_pD0+-_pD1+-_pD0++_pD1++_pD2++","_S0+-","_S0++","_D1--","_D0+-","_D1+-","_D0++","_D1++","_D2++","_D1--_pD1--","_D0+-_pD0+-","_D1+-_pD1+-","_D0++_pD0++","_D1++_pD1++","_D2++_pD2++","_pD1--","_pD0+-","_pD1+-","_pD0++","_pD1++","_pD2++","_S0+-_S0++","_D1--_D0+-_D1+-_D0++_D1++_D2++","_pD1--_pD0+-_pD1+-_pD0++_pD1++_pD2++","_D1--_D0+-_D1+-_D0++_D1++_D2++_pD1--_pD0+-_pD1+-_pD0++_pD1++_pD2++","_S0++_D0++_D1++_D2++_pD0++_pD1++_pD2++","_S0+-_D1--_D0+-_D1+-_pD1--_pD0+-_pD1+-"};
+vector<string> groups={"_S0+-_S0++_D1--_D0+-_D1+-_D0++_D1++_D2++_pD1--_pD0+-_pD1+-_pD0++_pD1++_pD2++"};
 void overlaySingleBin(int iBin,int nBins, vector<string> names1D, vector<TCanvas*> allCanvases, string selectPol, string folder){
         gStyle->SetOptStat(kFALSE);
 

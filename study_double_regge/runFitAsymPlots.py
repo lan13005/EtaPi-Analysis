@@ -35,8 +35,8 @@ def runCommand(cmd):
 #####################################
 ### Need to manually enter this, as parsing the file is complicated
 # i is the ith element of eventSelects vector which contains a specific systematic you wish to run
-#js=range(17) # main systematics + default fits have 17 total variations
-js=[0]
+js=range(17) # main systematics + default fits have 17 total variations
+#js=[0,1]
 
 cmds=["./fitAsymmetryPlots "+str(j)+" >> logs/output"+str(j)+".log 2>&1" for j in js]
 print("\n********************************************\nExecuting all the following commands in 3 seconds!\n********************************************")
@@ -46,7 +46,6 @@ time.sleep(3)
 
 with Pool(len(cmds)) as p:
     p.map(runCommand,cmds)
-
 
 end = time.time()
 

@@ -14,11 +14,12 @@ fluxCounts=[]
 def getFlux(args):
     pol,i=args
     fluxCounts.append([])
-    cmd_base="/d/grid13/gluex/gluex_top/hd_utilities/hd_utilities-1.17/psflux/plot_flux_ccdb.py --begin-run="+str(runStarts[i])+" --end-run="+str(runEnds[i])
+    cmd_base="/d/grid13/gluex/gluex_top/hd_utilities/hd_utilities-1.44/psflux/plot_flux_ccdb.py --begin-run="+str(runStarts[i])+" --end-run="+str(runEnds[i])
     cmd_bins="--num-bins=1"
     cmd_lowE="--energy-min=8.2"
     cmd_uppE="--energy-max=8.8"
-    cmds=[cmd_base,cmd_bins,cmd_lowE,cmd_uppE]
+    cmd_targetLength="--target-length=26"
+    cmds=[cmd_base,cmd_bins,cmd_lowE,cmd_uppE,cmd_targetLength]
     cmd=" ".join(cmds)
     
     if pol!="":

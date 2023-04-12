@@ -19,26 +19,24 @@ void split_flat_kinematics(){
     bool forceSplitting=true; // Should we run the splitting again? Or should we just sum runs if sumRuns=true
     bool remergePols=true; // should we remerge polarizations after splitting? 
     
-    //string otag="_selectGenTandM";
-    //string itag="_nominal";
-    string otag="_kmatrix";
-    string itag="";
+    string otag="_selectGenTandM";
+    string itag="_wUnusedShowers_sbN_accT";
 
     string folder="phase1_selected_v4/";
-    bool ignorePolarization=true; // Kmatrix stuff has only one polarization, so ignore. No polarization in Flat MC so ignore also
-    vector<string> runs={"2018_8"};//,"2018_1","2018_8"};
+    bool ignorePolarization=false; // Kmatrix stuff has only one polarization, so ignore. No polarization in Flat MC so ignore also
+    vector<string> runs={"2017_1","2018_1","2018_8"};
     vector<string> files;
     for (auto run: runs){
-        //files.push_back("D"+run+"_selected"+itag+"_data_flat.root");
-        //files.push_back("D"+run+"_selected"+itag+"_bkgnd_flat.root");
-        //files.push_back("D"+run+"_selected"+itag+"_acc_flat.root");
-        //files.push_back("F"+run+"_selected"+itag+"_acc_flat.root");
+        files.push_back("D"+run+"_selected"+itag+"_data_flat.root");
+        files.push_back("D"+run+"_selected"+itag+"_bkgnd_flat.root");
+        files.push_back("D"+run+"_selected"+itag+"_acc_flat.root");
+        files.push_back("F"+run+"_selected"+itag+"_acc_flat.root");
         //files.push_back("F"+run+"_gen_data_flat.root");
         
         //files.push_back("K"+run+"_selected"+itag+"_data_flat.root");
         //files.push_back("K"+run+"_selected"+itag+"_bkgnd_flat.root");
-        files.push_back("F"+run+"_selected"+itag+"_acc_flat.root");
-        files.push_back("F"+run+"_gen_data_flat.root");
+        //files.push_back("F"+run+"_selected"+itag+"_acc_flat.root");
+        //files.push_back("F"+run+"_gen_data_flat.root");
     }
 
     // ********************************************
@@ -46,12 +44,17 @@ void split_flat_kinematics(){
     // ********************************************
     int nFileTypes=((int)files.size())/((int)runs.size());
 
-    map<int,int> pols={{0,0}};//,{45,1},{90,2},{135,3},{-1,4}};
-    vector<string> polstrings={"000"};//,"045","090","135","AMO"};
+    map<int,int> pols={{0,0},{45,1},{90,2},{135,3},{-1,4}};
+    vector<string> polstrings={"000","045","090","135","AMO"};
 
+    /// NOMINAL t-binning
     map<string,int> ts={{"010020",0},{"0200325",1},{"0325050",2},{"050075",3},{"075100",4}}; // t
     vector<float> mint={0.1,0.2,0.325,0.5,0.75};
     vector<float> maxt={0.2,0.325,0.5,0.75,1.0};
+    /// VARIATION of t-binning
+    //map<string,int> ts={{"01502625",0},{"0262504125",1},{"041250625",2},{"06250875",3}}; // t
+    //vector<float> mint={0.15,0.2625,0.4125,0.625};   // Check to see if there is any t-binning effect going on
+    //vector<float> maxt={0.2625,0.4125,0.625,0.875};
     map<string,int> mpi0etas={{"104172",0}}; // m 
     vector<float> minmpi0eta={1.04};
     vector<float> maxmpi0eta={1.72};
@@ -158,7 +161,7 @@ void split_flat_kinematics(){
                          ++im; // this has to be first otherwise it might never increment
                          //pVH2=filterOmega(vanHove_omega,mpi0eta);
                          //if (has_recon_branches*!pVH2) continue;
-                         if (has_recon_branches*!pVH) continue;
+                         //if (has_recon_branches*!pVH) continue;
                          //if (has_recon_branches*!(mpi0p>2.0)) continue;
                          if (has_recon_branches*!((mandelstam_t>mint[it])*(mandelstam_t<maxt[it]))) continue;
                          if (has_recon_branches*!((mpi0eta>minmpi0eta[im])*(mpi0eta<maxmpi0eta[im]))) continue;

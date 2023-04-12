@@ -25,7 +25,7 @@ def printHelp():
     
 args=sys.argv
 nargs=len(args)
-if nargs!=10:
+if nargs!=11:
     printHelp()
     exit()
 else:
@@ -37,7 +37,8 @@ else:
     doAccCorr=str(args[6])
     plotAllVars=str(args[7])
     plotGenData=str(args[8])
-    folder=str(args[9])
+    ffonly=str(args[9])
+    folder=str(args[10])
     groupVec=ampString.split(";")
     groups=[tmp if tmp!="" else tmp for tmp in groupVec]
     groupTags=["_"+tmp if tmp!="" else tmp for tmp in groupVec]
@@ -56,7 +57,7 @@ def runEtaPiPlotterForAllBins():
     os.system("mkdir -p overlayPlots")
     #for igroup in range(len(groups)):
     #    cmd=["etapi_plotter",fitFile,"-o","etapi_plot"+groupTags[igroup]+".root","-s",groups[igroup]]
-    cmd=["etapi_plotter",fitFile,"-s",ampString,"-a",doAccCorr,"-var",plotAllVars,"-gen",plotGenData,"-F",Ls]
+    cmd=["etapi_plotter",fitFile,"-s",ampString,"-a",doAccCorr,"-var",plotAllVars,"-gen",plotGenData,"-ffonly",ffonly,"-F",Ls]
     print("calling: "+" ".join(cmd))
 #    os.system("touch etapi.root") # just for testing purposes
     if verbose:

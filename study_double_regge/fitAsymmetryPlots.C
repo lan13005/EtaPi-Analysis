@@ -38,7 +38,7 @@ string fitOption = "E S Q";
 bool verbose=true;
 bool fitPhi=false; // (True) exit program if fitting phi (shifted cosine fits) do not converge after maxiter times 
 int maxiter=200; // maximum reinitializations for asymmetry fits before we give up and exit, manually need to address this
-string fileType="png";
+string fileType="png"; // linux program 'montage' has trouble with pdfs...
 string folder="/d/grid17/ln16/dselector_v3/study_double_regge/rootFiles/";
 string outputFolder="fitAsymmetryPlots_results/";
 
@@ -112,28 +112,30 @@ int main(int argc, char* argv[]){
     //   where the "defaultSelections" are applied to the event selection variables. This is available for all systematic studies
     //   but is particually useful for this one where we are varying the selections. It does appear to work
     /////////////////////
-//    vector<string> sbTags={"_ASBS"}; 
-//    string weightVar="weightASBS"; // Will not overwrite AccWeight if "AccWeight" else overwrite weightVar with AccWeight*weightBS
-//    showSummary=true;
-//
-//    // L=Looser, T=tighter bounds
-//    eventSelects={
+    vector<string> sbTags={"_ASBS"}; 
+    //Will overwrite the branch defined by weightVar with AccWeight*weightBS if weightVar!='AccWeight'
+    //   and where weightBS is manullay defined around line 1030. Currently used to overwrite weightASBS branch to w.e. we want. i.e. if we do not want 
+    //   to use pi0 sidebands
+    string weightVar="weightASBS"; 
+    showSummary=true;
+    // L=Looser, T=tighter bounds
+    eventSelects={
 //        {"default", {make_pair(0,criteria{"default",0,0,0,0})} }, // Including a default where we do not make any selection modifications to the default
-//        {"_evtSel_ueL1", {make_pair(0,criteria{"unusedEnergy",fltmin,0.25,fltmin,fltmin})} },
-//        {"_evtSel_ueL2", {make_pair(0,criteria{"unusedEnergy",fltmin,0.40,fltmin,fltmin})} },
-//        {"_evtSel_chiT", {make_pair(1,criteria{"chiSq",fltmin,12,fltmin,fltmin})} },
-//        {"_evtSel_chiL", {make_pair(1,criteria{"chiSq",fltmin,24,fltmin,fltmin})} },
+//        {"_evtSel_ueL1", {make_pair(0,criteria{"unusedEnergy",fltmin,0.13,fltmin,fltmin})} },
+//        {"_evtSel_ueL2", {make_pair(0,criteria{"unusedEnergy",fltmin,0.17,fltmin,fltmin})} },
+//        {"_evtSel_chiT", {make_pair(1,criteria{"chiSq",fltmin,11.5,fltmin,fltmin})} },
+        {"_evtSel_chiL", {make_pair(1,criteria{"chiSq",fltmin,16,fltmin,fltmin})} },
 //        {"_evtSel_gThetaBeamL", {   
-//                                make_pair(2,criteria{"photonTheta1",2.0,10.3,11.9,fltmax}),
-//                                make_pair(3,criteria{"photonTheta2",2.0,10.3,11.9,fltmax}),
-//                                make_pair(4,criteria{"photonTheta3",2.0,10.3,11.9,fltmax}),
-//                                make_pair(5,criteria{"photonTheta4",2.0,10.3,11.9,fltmax}),
+//                                make_pair(2,criteria{"photonTheta1",2.1,10.3,11.9,fltmax}),
+//                                make_pair(3,criteria{"photonTheta2",2.1,10.3,11.9,fltmax}),
+//                                make_pair(4,criteria{"photonTheta3",2.1,10.3,11.9,fltmax}),
+//                                make_pair(5,criteria{"photonTheta4",2.1,10.3,11.9,fltmax}),
 //                            } },
 //        {"_evtSel_gThetaBeamT", {
-//                                make_pair(2,criteria{"photonTheta1",3.0,10.3,11.9,fltmax}),
-//                                make_pair(3,criteria{"photonTheta2",3.0,10.3,11.9,fltmax}),
-//                                make_pair(4,criteria{"photonTheta3",3.0,10.3,11.9,fltmax}),
-//                                make_pair(5,criteria{"photonTheta4",3.0,10.3,11.9,fltmax}),
+//                                make_pair(2,criteria{"photonTheta1",2.8,10.3,11.9,fltmax}),
+//                                make_pair(3,criteria{"photonTheta2",2.8,10.3,11.9,fltmax}),
+//                                make_pair(4,criteria{"photonTheta3",2.8,10.3,11.9,fltmax}),
+//                                make_pair(5,criteria{"photonTheta4",2.8,10.3,11.9,fltmax}),
 //                            } },
 //        {"_evtSel_gThetaTransL", {  
 //                                make_pair(2,criteria{"photonTheta1",2.5,11.4,11.4,fltmax}),
@@ -148,24 +150,24 @@ int main(int argc, char* argv[]){
 //                                make_pair(5,criteria{"photonTheta4",2.5,10.0,12.5,fltmax}),
 //                            } },
 //        {"_evtSel_gET1", {
+//                                make_pair(6,criteria{"photonE1",0.11,fltmax,fltmin,fltmin}),
+//                                make_pair(7,criteria{"photonE2",0.11,fltmax,fltmin,fltmin}),
+//                                make_pair(8,criteria{"photonE3",0.11,fltmax,fltmin,fltmin}),
+//                                make_pair(9,criteria{"photonE4",0.11,fltmax,fltmin,fltmin}),
+//                            } },
+//        {"_evtSel_gET2", {
 //                                make_pair(6,criteria{"photonE1",0.12,fltmax,fltmin,fltmin}),
 //                                make_pair(7,criteria{"photonE2",0.12,fltmax,fltmin,fltmin}),
 //                                make_pair(8,criteria{"photonE3",0.12,fltmax,fltmin,fltmin}),
 //                                make_pair(9,criteria{"photonE4",0.12,fltmax,fltmin,fltmin}),
 //                            } },
-//        {"_evtSel_gET2", {
-//                                make_pair(6,criteria{"photonE1",0.13,fltmax,fltmin,fltmin}),
-//                                make_pair(7,criteria{"photonE2",0.13,fltmax,fltmin,fltmin}),
-//                                make_pair(8,criteria{"photonE3",0.13,fltmax,fltmin,fltmin}),
-//                                make_pair(9,criteria{"photonE4",0.13,fltmax,fltmin,fltmin}),
-//                            } },
 //        {"_evtSel_pMomT1", {make_pair(10,criteria{"proton_momentum",0.35,fltmax,fltmin,fltmin})} },
 //        {"_evtSel_pMomT2", {make_pair(10,criteria{"proton_momentum",0.40,fltmax,fltmin,fltmin})} },
-//        {"_evtSel_pZL", {make_pair(11,criteria{"proton_z",50,80,fltmin,fltmin})} },
-//        {"_evtSel_pZT", {make_pair(11,criteria{"proton_z",54,76,fltmin,fltmin})} },
-//        {"_evtSel_mmsqT1", {make_pair(12,criteria{"mmsq",-0.025,0.025,fltmin,fltmin})} },
-//        {"_evtSel_mmsqT2", {make_pair(12,criteria{"mmsq",-0.020,0.020,fltmin,fltmin})} },
-//    };
+//        {"_evtSel_pZL", {make_pair(11,criteria{"proton_z",51,79,fltmin,fltmin})} },
+//        {"_evtSel_pZT", {make_pair(11,criteria{"proton_z",53,77,fltmin,fltmin})} },
+//        {"_evtSel_mmsqT1", {make_pair(12,criteria{"mmsq",-0.024,0.024,fltmin,fltmin})} },
+//        {"_evtSel_mmsqT2", {make_pair(12,criteria{"mmsq",-0.030,0.030,fltmin,fltmin})} },
+    };
 
     /////////////////////
     // EVENT SELECTION SCANS - MAINLY FOR CHISQ, UE, AND PROTON MOMENTUM WHICH WAS SHOWING LARGE BARLOWS
@@ -200,12 +202,12 @@ int main(int argc, char* argv[]){
 //    };
 
     /////////////////////
-    // SPLIT ETA IN TWO SIDEBAND SUB WITH ONE SIDE
-    //   need to make the selection on Meta manually
-    //   do not select on Mpi0
+    // SPLIT ONE SIDE OF THE ETA MASS DISTRIBUTION 
+    //   NO NEED TO MODIFY WEIGHTS. SPLITTING SIGNAL AND SIDEBAND REGIONS IN HALF, CANCELS
+    //   need to make the selection on Meta manually do not select on Mpi0
     //   Can check mass_plots_etaLeft_ASBS.pdf and mass_plots_etaRight_ASBS.pdf to see if the selection is working. It appears so
     /////////////////////
-//    vector<string> sbTags={"_etaLeft_ASBS"};  
+//    vector<string> sbTags={"_etaRight_ASBS"};  
 //    string weightVar="weightASBS";
 
     /////////////////////
@@ -219,28 +221,37 @@ int main(int argc, char* argv[]){
     // FLUX NORMALIZATION SYSTEMATIC 
     //  ** CANNOT DO BOTH REGIONS WITH DIFFERENT PROCESSES IN runFitAsymPlots.py SINCE IT SELECTS ON eventSelectSingles ** 
     /////////////////////
-//    vector<string> sbTags={"_fluxNormMinus5Perc_ASBS"};  
+//    vector<string> sbTags={"_fluxNormPlus5Perc_ASBS"};  
 //    string weightVar="weightASBS";
-//    fluxNormScaleFactor=0.95; // Scale flux normalization by +/- X% for systematics
+//    fluxNormScaleFactor=1.05; // Scale flux normalization by +/- X% for systematics
 
 
     /////////////////////
     // SIDEBAND SYSTEMATICS 
     /////////////////////
 //    sbRegions = {
-//        {2.5, 1.5, 2.0, 2.5, 2.5, 4.0}, //Narrow
-//        {3.5, 0.5, 4.0, 3.5, 1.5, 8.0} //Wider
+//        //{2.5, 1.5, 2.0, 2.5, 2.5, 4.0}, //Narrow
+//        //{3.5, 0.5, 4.0, 3.5, 1.5, 8.0} //Wider
+//        {0, 0, 0, 2.5, 2.5, 4.0}, //Narrow, no longer subtracting pi0
+//        {0, 0, 0, 3.5, 1.5, 8.0} //Wider, no longer subtracting pi0
 //    }; 
-//    vector<string> sbTags={"_sb_251520_252540_ASBS", "_sb_350540_351580_ASBS"}; 
+//    vector<string> sbTags={"_sb_252540_ASBS", "_sb_351580_ASBS"}; 
 //    string weightVar="weightASBS"; // Will not overwrite AccWeight if "AccWeight" else overwrite weightVar with AccWeight*weightBS
 
     /////////////////////
     // CHECK TO SEE IF WE SHOULD SIDEBAND SUBTRACT OR NOT
-    //   Fast eta has less data so we construct only 1 bin for the test
+    //   Fast eta has less data so we construct only 1 bin for the test. Dont do the additional binning in u3,  s12, s23. Integrated case only
     //   Only select on eta sidebands, where basically all the background exists
+    //   Need to change 'nt1bins' to reflect the binning
     /////////////////////
-    vector<string> sbTags={"_sbR"}; // {"_sbR"}, {"_sbL"}, {"_sbR_1bin"}, {"_sbL_1bin"} 
-    string weightVar="AccWeight"; // only subtract accidentals since we are testing sideband subtraction
+//    vector<string> sbTags={"_sbL_1bin"}; // {"_sbR"}, {"_sbL"}, {"_sbR_1bin"}, {"_sbL_1bin"} 
+//    string weightVar="AccWeight"; // only subtract accidentals since we are testing sideband subtraction
+
+
+    /////////////////////
+    // END 
+    /////////////////////
+
 
     map<string,vector<pair<int,criteria>>> eventSelectSingles;
     int ikey=0;
@@ -258,7 +269,7 @@ int main(int argc, char* argv[]){
     /////////////////////
     // EXTRACT ASYMS IN A LOOP
     /////////////////////
-    for (int i=0; i<(int)sbTags.size(); ++i){
+    for (int i=0; i<(int)sbTags.size(); ++i){ // loop mainly for sideband subtraction systematic scan but used by all scans
         vector<double> fluxRatios_90_0 = {  4.346818e+12/4.188001e+12*fluxNormScaleFactor, 0.965429*fluxNormScaleFactor, 0.918503*fluxNormScaleFactor }; 
         vector<double> fluxRatios_45_135 = {  4.076065e+12/4.095013e+12*fluxNormScaleFactor , 1.02261*fluxNormScaleFactor, 1.03254*fluxNormScaleFactor };
         constructFitArgs args = {weightVar, freePhase, fluxRatios_90_0, fluxRatios_45_135};
@@ -293,6 +304,16 @@ void constructAndFit(
     ofstream* saveCsv
     ){
     
+    TLatex *text = new TLatex();
+    text->SetTextSize(0.08);
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(2) << selections[0].minval1;
+    std::string sminval1 = ss.str();
+    ss.str(""); ss.clear();
+    ss << std::fixed << std::setprecision(2) << selections[0].maxval1;
+    std::string smaxval1 = ss.str();
+    bool overlayBinInfoIntoAsymPlots=true;
+
     cout << "Constructing phi histograms and fitting" << endl;
 
     string weightVar=args.weightVar;
@@ -603,6 +624,8 @@ void constructAndFit(
                 asymmetry000_090_eta_chiPerDOF = -999;
             }
             asymmetry000_090_eta->Draw("SAME");
+            if (overlayBinInfoIntoAsymPlots)
+                text->DrawTextNDC(0.12, 0.14, (sminval1+"<"+selections[0].variable+"<"+smaxval1).c_str());
             asymmetry000_090_eta->SetAxisRange(-1,1,"Y");
         
             allCanvases->cd(2);
@@ -639,6 +662,8 @@ void constructAndFit(
                 asymmetry045_135_eta_chiPerDOF = -999;
             }
             asymmetry045_135_eta->Draw("SAME");
+            if (overlayBinInfoIntoAsymPlots)
+                text->DrawTextNDC(0.12, 0.14, (sminval1+"<"+selections[0].variable+"<"+smaxval1).c_str());
             asymmetry045_135_eta->SetAxisRange(-1,1,"Y");
             allCanvases->SaveAs((fitSaveLoc+"_eta"+mint1s[it1bin]+"_"+dataSetTag2[iData]+"."+fileType).c_str()); 
 
@@ -738,6 +763,8 @@ void constructAndFit(
                 asymmetry000_090_pi0_chiPerDOF = -999;
             }
             asymmetry000_090_pi0->Draw("SAME");
+            if (overlayBinInfoIntoAsymPlots)
+                text->DrawTextNDC(0.12, 0.14, (sminval1+"<"+selections[0].variable+"<"+smaxval1).c_str());
             asymmetry000_090_pi0->SetAxisRange(-1,1,"Y");
             
             allCanvases->cd(2);
@@ -774,6 +801,8 @@ void constructAndFit(
                 asymmetry045_135_pi0_chiPerDOF = -999;
             }
             asymmetry045_135_pi0->Draw("SAME");
+            if (overlayBinInfoIntoAsymPlots)
+                text->DrawTextNDC(0.12, 0.14, (sminval1+"<"+selections[0].variable+"<"+smaxval1).c_str());
             asymmetry045_135_pi0->SetAxisRange(-1,1,"Y");
             allCanvases->SaveAs((fitSaveLoc+"_pi0"+mint1s[it1bin]+"_"+dataSetTag2[iData]+"."+fileType).c_str()); 
 
@@ -965,7 +994,7 @@ map<string, float> extractAsymmetries(
         "photonTheta1","photonTheta2","photonTheta3","photonTheta4",
         "photonE1","photonE2","photonE3","photonE4",
         "mandelstam_t","mandelstam_tp","mandelstam_teta","mandelstam_tpi0","Mpi0eta","AccWeight","weightASBS"};
-    unordered_map<string, vector<float>> array_variable_map_all;
+    unordered_map<string, vector<float>> array_variable_map_all; // Contains 'all' the values as opposed to array_variable_map, which contains selectiond
     unordered_map<string, vector<int>> array_BeamAngles_map_all;
 
     // **************************************************
@@ -1002,6 +1031,7 @@ map<string, float> extractAsymmetries(
     	TFile *dataFile = new TFile(dataFileName.c_str());
         dataFile->GetObject("kin",tree);
         tree->SetBranchStatus("*",0); // disable all branches and re-enable only the ones we want to look at
+        //nentries_all.push_back(10000); 
         nentries_all.push_back(tree->GetEntries());
         cout << dataSetTag[iData] << " nentries: " << nentries_all[iData] << endl;
         
@@ -1034,7 +1064,8 @@ map<string, float> extractAsymmetries(
             else if ( Meta > eta_peak-eta_std*(eta_sig+eta_skip+eta_sb) && Meta < eta_peak-eta_std*(eta_sig+eta_skip) ) { weightBSeta = eta_sbweight; } 
             else if ( Meta > eta_peak+eta_std*(eta_sig+eta_skip) && Meta < eta_peak+eta_std*(eta_sig+eta_skip+eta_sb) ) { weightBSeta = eta_sbweight; } 
             else { weightBSeta = 0; }
-            weightBS=weightBSpi0*weightBSeta;
+            //weightBS=weightBSpi0*weightBSeta;
+            weightBS=weightBSeta;
             //if ( abs(weightASBS-weightBS*AccWeight)>0.00001 ){ // CHECK IF WEIGHTING SCHEME WORKS AS EXPECTED BY COMPARING TO THE WEIGHTS IN THE TREE
             //    cout << "WEIGHTS NOT MATCHING!" << endl;
             //    exit(1);
@@ -1169,7 +1200,7 @@ map<string, float> extractAsymmetries(
                 Meta=array_variable_map_all[dataSetTag[iData]+"_Meta"][ientry];
                 accidental=array_variable_map_all[dataSetTag[iData]+"_AccWeight"][ientry];
                 //cout << "weight, Mpi0, Meta, accidental " << weight << ", " << Mpi0 << ", " << Meta << ", " << accidental << endl;
-                nentries_preDefaultSelects+=weight;
+                nentries_preDefaultSelects+=accidental; // 03/18/23 changed to accidental. For syst comparison we cant be using weightASBS
 
                 if (!selected)
                     continue;
@@ -1177,13 +1208,14 @@ map<string, float> extractAsymmetries(
                 //////////////////////
                 // MAKE SELECTIONS
                 //////////////////////
-                // ******* Select Pi0 Signal
+                // ******* Select Pi0 Signal // There really isn't any background. Just set to true
                 //selectPi0=(Mpi0>pi0sigL)*(Mpi0<pi0sigR);
+                selectPi0=true; 
 
                 // ******* Select Eta Sidebands
                 //selectEta=(Meta>etasbLL)*(Meta<etasbLR)||(Meta>etasbRL)*(Meta<etasbRR);
                 // ******* Select Eta Right Sideband
-                selectEta=(Meta>etasbRL)*(Meta<etasbRR);
+                //selectEta=(Meta>etasbRL)*(Meta<etasbRR);
                 // ******* Select Eta Left Sideband
                 //selectEta=(Meta>etasbLL)*(Meta<etasbLR);
                 // ******* Select Eta Signal
@@ -1195,8 +1227,7 @@ map<string, float> extractAsymmetries(
                 //selectEta=(Meta<eta_peak);
                 
                 // Do not select on Mpi0 nor Meta if we are going to do sideband subtraction also
-                //selectPi0=true; 
-                //selectEta=true;
+                selectEta=true;
                 if(selectPi0*selectEta){ 
                     for(string variable: variables){
                         array_variable_map[dataSetTag[iData]+"_"+variable].push_back(array_variable_map_all[dataSetTag[iData]+"_"+variable][ientry]); 
@@ -1209,8 +1240,8 @@ map<string, float> extractAsymmetries(
                     for (auto const& ele: diagnosticHists){
                         ele.second->Fill(array_variable_map_all[dataSetTag[iData]+"_"+ele.first][ientry],accidental);
                     }
-                    signalIntegral+=weight;
-                    nentries_postDefaultSelects+=weight;
+                    signalIntegral+=accidental; // 03/18/23 changed to accidental since the histogram is actually using accidental weights
+                    nentries_postDefaultSelects+=accidental; // 03/18/23 changed to accidental. For syst comparison we cant be using weightASBS
                 }
             }
             cout << "  remaining weighted entries percentage after default selections and possible sidebands subtraction: " 
@@ -1233,11 +1264,11 @@ map<string, float> extractAsymmetries(
         dHist_Mpi0->GetXaxis()->SetNdivisions(5);
         dHist_Mpi0->Draw("HIST");
         dHist_Mpi0->SetTitle(("Signal Integral: "+to_string((int)signalIntegral)).c_str());
-        box->SetFillColorAlpha(kGreen+2,0.3);
-        box->DrawBox(pi0sigL,0,pi0sigR,dHist_Mpi0->GetMaximum()*1.0);
-        box->SetFillColorAlpha(kRed+1,0.3);
-        box->DrawBox(pi0sbLL,0,pi0sbLR,dHist_Mpi0->GetMaximum()*1.0);
-        box->DrawBox(pi0sbRL,0,pi0sbRR,dHist_Mpi0->GetMaximum()*1.0);
+        //box->SetFillColorAlpha(kGreen+2,0.3);
+        //box->DrawBox(pi0sigL,0,pi0sigR,dHist_Mpi0->GetMaximum()*1.0);
+        //box->SetFillColorAlpha(kRed+1,0.3);
+        //box->DrawBox(pi0sbLL,0,pi0sbLR,dHist_Mpi0->GetMaximum()*1.0);
+        //box->DrawBox(pi0sbRL,0,pi0sbRR,dHist_Mpi0->GetMaximum()*1.0);
         c1->cd(2);
         dHist_Meta->Draw("HIST");
         dHist_Meta->SetTitle(("Signal Integral: "+to_string((int)signalIntegral)).c_str());

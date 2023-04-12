@@ -1,0 +1,43 @@
+import os
+
+floc="010020/etapi_result.fit"
+folderSearch="rootFiles\/t010020_m104180_selectGenTandM"
+folderReplace="rootFiles\/t010020_m104180_selectGenTandM_nominal_wPhotonSyst"
+fileSearch="selected"
+fileReplace="selected_nominal_wPhotonSyst"
+seed=1992
+conditionSearch="Mpi0eta 1.04 1.72 pVH 0.5 999 unusedEnergy -999 0.01 chiSq -999 13.277 !photonTheta1 -999 2.5 !photonTheta1 10.3 11.9 !photonTheta2 -999 2.5 !photonTheta2 10.3 11.9 !photonTheta3 -999 2.5 !photonTheta3 10.3 11.9 !photonTheta4 -999 2.5 !photonTheta4 10.3 11.9 photonE1 0.1 999 photonE2 0.1 999 photonE3 0.1 999 photonE4 0.1 999 proton_momentum 0.3 999 proton_z 52 78 mmsq -0.05 0.05"
+conditionSearch.replace(' ','\ ')
+conditionReplace=f"{seed} Mpi0eta 1.04 1.72 1 pVH 0.5 999 1 unusedEnergy -999 0.01 1 chiSq -999 13.277 1 !photonTheta1 -999 2.5 1 !photonTheta1 10.3 11.9 1 !photonTheta2 -999 2.5 1 !photonTheta2 10.3 11.9 1 !photonTheta3 -999 2.5 1 !photonTheta3 10.3 11.9 1 !photonTheta4 -999 2.5 1 !photonTheta4 10.3 11.9 1 photonE1 0.1 999 1 photonE2 0.1 999 1 photonE3 0.1 999 1 photonE4 0.1 999 1 proton_momentum 0.3 999 1 proton_z 52 78 1 mmsq -0.05 0.05 1"
+conditionSearch.replace(' ','\ ')
+readerSearch='ROOTDataReaderFilter'
+readerReplace='ROOTDataReaderRandomFilter'
+cmd=f"sed -i 's/{folderSearch}/{folderReplace}/g' {floc}"
+os.system(cmd)
+cmd=f"sed -i 's/{fileSearch}/{fileReplace}/g' {floc}"
+os.system(cmd)
+cmd=f"sed -i 's/104180/104172/g' {floc}"
+os.system(cmd)
+cmd=f"sed -i 's/{conditionSearch}/{conditionReplace}/g' {floc}"
+os.system(cmd)
+for dtype in ['data','bkgnd','accmc']:
+    cmd=f"sed -i '/^{dtype}*/s/{readerSearch}/{readerReplace}/g' {floc}"
+    os.system(cmd)
+
+
+#data EtaPi0_000 ROOTDataReaderFilter rootFiles/t010020_m104180_selectGenTandM/pol000_t010020_m104180_selectGenTandM_DTOT_selected_data_flat.root Mpi0eta 1.04 1.72 pVH 0.5 999 unusedEnergy -999 0.01 chiSq -999 13.277 !photonTheta1 -999 2.5 !photonTheta1 10.3 11.9 !photonTheta2 -999 2.5 !photonTheta2 10.3 11.9 !photonTheta3 -999 2.5 !photonTheta3 10.3 11.9 !photonTheta4 -999 2.5 !photonTheta4 10.3 11.9 photonE1 0.1 999 photonE2 0.1 999 photonE3 0.1 999 photonE4 0.1 999 proton_momentum 0.3 999 proton_z 52 78 mmsq -0.05 0.05
+#data EtaPi0_045 ROOTDataReaderFilter rootFiles/t010020_m104180_selectGenTandM/pol045_t010020_m104180_selectGenTandM_DTOT_selected_data_flat.root Mpi0eta 1.04 1.72 pVH 0.5 999 unusedEnergy -999 0.01 chiSq -999 13.277 !photonTheta1 -999 2.5 !photonTheta1 10.3 11.9 !photonTheta2 -999 2.5 !photonTheta2 10.3 11.9 !photonTheta3 -999 2.5 !photonTheta3 10.3 11.9 !photonTheta4 -999 2.5 !photonTheta4 10.3 11.9 photonE1 0.1 999 photonE2 0.1 999 photonE3 0.1 999 photonE4 0.1 999 proton_momentum 0.3 999 proton_z 52 78 mmsq -0.05 0.05
+#data EtaPi0_090 ROOTDataReaderFilter rootFiles/t010020_m104180_selectGenTandM/pol090_t010020_m104180_selectGenTandM_DTOT_selected_data_flat.root Mpi0eta 1.04 1.72 pVH 0.5 999 unusedEnergy -999 0.01 chiSq -999 13.277 !photonTheta1 -999 2.5 !photonTheta1 10.3 11.9 !photonTheta2 -999 2.5 !photonTheta2 10.3 11.9 !photonTheta3 -999 2.5 !photonTheta3 10.3 11.9 !photonTheta4 -999 2.5 !photonTheta4 10.3 11.9 photonE1 0.1 999 photonE2 0.1 999 photonE3 0.1 999 photonE4 0.1 999 proton_momentum 0.3 999 proton_z 52 78 mmsq -0.05 0.05
+#data EtaPi0_135 ROOTDataReaderFilter rootFiles/t010020_m104180_selectGenTandM/pol135_t010020_m104180_selectGenTandM_DTOT_selected_data_flat.root Mpi0eta 1.04 1.72 pVH 0.5 999 unusedEnergy -999 0.01 chiSq -999 13.277 !photonTheta1 -999 2.5 !photonTheta1 10.3 11.9 !photonTheta2 -999 2.5 !photonTheta2 10.3 11.9 !photonTheta3 -999 2.5 !photonTheta3 10.3 11.9 !photonTheta4 -999 2.5 !photonTheta4 10.3 11.9 photonE1 0.1 999 photonE2 0.1 999 photonE3 0.1 999 photonE4 0.1 999 proton_momentum 0.3 999 proton_z 52 78 mmsq -0.05 0.05
+#bkgnd EtaPi0_000 ROOTDataReaderFilter rootFiles/t010020_m104180_selectGenTandM/pol000_t010020_m104180_selectGenTandM_DTOT_selected_bkgnd_flat.root Mpi0eta 1.04 1.72 pVH 0.5 999 unusedEnergy -999 0.01 chiSq -999 13.277 !photonTheta1 -999 2.5 !photonTheta1 10.3 11.9 !photonTheta2 -999 2.5 !photonTheta2 10.3 11.9 !photonTheta3 -999 2.5 !photonTheta3 10.3 11.9 !photonTheta4 -999 2.5 !photonTheta4 10.3 11.9 photonE1 0.1 999 photonE2 0.1 999 photonE3 0.1 999 photonE4 0.1 999 proton_momentum 0.3 999 proton_z 52 78 mmsq -0.05 0.05
+#bkgnd EtaPi0_045 ROOTDataReaderFilter rootFiles/t010020_m104180_selectGenTandM/pol045_t010020_m104180_selectGenTandM_DTOT_selected_bkgnd_flat.root Mpi0eta 1.04 1.72 pVH 0.5 999 unusedEnergy -999 0.01 chiSq -999 13.277 !photonTheta1 -999 2.5 !photonTheta1 10.3 11.9 !photonTheta2 -999 2.5 !photonTheta2 10.3 11.9 !photonTheta3 -999 2.5 !photonTheta3 10.3 11.9 !photonTheta4 -999 2.5 !photonTheta4 10.3 11.9 photonE1 0.1 999 photonE2 0.1 999 photonE3 0.1 999 photonE4 0.1 999 proton_momentum 0.3 999 proton_z 52 78 mmsq -0.05 0.05
+#bkgnd EtaPi0_090 ROOTDataReaderFilter rootFiles/t010020_m104180_selectGenTandM/pol090_t010020_m104180_selectGenTandM_DTOT_selected_bkgnd_flat.root Mpi0eta 1.04 1.72 pVH 0.5 999 unusedEnergy -999 0.01 chiSq -999 13.277 !photonTheta1 -999 2.5 !photonTheta1 10.3 11.9 !photonTheta2 -999 2.5 !photonTheta2 10.3 11.9 !photonTheta3 -999 2.5 !photonTheta3 10.3 11.9 !photonTheta4 -999 2.5 !photonTheta4 10.3 11.9 photonE1 0.1 999 photonE2 0.1 999 photonE3 0.1 999 photonE4 0.1 999 proton_momentum 0.3 999 proton_z 52 78 mmsq -0.05 0.05
+#bkgnd EtaPi0_135 ROOTDataReaderFilter rootFiles/t010020_m104180_selectGenTandM/pol135_t010020_m104180_selectGenTandM_DTOT_selected_bkgnd_flat.root Mpi0eta 1.04 1.72 pVH 0.5 999 unusedEnergy -999 0.01 chiSq -999 13.277 !photonTheta1 -999 2.5 !photonTheta1 10.3 11.9 !photonTheta2 -999 2.5 !photonTheta2 10.3 11.9 !photonTheta3 -999 2.5 !photonTheta3 10.3 11.9 !photonTheta4 -999 2.5 !photonTheta4 10.3 11.9 photonE1 0.1 999 photonE2 0.1 999 photonE3 0.1 999 photonE4 0.1 999 proton_momentum 0.3 999 proton_z 52 78 mmsq -0.05 0.05
+#genmc EtaPi0_000 ROOTDataReaderFilter rootFiles/t010020_m104180_selectGenTandM/polALL_t010020_m104180_selectGenTandM_FTOT_gen_data_flat.root Mpi0eta_thrown 1.04 1.72
+#genmc EtaPi0_045 ROOTDataReaderFilter rootFiles/t010020_m104180_selectGenTandM/polALL_t010020_m104180_selectGenTandM_FTOT_gen_data_flat.root Mpi0eta_thrown 1.04 1.72
+#genmc EtaPi0_090 ROOTDataReaderFilter rootFiles/t010020_m104180_selectGenTandM/polALL_t010020_m104180_selectGenTandM_FTOT_gen_data_flat.root Mpi0eta_thrown 1.04 1.72
+#genmc EtaPi0_135 ROOTDataReaderFilter rootFiles/t010020_m104180_selectGenTandM/polALL_t010020_m104180_selectGenTandM_FTOT_gen_data_flat.root Mpi0eta_thrown 1.04 1.72
+#accmc EtaPi0_000 ROOTDataReaderFilter rootFiles/t010020_m104180_selectGenTandM/polALL_t010020_m104180_selectGenTandM_FTOT_selected_acc_flat.root Mpi0eta 1.04 1.72 pVH 0.5 999 unusedEnergy -999 0.01 chiSq -999 13.277 !photonTheta1 -999 2.5 !photonTheta1 10.3 11.9 !photonTheta2 -999 2.5 !photonTheta2 10.3 11.9 !photonTheta3 -999 2.5 !photonTheta3 10.3 11.9 !photonTheta4 -999 2.5 !photonTheta4 10.3 11.9 photonE1 0.1 999 photonE2 0.1 999 photonE3 0.1 999 photonE4 0.1 999 proton_momentum 0.3 999 proton_z 52 78 mmsq -0.05 0.05
+#accmc EtaPi0_045 ROOTDataReaderFilter rootFiles/t010020_m104180_selectGenTandM/polALL_t010020_m104180_selectGenTandM_FTOT_selected_acc_flat.root Mpi0eta 1.04 1.72 pVH 0.5 999 unusedEnergy -999 0.01 chiSq -999 13.277 !photonTheta1 -999 2.5 !photonTheta1 10.3 11.9 !photonTheta2 -999 2.5 !photonTheta2 10.3 11.9 !photonTheta3 -999 2.5 !photonTheta3 10.3 11.9 !photonTheta4 -999 2.5 !photonTheta4 10.3 11.9 photonE1 0.1 999 photonE2 0.1 999 photonE3 0.1 999 photonE4 0.1 999 proton_momentum 0.3 999 proton_z 52 78 mmsq -0.05 0.05
+#accmc EtaPi0_090 ROOTDataReaderFilter rootFiles/t010020_m104180_selectGenTandM/polALL_t010020_m104180_selectGenTandM_FTOT_selected_acc_flat.root Mpi0eta 1.04 1.72 pVH 0.5 999 unusedEnergy -999 0.01 chiSq -999 13.277 !photonTheta1 -999 2.5 !photonTheta1 10.3 11.9 !photonTheta2 -999 2.5 !photonTheta2 10.3 11.9 !photonTheta3 -999 2.5 !photonTheta3 10.3 11.9 !photonTheta4 -999 2.5 !photonTheta4 10.3 11.9 photonE1 0.1 999 photonE2 0.1 999 photonE3 0.1 999 photonE4 0.1 999 proton_momentum 0.3 999 proton_z 52 78 mmsq -0.05 0.05
+#accmc EtaPi0_135 ROOTDataReaderFilter rootFiles/t010020_m104180_selectGenTandM/polALL_t010020_m104180_selectGenTandM_FTOT_selected_acc_flat.root Mpi0eta 1.04 1.72 pVH 0.5 999 unusedEnergy -999 0.01 chiSq -999 13.277 !photonTheta1 -999 2.5 !photonTheta1 10.3 11.9 !photonTheta2 -999 2.5 !photonTheta2 10.3 11.9 !photonTheta3 -999 2.5 !photonTheta3 10.3 11.9 !photonTheta4 -999 2.5 !photonTheta4 10.3 11.9 photonE1 0.1 999 photonE2 0.1 999 photonE3 0.1 999 photonE4 0.1 999 proton_momentum 0.3 999 proton_z 52 78 mmsq -0.05 0.05

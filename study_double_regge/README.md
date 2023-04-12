@@ -1,5 +1,7 @@
 Code to study the double regge process. The goal is to extract the beam asymmetry in various kinematic bins
 
+### Versions
+v0 - Final results before 03/16/23. To ease the discussion, we will set chiSq<13.277 instead of 16. Will also remove the pi0 sidebands
 
 ### NOTES 
 Include a selection on teta<1 or tpi0<1

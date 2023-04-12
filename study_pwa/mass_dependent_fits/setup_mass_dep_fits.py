@@ -46,42 +46,50 @@ print("copying "+fileName+" to "+newFileName)
 os.system("cp "+fileName+" "+newFileName)
 
 
+#t="01502625"
+#m="104172" 
 t="010020"
 m="104180" 
-extraTag="_selectGenTandM" 
+folderTag="_selectGenTandM" 
 for pol in ["000","045","090","135"]:
-    baseLoc=baseDir+"t"+t+"_m"+m+extraTag+"/"
+    baseLoc=baseDir+"t"+t+"_m"+m+folderTag+"/"
     if not os.path.exists(baseLoc):
+        print(f'{baseLoc}')
         raise ValueError("YOU ARE REQUESTING FOR A FOLDER THAT DOES NOT EXIST! FIX IN SETUP FIT SCRIPT")
 
     search="DATAFILE_"+pol
-    fileLoc="pol"+pol+"_t"+t+"_m"+m+extraTag+"_DTOT_selected_data_flat.root"
+    fileLoc="pol"+pol+"_t"+t+"_m"+m+folderTag+"_DTOT_selected_data_flat.root"
     replace=baseLoc+fileLoc
     replaceStr(search,replace,newFileName)
 
     search="BKGNDFILE_"+pol
-    fileLoc="pol"+pol+"_t"+t+"_m"+m+extraTag+"_DTOT_selected_bkgnd_flat.root"
+    fileLoc="pol"+pol+"_t"+t+"_m"+m+folderTag+"_DTOT_selected_bkgnd_flat.root"
     replace=baseLoc+fileLoc
     replaceStr(search,replace,newFileName)
 
     search="ACCMCFILE_"+pol
-    fileLoc="polALL_t"+t+"_m"+m+extraTag+"_FTOT_selected_acc_flat.root"
+    fileLoc="polALL_t"+t+"_m"+m+folderTag+"_FTOT_selected_acc_flat.root"
     #fileLoc="pol"+pol+"_t"+t+"_m"+m+"_FTOT_selected_acc_flat.root"
     replace=baseLoc+fileLoc
     replaceStr(search,replace,newFileName)
 
     search="GENMCFILE_"+pol
-    fileLoc="polALL_t"+t+"_m"+m+extraTag+"_FTOT_gen_data_flat.root"
+    fileLoc="polALL_t"+t+"_m"+m+folderTag+"_FTOT_gen_data_flat.root"
     #fileLoc="pol"+pol+"_t"+t+"_m"+m+"_FTOT_gen_data_flat.root"
     replace=baseLoc+fileLoc
     replaceStr(search,replace,newFileName)
     
 
+#waves=[
+#        "D0+-", "D0++", "D1+-", "D1++", "D2++", "D1--",
+#        "pD0+-", "pD0++", "pD1+-", "pD1++", "pD2++", "pD1--",
+#        "P0+-", "P0++", "P1+-", "P1++",
+#        ] # TMD waveset
 waves=[
         "D0+-", "D0++", "D1+-", "D1++", "D2++", "D1--",
         "pD0+-", "pD0++", "pD1+-", "pD1++", "pD2++", "pD1--",
-        "P0+-", "P0++", "P1+-", "P1++",
         ] # TMD waveset
+#waves=["D2++","D1+-","pD2++","pD1+-"] # minimal waveset for wavest grower
 #waves=["D2++","D2+-","D0++","D0+-"] # KMATRIX waveset
 refs=["Negative","Positive"]
 parts=["Re","Im"]
@@ -115,9 +123,16 @@ for wave in waves:
 print("\n------------------------------------------------\n")
 print("intializing piecewise production parameters")
 print("------------------------------------------------\n")
+############### OPTION 1 FOR ROOTDataReaderFilter ##############
 condition=' pVH 0.5 999 unusedEnergy -999 0.01 chiSq -999 13.277 !photonTheta1 -999 2.5 !photonTheta1 10.3 11.9 !photonTheta2 -999 2.5 !photonTheta2 10.3 11.9 !photonTheta3 -999 2.5 !photonTheta3 10.3 11.9 !photonTheta4 -999 2.5 !photonTheta4 10.3 11.9 photonE1 0.1 999 photonE2 0.1 999 photonE3 0.1 999 photonE4 0.1 999 proton_momentum 0.3 999 proton_z 52 78 mmsq -0.05 0.05'
+############### OPTION 2 FOR ROOTDataReaderRandomFilter ##############
+#condition=' pVH 0.5 999 1 unusedEnergy -999 0.01 1 chiSq -999 13.277 1 !photonTheta1 -999 2.5 1 !photonTheta1 10.3 11.9 1 !photonTheta2 -999 2.5 1 !photonTheta2 10.3 11.9 1 !photonTheta3 -999 2.5 1 !photonTheta3 10.3 11.9 1 !photonTheta4 -999 2.5 1 !photonTheta4 10.3 11.9 1 photonE1 0.1 999 1 photonE2 0.1 999 1 photonE3 0.1 999 1 photonE4 0.1 999 1 proton_momentum 0.3 999 1 proton_z 52 78 1 mmsq -0.05 0.05 1 !photonSystem1 -999 15 1'
+#os.system(f"sed -i 's/ROOTDataReaderFilter/ROOTDataReaderRandomFilter/g' {newFileName}")
 with open(newFileName) as cfg:
+    ############### OPTION 1 FOR ROOTDataReaderFilter ##############
     lines=[line.rstrip() for line in cfg.readlines() if "ROOTDataReaderFilter" in line]
+    ############### OPTION 2 FOR ROOTDataReaderRandomFilter ##############
+    #lines=[line.rstrip() for line in cfg.readlines() if "ROOTDataReaderRandomFilter" in line]
     for line in lines:
         accReplace=f" Mpi0eta {pcwsMassMin} {pcwsMassMax}"+condition 
         genReplace=f" Mpi0eta_thrown {pcwsMassMin} {pcwsMassMax}"

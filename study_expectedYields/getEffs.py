@@ -27,13 +27,22 @@ plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
 plt.rc('legend', fontsize=17)    # legend fontsize
 plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
+#dselectedFolder="zDSelectedBkgndSamples_noUE_t010100_m104172/"
+#baseDir="zExpectedLeakage_noUE_t010100_m104172/"
 dselectedFolder="zDSelectedBkgndSamples/"
 baseDir="zExpectedLeakage/"
+#dselectedFolder="zDSelectedBkgndSamples_no_lmac/"
+#baseDir="zExpectedLeakage_no_lmac/"
+
 os.system("mkdir -p "+baseDir+"/montage")
 f=open(baseDir+"tabulate_calculations.csv","w")
 f.write("Channel,Weight,signalRegion,Ecenter,Ewidth,Yield,YieldErr,XSec,XSecErr,Flux,FluxErr,Eff,EffErr,BR\n")
 simplify={"AccWeight":"AS", "weightASBS":"ASBS"}
 
+shade_a2Region=True # in the mass plots include a shaded region from 1.04<Metapi<1.72
+
+#leakageLabel=r"Upper 3$\sigma$ limit"+"\n leakage"
+leakageLabel=r"Expected Background"
 
 def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
     getB1 = True if channel=="b1" else False
@@ -43,6 +52,16 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
     getF2 = True if channel=="f2" else False
     getEtaPr = True if channel=="etapr" else False
     getA2Pi = True if channel=="a2pi" else False
+
+    prettyChannel={
+            'b1':r'$b_1$',
+            'omega':r'$\omega$',
+            'eta':r'$\eta$',
+            'f1':r'$f_1$',
+            'f2':r'$f_2$',
+            'etapr':r'$\eta^{\prime}$',
+            'a2pi':r'$a_2\pi$',
+            }
     
     forceGetNewFluxVals=False # should we get the flux again
 
@@ -121,6 +140,9 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         crossSectionErrs=np.array([fa2018_err,sp2018_err,sp2017_err])*1000
         baseFolder=dselectedFolder+"/b1vps_"
         for run in ["2018_8","2018_1","2017_1"]:
+            entries=uproot.open(baseFolder+run+"/bkgndSample_recon_acc_flat.root")['kin'].numentries
+            if entries==0:
+                return 0
             recons.append(rp.read_root(baseFolder+run+"/bkgndSample_recon_acc_flat.root",columns=columns))
             throwns.append(rp.read_root(baseFolder+run+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy]))
     
@@ -136,6 +158,9 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         crossSections=np.array([[37.9,34.5]]) 
         crossSectionErrs=np.array([[0,0]]) 
         baseFolder=dselectedFolder+"/eta_to_3pi/"
+        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].numentries
+        if entries==0:
+            return 0
         recons=[rp.read_root(baseFolder+"bkgndSample_recon_acc_flat.root",columns=columns)]
         throwns=[rp.read_root(baseFolder+"bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
     
@@ -150,6 +175,9 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         crossSections=np.array([[37.9,34.5]])
         crossSectionErrs=np.array([[0,0]]) 
         baseFolder=dselectedFolder+"/f1_1285_to_etapipi/"
+        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].numentries
+        if entries==0:
+            return 0
         recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
         throwns=[rp.read_root(baseFolder+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
 
@@ -164,6 +192,9 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         crossSections=np.array([[12.2,11]])/0.394 # George did not divide the cross sections by the branching ratio for eta->2g which is ~40%
         crossSectionErrs=np.array([[0.234,0.234]]) 
         baseFolder=dselectedFolder+"/etap_to_etapipi/"
+        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].numentries
+        if entries==0:
+            return 0
         recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
         throwns=[rp.read_root(baseFolder+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
 
@@ -178,6 +209,9 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         crossSections=np.array([[37.9,34.5]]) 
         crossSectionErrs=np.array([[0,0]]) 
         baseFolder=dselectedFolder+"/a2pi/"
+        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].numentries
+        if entries==0:
+            return 0
         recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
         throwns=[rp.read_root(baseFolder+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
 
@@ -192,6 +226,9 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         crossSections=np.array([[12.72645681]]) # These new estimates simply come from a BW fit to the f2 mass peak
         crossSectionErrs=np.array([[1.1274463]]) # These new estimates simply come from a BW fit to the f2 mass peak
         baseFolder=dselectedFolder+"/pi0pi0/"
+        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].numentries
+        if entries==0:
+            return 0
         recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
         throwns=[rp.read_root(baseFolder+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
     
@@ -207,6 +244,9 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         crossSections=np.array([[1.331, 1.293, 1.275]])*1000
         crossSectionErrs=np.array([[0.08, 0.08, 0.08]])*1000
         baseFolder=dselectedFolder+"/omega_pi0g_2018_8_v2/"
+        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].numentries
+        if entries==0:
+            return 0
         recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
         throwns=[rp.read_root(baseFolder+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
 
@@ -237,10 +277,12 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
     assert((len(binedges)-1==len(crossSections[0])) and 
         (len(crossSections[0])==len(crossSectionErrs[0])))
 
+
+    print('Avg cross section for {}: {:0.5f}'.format(channel,np.mean(crossSections)))
+    return 0
     #############################################
     ###### END  
     #############################################
-
 
 
     ####################################
@@ -388,7 +430,9 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         # Currently we assume no errors on the target, branching ratio, and flux ratios
         expectedYield=cs*eff*fc*target*BR
         expectedYields.append(expectedYield)
-        expectedYieldErrs.append(expectedYield*np.sqrt((cserr/cs)*(cserr/cs)+(fcerr/fc)*(fcerr/fc)+(efferr/eff)*(efferr/eff)))
+        expectedYieldErr=expectedYield*np.sqrt((cserr/cs)*(cserr/cs)+(fcerr/fc)*(fcerr/fc)+(efferr/eff)*(efferr/eff))
+        expectedYieldErr=np.nan_to_num(expectedYieldErr) # efficiency could be zero so error can be nan
+        expectedYieldErrs.append(expectedYieldErr)
     expectedYields=np.array(expectedYields)
     expectedYieldErrs=np.array(expectedYieldErrs)
     totalExpectedYield=expectedYields.sum(axis=0) # total expected yield across all energy bins
@@ -439,9 +483,9 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         data=data[(data["weightBSpi0"]==1)&(data["weightBSeta"]==1)]
     print("phase1 has {} entries".format(data.AccWeight.sum()))
     
-    for varx,label in zip(["Mpi0eta","Mpi0g3","Mpi0g4","cosTheta_eta_gj","cosTheta_eta_hel","phi_eta_gj","phi_eta_hel"],
+    for varx,label in zip(["Mpi0eta","Mpi0g3","Mpi0g4","cosTheta_eta_gj","cosTheta_eta_hel","phi_eta_gj","phi_eta_hel","Mpi0","Meta"],
                 [r"$M(4\gamma)$ GeV",r"$M(\pi\gamma_3)$ GeV",r"$M(\pi\gamma_4)$ GeV",r"$cos\theta_{GJ}$ radians",r"$cos\theta_{hel}$ radians",
-                    r"$\phi_{GJ}$i degrees",r"$\phi_{hel}$ degrees"]):
+                    r"$\phi_{GJ}$i degrees",r"$\phi_{hel}$ degrees",r"$M(\pi)$ GeV",r"$M(\eta)$ GeV"]):
         fig,ax=plt.subplots(1,1,figsize=(8,6))
         _, edges = np.histogram(dataFull[varx],bins=histBinning)
         centers=edges[:-1]+(edges[1]-edges[0])/2
@@ -466,8 +510,8 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
             rcounts=np.histogram(recons[0][varx],weights=recons[0][weightBranch],bins=edges)[0]
             rcounts/=rcounts.sum()
 
-        hep.histplot((rcounts*upper3SigEstimate,edges),color='red',linewidth=2,label=r"Upper 3$\sigma$ limit"+"\n leakage")
-        #ax.step(centers,rcounts*upper3SigEstimate,color='red',linewidth=2,label=r"Upper 3$\sigma$ limit"+"\n leakage")
+        hep.histplot((rcounts*upper3SigEstimate,edges),color='red',linewidth=2,label=leakageLabel)
+        #ax.step(centers,rcounts*upper3SigEstimate,color='red',linewidth=2,labe=leakageLabel)
         #ax.fill_between(centers,lower3SigEstimate*rcount,upper3SigEstimate*rcount,color='red',alpha=0.5,linewidth=1,label=r"3$\sigma$ limit"+"\n leakage")
         #ax.step(centers,dcount-rcount,color='green',linewidth=2,label="Data-MC") # plot the difference
         ax.set_xlabel(label)
@@ -476,6 +520,8 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         ax.axhline(0,linewidth=1,c='black')
         ax.legend()
         plt.tight_layout()
+        if shade_a2Region and varx=="Mpi0eta":
+            ax.axvspan(1.04,1.72,color='lightgray',alpha=0.7)
         plt.savefig(outputFolder+"expectedYield_"+varx+"_"+weightBranch+signalTag+".png")
         ax.set_yscale('log')
         plt.savefig(outputFolder+"expectedYield_"+varx+"_"+weightBranch+signalTag+"_log.png")
@@ -507,8 +553,8 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
                 rcounts=np.histogram(recons[0][varx],weights=recons[0]["AccWeight"],bins=edges)[0]
                 rcounts/=rcounts.sum()
 
-            hep.histplot((rcounts*upper3SigEstimate,edges),color='red',linewidth=2,label=r"Upper 3$\sigma$ limit"+"\n leakage")
-            #ax.step(centers,rcounts*upper3SigEstimate,color='red',linewidth=2,label=r"Upper 3$\sigma$ limit"+"\n leakage")
+            hep.histplot((rcounts*upper3SigEstimate,edges),color='red',linewidth=2,label=leakageLabel)
+            #ax.step(centers,rcounts*upper3SigEstimate,color='red',linewidth=2,labe=leakageLabel)
             #ax.fill_between(centers,lower3SigEstimate*rcount,upper3SigEstimate*rcount,color='red',alpha=0.5,linewidth=1,label=r"3$\sigma$ limit"+"\n leakage")
 
             ax.axvspan(args[0]-args[2]*args[1],args[0]+args[2]*args[1],color='green',alpha=0.3)
@@ -523,13 +569,23 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         plt.savefig(outputFolder+"sidebands.png")
         
     print(expectedYields)
+    print(len(energies))
+    print(len(expectedYields))
+    print(len(expectedYieldErrs))
+    print(len(cs))
+    print(len(cserr))
+    print(len(fc))
+    print(len(fcerr))
+    print(len(eff))
+    print(len(efferr))
     for i in range(len(energies)):
         #f.write("{},{},{},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e},{:0.2e}\n".format(
-        #    channel,simplify[weightBranch],selectSignalRegion,
-        #    energies[i],binwidth,expectedYields[i],expectedYieldErrs[i],cs[i],cserr[i],fc[i],fcerr[i],eff[i],efferr[i],target,BR))
-        f.write("{},{},{},{:0.2e},{:0.2e},{:0.2e},{:0.2e}\n".format(
+        f.write("{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(
             channel,simplify[weightBranch],selectSignalRegion,
-            energies[i],binwidth,totalExpectedYield[i],totalExpectedYieldErr[i]))
+            energies[i],binwidth,totalExpectedYield[i],totalExpectedYieldErr[i],cs[i],cserr[i],fc[i],fcerr[i],eff[i],efferr[i],BR))
+        #f.write("{},{},{},{:0.2e},{:0.2e},{:0.2e},{:0.2e}\n".format(
+        #    channel,simplify[weightBranch],selectSignalRegion,
+        #    energies[i],binwidth,totalExpectedYield[i],totalExpectedYieldErr[i]))
 
 def montage(filename, nrows, ncols, baseDir,outputname):
     # search subdirectories for filenames and montage them
@@ -558,7 +614,7 @@ for weightBranch, selectSignalRegion,signalTag in zip(["AccWeight", "AccWeight",
         print("\n=================\nRunning analysis for {} with {}{}\n=================\n".format(channel,weightBranch,signalTag))
         runAnalysis(channel,weightBranch,signalTag,selectSignalRegion)
     print("\nMaking montages of the histograms\n")
-    for varx in ["Mpi0eta","Mpi0g3","Mpi0g4","cosTheta_eta_gj","cosTheta_eta_hel","phi_eta_gj","phi_eta_hel"]:
+    for varx in ["Mpi0eta","Mpi0g3","Mpi0g4","cosTheta_eta_gj","cosTheta_eta_hel","phi_eta_gj","phi_eta_hel","Mpi0","Meta"]:
         montage("expectedYield_"+varx+"_"+weightBranch+signalTag+".png",3,3,baseDir,baseDir+"/montage_"+varx+"_"+weightBranch+signalTag+".png")
         montage("expectedYield_"+varx+"_"+weightBranch+signalTag+"_log.png",3,3,baseDir,baseDir+"/montage_"+varx+"_"+weightBranch+signalTag+"_log.png")
 

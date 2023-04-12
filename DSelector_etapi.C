@@ -54,6 +54,12 @@ void DSelector_etapi::Init(TTree *locTree)
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonE4");	
             dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pPhotonE");
             dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pPhotonTheta");
+            // System = BCAL/FCAL/NULL. Actual type is DetectorSystem_t which is enum object	
+            //      FCAL = 0x0020 = 32 in hexadecimal, BCAL = 0x0004 = 4
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonSystem1"); 
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonSystem2");	
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonSystem3");	
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonSystem4");	
             // Proton Related
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("proton_momentum");
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("proton_z");
@@ -67,6 +73,7 @@ void DSelector_etapi::Init(TTree *locTree)
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("DOFKinFit"); 
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("chiSq"); 
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("unusedEnergy"); 
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("unusedShowers"); 
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mmsq");
             dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pMissingMassSquared");
             // Kinematics Related
@@ -121,6 +128,7 @@ void DSelector_etapi::Init(TTree *locTree)
             // Event Related
             dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("run");
             dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("event");
+            dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("topologyId");
         }
 	/*********************************** EXAMPLE USER INITIALIZATION: ANALYSIS ACTIONS **********************************/
 
@@ -173,6 +181,29 @@ void DSelector_etapi::Init(TTree *locTree)
 //	dAnalyzeCutActions->Initialize(); // manual action, must call Initialize()
 
 	/******************************** EXAMPLE USER INITIALIZATION: STAND-ALONE HISTOGRAMS *******************************/
+
+        /// Topology histogram. Useful for BGGEN studies where a variety of photoproduction reactions
+        //    are simulated. For each event we know the generated reaction so we can begin understanding
+        //    which processes leak into our final state. We have to turn off bTopology! Otherwise we will
+        //    just have etapi0 events!
+        //dHistThrownTopologies = new TH1F("hThrownTopologies","hThrownTopologies", 10, -0.5, 9.5);
+        //vector<TString> locThrownTopologies;
+        //locThrownTopologies.push_back("4#gammap[#pi^{0},#eta]");
+        //locThrownTopologies.push_back("6#gammap[3#pi^{0}]");
+        //locThrownTopologies.push_back("5#gammap[2#pi^{0},#omega]");
+        //locThrownTopologies.push_back("6#gammap[2#pi^{0},#eta]");
+        //locThrownTopologies.push_back("4#gammap[2#pi^{0}]");
+        //locThrownTopologies.push_back("8#gammap[4#pi^{0},#eta]");
+        //locThrownTopologies.push_back("6#gamma#pi^{#plus}#pi^{#minus}p[3#pi^{0}]");
+        //locThrownTopologies.push_back("4#gamma#pi^{#plus}#pi^{#minus}p[2#pi^{0}]");
+        //locThrownTopologies.push_back("4#gamma#pi^{#plus}#pi^{#minus}p[#pi^{0},#eta]");
+        //locThrownTopologies.push_back("8#gammap[3#pi^{0},#eta]");
+        //locThrownTopologies.push_back("3#gammap[#pi^{0},#omega]");
+        //for(uint i=0; i<locThrownTopologies.size(); i++) {
+        //        dHistInvariantMass_ThrownTopology[locThrownTopologies[i]] = new TH1I(Form("hInvariantMass_ThrownTopology_%d", i),
+        //                Form("Invariant Mass Topology: %s", locThrownTopologies[i].Data()), 1000, 0.5, 2.0);
+        //}
+
 
 	//EXAMPLE MANUAL HISTOGRAMS:
 	// Best practices is to include the bin width in the axis labels
@@ -348,7 +379,9 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
         bool bBeamE_thrown = (locBeamE_thrown<8.8)*(locBeamE_thrown>8.2);
         bool bMpi0eta_thrown = (locMetapi0_thrown<1.80)*(locMetapi0_thrown>0.8);
         bool bTopology = locThrownTopology==topologyString; 
+        //bTopology=true; // For the BGGEN study
         bool selection_thrown=bTopology;//*bBeamE_thrown;//*bmandelstamt_thrown*bMpi0eta_thrown;
+        selection_thrown=true;
         if (dIsMC*!selection_thrown)
             return kTRUE;
 
@@ -396,7 +429,6 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 	        vector<Int_t> thrownPIDs;
 	        vector<Int_t> parentIDs;
                 vector<Int_t> matchedParentPIDs;
-                cout << endl;
 	        if (Get_NumThrown()!=0){
 	            for(UInt_t loc_i = 0; loc_i < Get_NumThrown(); ++loc_i)
 	            {	
@@ -478,6 +510,14 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		TLorentzVector locPhoton3P4_Measured = dPhoton3Wrapper->Get_P4_Measured();
 		TLorentzVector locPhoton4P4_Measured = dPhoton4Wrapper->Get_P4_Measured();
 
+            
+                // Get Detector System:
+                // Step 1/2
+                DetectorSystem_t locPhoton1System = dPhoton1Wrapper->Get_Detector_System_Timing();
+                DetectorSystem_t locPhoton2System = dPhoton2Wrapper->Get_Detector_System_Timing();
+                DetectorSystem_t locPhoton3System = dPhoton3Wrapper->Get_Detector_System_Timing();
+                DetectorSystem_t locPhoton4System = dPhoton4Wrapper->Get_Detector_System_Timing();
+
 		/********************************************* GET COMBO RF TIMING INFO *****************************************/
 
 		TLorentzVector locBeamX4_Measured = dComboBeamWrapper->Get_X4_Measured();
@@ -489,13 +529,15 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		//Number of out-of-time beam bunches in tree (on a single side, so that total number out-of-time bunches accepted is 2 times 
 		//	this number for left + right bunches) 
 		Bool_t locSkipNearestOutOfTimeBunch = true; // True: skip events from nearest out-of-time bunch on either side (recommended).
-		Int_t locNumOutOfTimeBunchesToUse = locSkipNearestOutOfTimeBunch ? locNumOutOfTimeBunchesInTree-1:locNumOutOfTimeBunchesInTree; 
+                int bunchesToSkip=1;
+		Int_t locNumOutOfTimeBunchesToUse = locSkipNearestOutOfTimeBunch ? locNumOutOfTimeBunchesInTree-bunchesToSkip:locNumOutOfTimeBunchesInTree; 
 		// Ideal value would be 1, but deviations require added factor, which is different for data and MC.
 		float locAccidentalScalingFactor = (float)(dAnalysisUtilities.Get_AccidentalScalingFactor(Get_RunNumber(), locBeamP4.E(), dIsMC)); 
 		float locAccidentalScalingFactorError = (float)(dAnalysisUtilities.Get_AccidentalScalingFactorError(Get_RunNumber(), locBeamP4.E())); 
 		// Weight by 1 for in-time events, ScalingFactor*(1/NBunches) for out-of-time
 		float locHistAccidWeightFactor = (float)(locRelBeamBucket==0 ? 1 : -locAccidentalScalingFactor/(2*locNumOutOfTimeBunchesToUse)) ; 
-		if((locSkipNearestOutOfTimeBunch && abs(locRelBeamBucket)==1) || abs(locDeltaT_RF)>4*(locNumOutOfTimeBunchesInTree+1)) { 
+		if((locSkipNearestOutOfTimeBunch && (abs(locRelBeamBucket)<=bunchesToSkip && abs(locRelBeamBucket)>0)) || 
+                        abs(locDeltaT_RF)>4*(locNumOutOfTimeBunchesInTree+1)) { 
                     // Skip nearest out-of-time bunch: tails of in-time distribution also leak in
                     // Sometimes we get RF times that are very large, like O(10^5). Lets just keep times within an extra bunch 
 		    dComboWrapper->Set_IsComboCut(true); 
@@ -564,7 +606,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		    branchWeight=1;}
 		//---------CHOICE 2 FOR "bkgnd" RUN OVER SIGNAL/DATA-------------
                 if (choice==2){
-		    bSignalRegion=!((pi0_sbweight==1)*(eta_sbweight==1)*(locHistAccidWeightFactor==1)); // Keep combos ONLY in the sideband region
+		    bSignalRegion=!((pi0_sbweight==1)*(eta_sbweight==1)*(locHistAccidWeightFactor==1)); // Keep combo NOT in the signal region
 		    branchWeight=-weight;}
 		//---------CHOICE 3 FOR "accmc" RUN OVER FLAT MC-------------
                 if (choice==3){
@@ -741,17 +783,18 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		//bool selection=bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*(dComboWrapper->Get_ChiSq_KinFit("")<100)*bUnusedEnergy*bMMsq*bBeamEnergy*
 		//		bmandelstamt*bMpi0p*bMetapi0*bSignalRegion;
                 // Choice 3: Nominal selection for a2 pwa
-		//bool selection=bBeamEnergy*bChiSq*bUnusedEnergy*bPhotonTheta*bProtonZ*bPhotonE*bProton_dEdx*bProtonMomentum*bMMsq*
-		//		bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion;
+		bool selection=bBeamEnergy*bChiSq*bUnusedEnergy*bPhotonTheta*bProtonZ*bPhotonE*bProton_dEdx*bProtonMomentum*bMMsq*
+				bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion;
                 // Choice 3.1: Loose selections for a2 pwa for systematic variations
-                bool selection=bBeamEnergy*(dComboWrapper->Get_ChiSq_KinFit("")<25)*(dComboWrapper->Get_Energy_UnusedShowers()<0.5)*
-                            ((locPhoton1P4.Theta()*radToDeg>=1.5 && locPhoton1P4.Theta()*radToDeg<=11) || locPhoton1P4.Theta()*radToDeg>=11.4)*
-                            ((locPhoton2P4.Theta()*radToDeg>=1.5 && locPhoton2P4.Theta()*radToDeg<=11) || locPhoton2P4.Theta()*radToDeg>=11.4)*
-                            ((locPhoton3P4.Theta()*radToDeg>=1.5 && locPhoton3P4.Theta()*radToDeg<=11) || locPhoton3P4.Theta()*radToDeg>=11.4)*
-                            ((locPhoton4P4.Theta()*radToDeg>=1.5 && locPhoton4P4.Theta()*radToDeg<=11) || locPhoton4P4.Theta()*radToDeg>=11.4)*
-                            (locProtonX4.Z()>50)*(locProtonX4.Z()<80)*  
-                            bPhotonE*bProton_dEdx*bProtonMomentum*bMMsq* // These selections remain unchanged (systematic only going tighter) - MMSq selection removed
-                            bSignalRegion;
+                //    1/27/23 - turned off unused energy selection so we can understand number of unused shower selection
+                //bool selection=bBeamEnergy*(dComboWrapper->Get_ChiSq_KinFit("")<25)* //(dComboWrapper->Get_Energy_UnusedShowers()<0.5)*
+                //            ((locPhoton1P4.Theta()*radToDeg>=1.5 && locPhoton1P4.Theta()*radToDeg<=11) || locPhoton1P4.Theta()*radToDeg>=11.4)*
+                //            ((locPhoton2P4.Theta()*radToDeg>=1.5 && locPhoton2P4.Theta()*radToDeg<=11) || locPhoton2P4.Theta()*radToDeg>=11.4)*
+                //            ((locPhoton3P4.Theta()*radToDeg>=1.5 && locPhoton3P4.Theta()*radToDeg<=11) || locPhoton3P4.Theta()*radToDeg>=11.4)*
+                //            ((locPhoton4P4.Theta()*radToDeg>=1.5 && locPhoton4P4.Theta()*radToDeg<=11) || locPhoton4P4.Theta()*radToDeg>=11.4)*
+                //            (locProtonX4.Z()>50)*(locProtonX4.Z()<80)*  
+                //            bPhotonE*bProton_dEdx*bProtonMomentum*bMMsq* // These selections remain unchanged (systematic only going tighter) - MMSq selection removed
+                //            bSignalRegion;
                 // Choice 4: Nominal selections for double Regge beam asymmetry systematic studies. Loosen most cuts. 
                 //           MANUALLY COMMENT OUT bWeight FILTERING LINE BELOW
                 //bool selection=(Metapi0>1.6)*(Metapi0<3.0)*bBeamEnergy*(dComboWrapper->Get_ChiSq_KinFit("")<50)*(dComboWrapper->Get_Energy_UnusedShowers()<10)*
@@ -773,12 +816,12 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 			dHist_Mpi0->Fill((locPhoton1P4+locPhoton2P4).M(),locHistAccidWeightFactor);
 			dHist_Meta->Fill((locPhoton3P4+locPhoton4P4).M(),locHistAccidWeightFactor);
 		}
-//		if (!bWeight){ 
-//                        // Turn ON for a2 study: We do not want to keep any combos with weight 0. Not just a waste of space, can cause problems during fitting
-//                        // Turn OFF for double regge study since we do sideband subtraction separately there 
-//			dComboWrapper->Set_IsComboCut(true);
-//			continue;
-//		}
+		if (!bWeight){ 
+                        // Turn ON for a2 study: We do not want to keep any combos with weight 0. Not just a waste of space, can cause problems during fitting
+                        // Turn OFF for double regge study since we do sideband subtraction separately there 
+			dComboWrapper->Set_IsComboCut(true);
+			continue;
+		}
 		if(bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bBeamEnergy*bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion){
 			dHist_mmsq->Fill(locMissingMassSquared,weight);}
 		if(bPhotonE*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bMMsq*bBeamEnergy*bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion){
@@ -835,7 +878,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 			dFlatTreeInterface->Fill_TObject<TLorentzVector>("flat_my_p4_array", locMyComboP4_Flat, loc_j);
 		}
 		*/
-
+                
                 if (dFlatTreeFileName!=""){
                     // Photon Related 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta1", locPhoton1P4.Theta()*radToDeg);	
@@ -846,6 +889,10 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("photonE2", locPhoton2P4.E());	
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("photonE3", locPhoton3P4.E());	
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("photonE4", locPhoton4P4.E());	
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonSystem1", locPhoton1System);	
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonSystem2", locPhoton2System);	
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonSystem3", locPhoton3System);	
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonSystem4", locPhoton4System);	
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("pPhotonE", bPhotonE);
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("pPhotonTheta", bPhotonTheta);
                     // Proton Related
@@ -860,6 +907,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("DOFKinFit", dComboWrapper->Get_NDF_KinFit("")); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("chiSq", dComboWrapper->Get_ChiSq_KinFit("")); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("unusedEnergy",dComboWrapper->Get_Energy_UnusedShowers()); 
+                    dFlatTreeInterface->Fill_Fundamental<Float_t>("unusedShowers",(float)(dComboWrapper->Get_NumUnusedShowers())); 
                     dFlatTreeInterface->Fill_Fundamental<Float_t>("mmsq",locMissingMassSquared);
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("pMissingMassSquared", bMMsq);
                     // Kinematics Related
@@ -912,8 +960,14 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectBeam",isCorrectBeam);
                     dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectSpect",isCorrectSpect);
                     // Event Related
-                    dFlatTreeInterface->Fill_Fundamental<Int_t>("run",Get_EventNumber());
-                    dFlatTreeInterface->Fill_Fundamental<Int_t>("event",Get_RunNumber());
+                    dFlatTreeInterface->Fill_Fundamental<Int_t>("event",Get_EventNumber());
+                    dFlatTreeInterface->Fill_Fundamental<Int_t>("run",Get_RunNumber());
+                    if (mapTopologyToInt.find(locThrownTopology)==mapTopologyToInt.end()){
+                        dFlatTreeInterface->Fill_Fundamental<Int_t>("topologyId",-1);
+                    }
+                    else
+                        dFlatTreeInterface->Fill_Fundamental<Int_t>("topologyId",mapTopologyToInt[locThrownTopology]);
+
 
 		    // AmpTools tree output - step 3
 		    // Filling the branches of the flat tree
@@ -930,13 +984,19 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		    FillAmpTools_FlatTree(locBeamP4, locFinalStateP4);
 		    Fill_FlatTree(); //for the active combo
                 }
+
+                // Use me to find the topologies in the MC sample
+                if (topologyCount.find(locThrownTopology)==topologyCount.end())
+                    topologyCount[locThrownTopology]=0;
+                else
+                    topologyCount[locThrownTopology]+=1;
 	} // end of combo loop
 
 	//FILL HISTOGRAMS: Num combos / events surviving actions
 //	Fill_NumCombosSurvivedHists();
 //
 	dHist_combosRemaining->Fill(combos_remaining);
-
+        
 	/****************************************** LOOP OVER OTHER ARRAYS (OPTIONAL) ***************************************/
 /*
 	//Loop over beam particles (note, only those appearing in combos are present)
@@ -998,6 +1058,7 @@ void DSelector_etapi::Finalize(void)
 		//Besides, it is best-practice to do post-processing (e.g. fitting) separately, in case there is a problem.
 
 	//DO YOUR STUFF HERE
+        print_sorted_map(topologyCount);
 
 	//CALL THIS LAST
 	DSelector::Finalize(); //Saves results to the output file

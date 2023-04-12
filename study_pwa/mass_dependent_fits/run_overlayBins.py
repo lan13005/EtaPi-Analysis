@@ -10,7 +10,7 @@ workingDir=os.getcwd()
 
 #ts=["010016", "016021", "021027", "027034", "034042", "042051", "051061", "061072", "072085", "085100"]
 ts=["010020", "0200325", "0325050", "050075", "075100"]
-#ts=["010020"]
+#ts=["01502625", "0262504125", "041250625", "06250875"]
 
 subdir="./"
 
@@ -20,6 +20,7 @@ doAccCorr="true" # this should generally be true. AccCorr is chosen during the f
 plotAllVars="true" # should we plot all variables in etapi_plotter or just plot the mass plot
 plotGenData="false" # should we plot gen mc in etapi_plotter or just plot {dat,bkgnd,accmc} trees
 Ls="S_D_pD"
+ffonly="true"
 #Ls="S_D"
 
 waves=[
@@ -61,7 +62,9 @@ def draw(folder):
 
     os.chdir(folder)
     folder=workingDir+"/"+folder
-    cmd="python3 "+workingDir+"/overlayBins.py 2 '"+waves+"' '"+fitFileName+"' '"+workingDir+"' '"+Ls+"' '"+doAccCorr+"' '"+plotAllVars+"' '"+plotGenData+"' '"+folder+"'"
+    cmd="python3 "+workingDir+"/overlayBins.py 2 '"+waves+"' '"+fitFileName+"' '"+workingDir+"' '"+Ls+"' '"+doAccCorr+"' '"+plotAllVars+"' '"+plotGenData\
+            +"' '"+ffonly+"' '"+folder+"'"
+    cmd+=' > stdout.log' # dump stdout to some file
     print(cmd)
     os.system(cmd)
     os.chdir("..")
@@ -98,9 +101,9 @@ if len(convergedFiles)!=len(folders):
     for c,f in zip(convergedFiles,folders):
         print(c,f)
     print("** There appears to be a mismatch in the above lists! Will cause problems... exiting... **")
-    
 
-maxProcesses=30 # its about 5GB memory per process if we do not make the genmc plots
+
+maxProcesses=50 # its about 5GB memory per process if we do not make the genmc plots
 print(f"Running etapi_plotter over {len(folders)} files with {maxProcesses} processes...")
 
 [os.system("mkdir -p "+folder) for folder in folders]

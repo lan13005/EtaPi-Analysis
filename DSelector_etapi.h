@@ -16,6 +16,21 @@ bool filterOmega(float omega, float Mpi0eta){
     return -29.0*atan(-1.05*Mpi0eta+2.78)+328 > omega;
 }
 
+map<TString,Int_t> mapTopologyToInt={
+    // Run DSelector with topologyCounter to determinethe counts of each MC topology
+    //   Use mergeTopologyOutputs.py to output the counts AND the following lines that build the map
+    {"4#gammap[#pi^{0},#eta]",0},
+    {"4#gammap[2#pi^{0}]",1},
+    {"6#gammap[3#pi^{0}]",2},
+    {"5#gammap[2#pi^{0},#omega]",3},
+    {"3#gammap[#pi^{0},#omega]",4},
+    {"6#gammap[2#pi^{0},#eta]",5},
+    {"4#gammap[#eta]",6},
+    {"5#gammap[2#pi^{0}]",7},
+    {"4#gammap[#pi^{0},#eta']",8},
+    {"3#gammap[#eta,#phi]",9}
+};
+
 class DSelector_etapi : public DSelector
 {
 	public:
@@ -82,6 +97,11 @@ class DSelector_etapi : public DSelector
 		TH1F* dHist_photonThetaEta;
 		TH2F* dHist_dEdx_momentum;
 		TH1F* dHist_combosRemaining;
+                
+                //// Topology histograms
+                //TH1F* dHistThrownTopologies;
+                //map<TString, TH1I*> dHistInvariantMass_ThrownTopology;
+                map<TString,int> topologyCount;
 
 	ClassDef(DSelector_etapi, 0);
 };
@@ -102,6 +122,28 @@ void DSelector_etapi::Get_ComboWrappers(void)
 	dStep2Wrapper = dComboWrapper->Get_ParticleComboStep(2);
 	dPhoton3Wrapper = static_cast<DNeutralParticleHypothesis*>(dStep2Wrapper->Get_FinalParticle(0));
 	dPhoton4Wrapper = static_cast<DNeutralParticleHypothesis*>(dStep2Wrapper->Get_FinalParticle(1));
+}
+
+void print_sorted_map(map<TString, int> &my_map) { // Thank you Chat-GPT
+    cout << "Printing topologies sorted by counts!" << endl;
+    // Create a vector of pairs to store the key-value pairs of the map
+    vector<pair<TString, int>> my_vector;
+
+    // Copy the key-value pairs from the map to the vector
+    for (auto &pair : my_map) {
+        my_vector.push_back(pair);
+    }
+
+    // Sort the vector by the values in ascending order
+    sort(my_vector.begin(), my_vector.end(),
+         [](const pair<TString, int> &a, const pair<TString, int> &b) {
+             return a.second < b.second;
+         });
+
+    // Print the sorted key-value pairs
+    for (auto &pair : my_vector) {
+        cout << pair.first << ": " << pair.second << endl;
+    }
 }
 
 #endif // DSelector_etapi_h

@@ -17,6 +17,8 @@
 #include <TRandom.h>
 #include <TMath.h>
 #include <TSystem.h>
+#include <TLatex.h>
+#include <sstream>
 
 using namespace std;
 
@@ -39,7 +41,7 @@ struct criteria{
 struct defaultSelections{
     vector<criteria> selections={
         {"unusedEnergy",fltmin,0.01,fltmin,fltmin},
-        {"chiSq",fltmin,16,fltmin,fltmin},
+        {"chiSq",fltmin,13.277,fltmin,fltmin},
         {"photonTheta1",2.5,10.3,11.9,fltmax},
         {"photonTheta2",2.5,10.3,11.9,fltmax},
         {"photonTheta3",2.5,10.3,11.9,fltmax},

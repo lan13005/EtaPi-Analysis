@@ -34,13 +34,13 @@ def move(folder):
     os.system("yes | mv *bkgndSample*.root %s" % folder)
 
 
-proof_Nthreads=48
+proof_Nthreads=36
 recon_cfiles=["DSelector_etapi.C", "runDSelector.C"]
 thrown_cfiles=["DSelector_thrown.C", "runDSelector_thrown.C"]
 
 reconTreeName="pi0eta__B4_M17_M7_Tree"
 thrownTreeName="Thrown_Tree"
-baseOutputFolder="zDSelectedBkgndSamples"
+baseOutputFolder="zDSelectedBkgndSamples_noUE_t010100_m104172"
 
 
 topologies=[]
@@ -51,41 +51,41 @@ ifolders=[]
 # MAIN STUDY: RUN OVER ALL BACKGROUND SIMULATIONS TO DETERMINE EXPECTED LEAKAGES
 ##############################################
 topologies+=[
-        "6#gammap[2#pi^{0},#eta]",
-        "6#gammap[2#pi^{0},#eta]",
-        "6#gammap[3#pi^{0}]",
-        "6#gammap[2#pi^{0},#eta]",
+#        "6#gammap[2#pi^{0},#eta]",
+#        "6#gammap[2#pi^{0},#eta]",
+#        "6#gammap[3#pi^{0}]",
+#        "6#gammap[2#pi^{0},#eta]",
         "3#gammap[#pi^{0}]",
-#        "3#gammap[#pi^{0}]",
-#        "3#gammap[#pi^{0}]",
-        "4#gammap[2#pi^{0}]",
-        "5#gammap[2#pi^{0}]",
+        "3#gammap[#pi^{0}]",
+        "3#gammap[#pi^{0}]",
+#        "4#gammap[2#pi^{0}]",
+#        "5#gammap[2#pi^{0}]",
         "5#gammap[2#pi^{0}]",
         "5#gammap[2#pi^{0}]",
         ]
 ofolders+=[
-        "a2pi",
-        "etap_to_etapipi",
-        "eta_to_3pi",
-        "f1_1285_to_etapipi",
+#        "a2pi",
+#        "etap_to_etapipi",
+#        "eta_to_3pi",
+#        "f1_1285_to_etapipi",
         "omega_pi0g",
-#        "omega_pi0g_2018_8_v1",
-#        "omega_pi0g_2018_8_v2",
-        "pi0pi0",
-        "b1vps_2018_8",
+        "omega_pi0g_2018_8_v1",
+        "omega_pi0g_2018_8_v2",
+#        "pi0pi0",
+#        "b1vps_2018_8",
         "b1vps_2018_1",
         "b1vps_2017_1",
         ]
 ifolders+=[
-        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/a2pi/tree_',
-        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/etap_to_etapipi/tree_',
-        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/eta_to_3pi/tree_',
-        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/f1_to_etapipi/tree_',
+#        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/a2pi/tree_',
+#        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/etap_to_etapipi/tree_',
+#        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/eta_to_3pi/tree_',
+#        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/f1_to_etapipi/tree_',
         '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/omega_pi0g/tree_',
-#        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/omega_pi0g_2018_8/tree_',
-#        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/omega_pi0g_2018_8_v2/tree_',
-        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/pi0pi0/tree_',
-        '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_08_ver03.0_60M/root/merged/tree_',
+        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/omega_pi0g_2018_8/tree_',
+        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/omega_pi0g_2018_8_v2/tree_',
+#        '"/d/grid15/ln16/rootFiles/pi0eta/seansBkgMC/rootTrees/30M/pi0pi0/tree_',
+#        '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_08_ver03.0_60M/root/merged/tree_',
         '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2018_01_ver03.0/root/merged/tree_',
         '"/d/grid17/ln16/rootFiles/omegapi_rad_massDepFit_2017_01_ver03.0/root/merged/tree_',
         ]
@@ -113,21 +113,21 @@ ifolders+=[
 # THIRD STUDY:  RUN OVER DATA
 ##############################################
 
-topologies+=[
-        "4#gammap[#pi^{0},#eta]",
-        "4#gammap[#pi^{0},#eta]",
-        "4#gammap[#pi^{0},#eta]"
-        ]
-ofolders+=[
-        "gluex_2017_1",
-        "gluex_2018_1",
-        "gluex_2018_8"
-        ]
-ifolders+=[
-        '"/d/grid17/ln16/dselector_v3/phase1_data_looseChiUE/D2017_1_loose_tree.root"',
-        '"/d/grid17/ln16/dselector_v3/phase1_data_looseChiUE/D2018_1_loose_tree.root"',
-        '"/d/grid17/ln16/dselector_v3/phase1_data_looseChiUE/D2018_8_loose_tree.root"'
-        ]
+#topologies+=[
+#        "4#gammap[#pi^{0},#eta]",
+#        "4#gammap[#pi^{0},#eta]",
+#        "4#gammap[#pi^{0},#eta]"
+#        ]
+#ofolders+=[
+#        "gluex_2017_1",
+#        "gluex_2018_1",
+#        "gluex_2018_8"
+#        ]
+#ifolders+=[
+#        '"/d/grid17/ln16/dselector_v3/phase1_data_looseChiUE/D2017_1_loose_tree.root"',
+#        '"/d/grid17/ln16/dselector_v3/phase1_data_looseChiUE/D2018_1_loose_tree.root"',
+#        '"/d/grid17/ln16/dselector_v3/phase1_data_looseChiUE/D2018_8_loose_tree.root"'
+#        ]
 
 ##############################################
 # FOURTH STUDY:  RUN OVER FLAT MC TO HELP STUDY QFACTORS

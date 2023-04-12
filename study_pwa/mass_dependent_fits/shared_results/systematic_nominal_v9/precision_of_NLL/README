@@ -1,0 +1,24 @@
+
+delta5NLL_dataBkgndAccmc - bootstraps data, bkgnd, and accmc to determine the precision
+delta100NLL_dataBkgnd_accmc - bootstrap data,bkgnd to determine precision of sampling and accmc to determine MC integral precision
+
+v1 - will boostrap the accmc alone for the lowest t-bin and highest t-bin. Compare the best solutions in each solution set
+    1) lowest t-bin altMin worse by 5 NLL. altMin best of second cluster
+        its the etapi_result_0.fit and etapi_result_2.fit
+    2) highest t-bin altMin worse by 8 NLL. altMin best of second cluster
+        ../../malte_v3_m104172/gathered_topNLLs_scaled50NLL/075100/etapi_result_0.fit:  bestMinimum     -267802.840663345
+        ../../malte_v3_m104172/gathered_topNLLs_scaled50NLL/075100/etapi_result_31.fit:  bestMinimum    -267794.001478719
+    v1 contains a nominal folder which should contain the drawn partial waves
+
+
+
+The basis for this code, drawPlots.py, is found in a jupyter notebook
+study_pwa/mass_dependent_fits/shared_results/malte_v5_bootstrap_accmc/bootstrap_quality.ipynb
+
+This code is made standalone for future use
+
+Currently, 
+Two pairs of fits are made
+One pair of fits differ by 100 NLL
+Another pair differ by 5 NLL
+Both pairs sees a precision of around 50 NLL
