@@ -1,6 +1,3 @@
-Here we study the precision of the likelihood by bootstrapping the accmc. We can argue for potential alternative solutions if the nominal difference between the NLL is similar in value to the precision
-
-
 The best fit files are taken from malte_v3_m104172
 These are the best converged files, does not have to properly reconverge
 
