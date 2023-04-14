@@ -1,5 +1,0 @@
-
-02/08/23
-Running bootstrap for the 5 different t-bins where the nominal fits
-have been set to the best converged likelihood fit from malte_v3 (>250 randomized fits in 1.04-1.72 mass region)
-Did not check for reconvergence, we think we can fix it using perturbation scans
