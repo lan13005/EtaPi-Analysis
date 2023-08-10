@@ -34,7 +34,7 @@ thrownTreeName="Thrown_Tree"
 #tag="_sbL_accN"
 #tag="_sidebandStudy"
 #tag="_wUnusedShowers_sbN_accT"
-tag="_bggen_2018_8"
+#tag="_bggen_2018_8"
 
 ### PHASE 1 MONTE CARLO
 #runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_pi0eta*"',reconTreeName,"F2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
@@ -72,7 +72,7 @@ tag="_bggen_2018_8"
 #    runSelector('"/d/home/sdobbs/GlueX/gluex_data/RunPeriod-2018-08/analysis-ver02/tree_pi0eta__B4_M17_M7/merged/*"',reconTreeName,"D2018_8_selected",i,proof_Nthreads,recon_cfiles)
 
 #### Thrown trees generally need less threads to run over since there isn't much calculation being done
-#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_thrown*"',thrownTreeName,"F2017_1_gen",1,proof_Nthreads,thrown_cfiles)
+runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_thrown*"',thrownTreeName,"F2017_1_gen",1,proof_Nthreads,thrown_cfiles)
 #runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_1_400M/merged/tree_thrown*"',thrownTreeName,"F2018_1_gen",1,proof_Nthreads,thrown_cfiles)
 #runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_8_260M_130M/merged/tree_thrown*"',thrownTreeName,"F2018_8_gen",1,proof_Nthreads,thrown_cfiles)
 
@@ -139,8 +139,8 @@ tag="_bggen_2018_8"
 #        "ExoticReview_2018_8_gen",1,proof_Nthreads,thrown_cfiles)
 
 ## BGGEN 2018_8
-runSelector('"/d/grid17/ln16/rootFiles/pi0eta/bggen_2018_8/symlinked_trees/tree_pi0eta__B4_M17_M7_*"',
-        reconTreeName,"BGGEN2018_8_selected",3,proof_Nthreads,recon_cfiles)
+#runSelector('"/d/grid17/ln16/rootFiles/pi0eta/bggen_2018_8/symlinked_trees/tree_pi0eta__B4_M17_M7_*"',
+#        reconTreeName,"BGGEN2018_8_selected",3,proof_Nthreads,recon_cfiles)
 
 
 

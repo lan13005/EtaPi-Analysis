@@ -55,6 +55,7 @@ void DSelector_thrown::Init(TTree *locTree)
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_omega_thrown");
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_x_thrown");
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_y_thrown");
+            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Phi_thrown");
             dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("pVH_thrown");
         }
 
@@ -227,7 +228,7 @@ Bool_t DSelector_thrown::Process(Long64_t locEntry)
             dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_omega_thrown",omega*radToDeg);
             dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_x_thrown",vanHove_x);
             dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_y_thrown",vanHove_y);
-            dFlatTreeInterface->Fill_Fundamental<Float_t>("pVH_thrown",pVH);
+            dFlatTreeInterface->Fill_Fundamental<Float_t>("Phi_thrown",Phi);
 	    FillAmpTools_FlatTree(locBeamP4, locFinalStateP4);
 	    Fill_FlatTree(); //for the active combo
         }

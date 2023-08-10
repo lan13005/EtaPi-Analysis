@@ -1,0 +1,13 @@
+
+# Nominal fit results should all be named 010020, 0200325...
+#   and should contain a single fit file that has been run_overlayPlots already
+
+# Draw the nominal fit results
+./drawOverview.py systematic_nominal_v6/nominal/ 
+
+# Run your systematics using runSystComparison.py, it should generate a barlow.csv file 
+# Once you have run the systematics scans overlay the systematic errors
+./drawOverview.py systematic_nominal_v6/nominal/ systematic_nominal_v6/systematic_v21/SOURCE/systematic_syst/barlows.csv
+
+
+

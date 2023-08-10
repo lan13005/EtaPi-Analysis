@@ -1,4 +1,7 @@
 
+bootstrap_t010020 are made by me and I think results_t010020 are made by Malte
+The files like "bootstrap_results/bootstrap_result_mean_std_t010020.log" do not have the uncertainties on the parameter values (like a2 mass, and bin 0 S-wave) only the fit fractions. This is the only thing that matters for the cross section measurement 
+
 Use fit_bootstrap.py to run bootstrap fits with different seeds. It should result in a bunch of folders. 
 
 You should use run_overlayBins.py program to extract the fit fractions. I forgot if this should be before or after reorganize.py.

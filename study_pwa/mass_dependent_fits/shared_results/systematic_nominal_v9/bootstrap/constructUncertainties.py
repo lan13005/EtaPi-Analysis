@@ -58,7 +58,7 @@ for ofolder, fracOrYield in zip(['bootstrap_results_fitFrac', 'bootstrap_results
             print(f'loading: {fname}')
             with open(fname) as f:
                 lines=f.readlines()
-                assert(len(lines)==138)
+                assert(len(lines)==138) # this is very specific to my current setup!
                 for line in lines:
                     line=line.split(' ')
                     prefix, value = ' '.join(line[:-3]), float(line[-3])
