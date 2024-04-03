@@ -19,12 +19,12 @@ void runDSelector_thrown(string inputFileLocation, string treeName, string outpu
 	gROOT->ProcessLine(".x $(ROOT_ANALYSIS_HOME)/scripts/Load_DSelector.C");
 	TChain *chain = new TChain(treeName.c_str());
 
-        chain->Add(inputFileLocation.c_str());
+    chain->Add(inputFileLocation.c_str());
         
 	string outputHistFileName = outputFileNameTag+"_hists.root";
-        string outputTreeFileName = outputFileNameTag+"_trees.root";
+    string outputTreeFileName = outputFileNameTag+"_trees.root";
 	DPROOFLiteManager::Process_Chain(chain, "DSelector_thrown.C++",  proof_Nthreads, outputHistFileName, outputTreeFileName, "");
-	//chain->Process("DSelector_thrown.C++", "");
+	// chain->Process("DSelector_thrown.C++", "");
 	
 	return;
 }

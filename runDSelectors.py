@@ -24,7 +24,7 @@ def runSelector(inFileLoc, treeName, outFileName, choice, proof_Nthreads, cfiles
     os.system("root -l -b -q '"+crun+"("+inFileLoc+","+'"'+treeName+'","'+outFileName+"_"+choiceToType[choice]+'",'+str(proof_Nthreads)+")'")
     os.system("mv output_flat.root "+outFileName+"_"+choiceToType[choice]+"_flat.root")
 
-proof_Nthreads=32
+proof_Nthreads=16
 recon_cfiles=["DSelector_etapi.C", "runDSelector.C"]
 thrown_cfiles=["DSelector_thrown.C", "runDSelector_thrown.C"]
 
@@ -35,6 +35,30 @@ thrownTreeName="Thrown_Tree"
 #tag="_sidebandStudy"
 #tag="_wUnusedShowers_sbN_accT"
 #tag="_bggen_2018_8"
+
+
+### a0a2 bw study for NIFTy
+# for i in [1,2,3]:
+#     runSelector('"/w/halld-scshelf2101/lng/DATA/a0a2_2bw/root/trees/tree_pi0eta*"',reconTreeName,"a0a2_2bw",i,proof_Nthreads,recon_cfiles)
+# runSelector('"/w/halld-scshelf2101/lng/DATA/a0a2_2bw/root/thrown/tree_thrown*"',thrownTreeName,"a0a2_2bw_gen",1,proof_Nthreads,thrown_cfiles)
+# for i in [1,2,3]: # First MC sample. Turns out it is about 1:1 in size to the above a0a2 sample in the peak region
+#     runSelector('"/w/halld-scshelf2101/lng/DATA/a0a2_flat/root/trees/tree_pi0eta*"',reconTreeName,"a0a2_flat",i,proof_Nthreads,recon_cfiles)
+# runSelector('"/w/halld-scshelf2101/lng/DATA/a0a2_flat/root/thrown/tree_thrown*"',thrownTreeName,"a0a2_flat_gen",1,proof_Nthreads,thrown_cfiles)
+
+
+for i in [1,2,3]:
+    runSelector('"/w/halld-scshelf2101/lng/DATA/a0a2_bin_10_1M/trees/tree_pi0eta__B4_M17_M7_gen_amp/tree_pi0eta__B4_M17_M7_gen_amp_*.root"',reconTreeName,"a0a2_bin_10",i,proof_Nthreads,recon_cfiles)
+for i in [1]:
+    runSelector('"/w/halld-scshelf2101/lng/DATA/a0a2_bin_10_1M/thrown/tree_thrown_gen_amp_*"',thrownTreeName,"a0a2_bin10_gen",1,proof_Nthreads,thrown_cfiles)
+for i in [1,2,3]:
+    runSelector('"/w/halld-scshelf2101/lng/DATA/a0a2_flat_100M/trees/tree_pi0eta__B4_M17_M7_gen_amp/tree_pi0eta__B4_M17_M7_gen_amp_*"',reconTreeName,"flat_",i,proof_Nthreads,recon_cfiles)
+for i in [1]:
+    runSelector('"/w/halld-scshelf2101/lng/DATA/a0a2_flat_100M/thrown/tree_thrown_gen_amp_*"',thrownTreeName,"flat_gen",1,proof_Nthreads,thrown_cfiles)
+
+
+# phase 1 data on ifarm
+# runSelector('"/cache/halld/RunPeriod-2018-08/analysis/ver02/tree_pi0eta__B4_M17_M7/merged/*"',reconTreeName,"D2018_8_selected",3,proof_Nthreads,recon_cfiles)
+
 
 ### PHASE 1 MONTE CARLO
 #runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_pi0eta*"',reconTreeName,"F2017_1_selected"+tag,3,proof_Nthreads,recon_cfiles)
@@ -72,7 +96,7 @@ thrownTreeName="Thrown_Tree"
 #    runSelector('"/d/home/sdobbs/GlueX/gluex_data/RunPeriod-2018-08/analysis-ver02/tree_pi0eta__B4_M17_M7/merged/*"',reconTreeName,"D2018_8_selected",i,proof_Nthreads,recon_cfiles)
 
 #### Thrown trees generally need less threads to run over since there isn't much calculation being done
-runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_thrown*"',thrownTreeName,"F2017_1_gen",1,proof_Nthreads,thrown_cfiles)
+# runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2017_1_130M/merged/tree_thrown*"',thrownTreeName,"F2017_1_gen",1,proof_Nthreads,thrown_cfiles)
 #runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_1_400M/merged/tree_thrown*"',thrownTreeName,"F2018_1_gen",1,proof_Nthreads,thrown_cfiles)
 #runSelector('"/d/grid17/ln16/rootFiles/pi0eta/120921/2018_8_260M_130M/merged/tree_thrown*"',thrownTreeName,"F2018_8_gen",1,proof_Nthreads,thrown_cfiles)
 

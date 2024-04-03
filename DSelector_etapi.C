@@ -23,9 +23,9 @@ void DSelector_etapi::Init(TTree *locTree)
 	dFlatTreeName = "kin"; //if blank, default name will be chosen
 	dSaveDefaultFlatBranches = false; // False: don't save default branches, reduce disk footprint.
 	//dSaveTLorentzVectorsAsFundamentaFlatTree = false; // Default (or false): save particles as TLorentzVector objects. True: save as four doubles instead.
-        
+
 	//Because this function gets called for each TTree in the TChain, we must be careful:
-		//We need to re-initialize the tree interface & branch wrappers, but don't want to recreate histograms
+	//We need to re-initialize the tree interface & branch wrappers, but don't want to recreate histograms
 	bool locInitializedPriorFlag = dInitializedFlag; //save whether have been initialized previously
 	DSelector::Init(locTree); //This must be called to initialize wrappers for each new TTree
 	//gDirectory now points to the output file with name dOutputFileName (if any)
@@ -35,7 +35,7 @@ void DSelector_etapi::Init(TTree *locTree)
 	Get_ComboWrappers();
 	dPreviousRunNumber = 0;
 
-        if (dFlatTreeFileName!=""){
+    if (dFlatTreeFileName!=""){
             // Fundamental = char, int, float, double, etc.
 	    // AmpTools tree output - step 2
 	    // Creating new branches in the flat tree
@@ -43,93 +43,93 @@ void DSelector_etapi::Init(TTree *locTree)
  	    dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Target_Mass"); 
  	    dFlatTreeInterface->Create_Branch_FundamentalArray<Int_t>("PID_FinalState","NumFinalState");
  	    dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("BeamAngle");
-            // Photon Related 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonTheta1");	
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonTheta2");	
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonTheta3");	
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonTheta4");	
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonE1");	
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonE2");	
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonE3");	
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonE4");	
-            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pPhotonE");
-            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pPhotonTheta");
-            // System = BCAL/FCAL/NULL. Actual type is DetectorSystem_t which is enum object	
-            //      FCAL = 0x0020 = 32 in hexadecimal, BCAL = 0x0004 = 4
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonSystem1"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonSystem2");	
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonSystem3");	
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonSystem4");	
-            // Proton Related
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("proton_momentum");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("proton_z");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("proton_R");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("proton_dEdxCDC");
-            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pMagP3Proton");
-            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pzCutmin");
-            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pRProton");
-            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pdEdxCDCProton");
-            // Exclusivity Related
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("DOFKinFit"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("chiSq"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("unusedEnergy"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("unusedShowers"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mmsq");
-            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pMissingMassSquared");
-            // Kinematics Related
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mismatchPairMass_13");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mismatchPairMass_24");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mismatchPairMass_23");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mismatchPairMass_14");
-            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("omegaCut");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0p");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Metap");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0g3"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0g4"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Meta"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0eta"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Ebeam");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mandelstam_tp"); 
+        // Photon Related 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonTheta1");	
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonTheta2");	
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonTheta3");	
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonTheta4");	
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonE1");	
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonE2");	
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonE3");	
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonE4");	
+        dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pPhotonE");
+        dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pPhotonTheta");
+        // System = BCAL/FCAL/NULL. Actual type is DetectorSystem_t which is enum object	
+        //      FCAL = 0x0020 = 32 in hexadecimal, BCAL = 0x0004 = 4
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonSystem1"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonSystem2");	
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonSystem3");	
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("photonSystem4");	
+        // Proton Related
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("proton_momentum");
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("proton_z");
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("proton_R");
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("proton_dEdxCDC");
+        dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pMagP3Proton");
+        dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pzCutmin");
+        dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pRProton");
+        dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pdEdxCDCProton");
+        // Exclusivity Related
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("DOFKinFit"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("chiSq"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("unusedEnergy"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("unusedShowers"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mmsq");
+        dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("pMissingMassSquared");
+        // Kinematics Related
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mismatchPairMass_13");
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mismatchPairMass_24");
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mismatchPairMass_23");
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mismatchPairMass_14");
+        dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("omegaCut");
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0p");
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Metap");
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0g3"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0g4"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Meta"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0eta"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Ebeam");
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mandelstam_tp"); 
  	    dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mandelstam_t"); 
 	    dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mandelstam_teta");	
 	    dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mandelstam_tpi0");	
-            ////// Angles related
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Phi"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_X_cm"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_X_cm"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_eta_cm"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_pi0_cm"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_X_lab"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_eta_lab"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_pi0_lab"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_eta_gj"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_eta_gj"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_eta_hel"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_eta_hel"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_omega");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_x");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_y");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("pVH");
-            // Weighting Related
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("AccWeight"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("weightASBS"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("weightBS"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("weightBSpi0"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("weightBSeta"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("rfTime"); 
-            // Thrown quantities
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0eta_thrown");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mandelstam_t_thrown");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Ebeam_thrown");
-            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("isCorrectCombo");
-            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("isCorrectBeam");
-            dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("isCorrectSpect");
-            // Event Related
-            dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("run");
-            dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("event");
-            dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("topologyId");
-        }
+        ////// Angles related
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Phi"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_X_cm"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_X_cm"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_eta_cm"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_pi0_cm"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_X_lab"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_eta_lab"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_pi0_lab"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_eta_gj"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_eta_gj"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_eta_hel"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_eta_hel"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_omega");
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_x");
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_y");
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("pVH");
+        // Weighting Related
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("AccWeight"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("weightASBS"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("weightBS"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("weightBSpi0"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("weightBSeta"); 
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("rfTime"); 
+        // Thrown quantities
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0eta_thrown");
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mandelstam_t_thrown");
+        dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Ebeam_thrown");
+        dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("isCorrectCombo");
+        dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("isCorrectBeam");
+        dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("isCorrectSpect");
+        // Event Related
+        dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("run");
+        dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("event");
+        dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("topologyId");
+    }
 	/*********************************** EXAMPLE USER INITIALIZATION: ANALYSIS ACTIONS **********************************/
 
 //	// EXAMPLE: Create deque for histogramming particle masses:
@@ -301,7 +301,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 	{
 		dIsPolarizedFlag = dAnalysisUtilities.Get_IsPolarizedBeam(locRunNumber, dIsPARAFlag);
 		dPreviousRunNumber = locRunNumber;
-	        hasPolarizationAngle = dAnalysisUtilities.Get_PolarizationAngle(locRunNumber, locPolarizationAngle);
+	    hasPolarizationAngle = dAnalysisUtilities.Get_PolarizationAngle(locRunNumber, locPolarizationAngle);
 	}
 
 	/********************************************* SETUP UNIQUENESS TRACKING ********************************************/
@@ -312,19 +312,19 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 //	dAnalyzeCutActions->Reset_NewEvent(); // manual action, must call Reset_NewEvent()
 
 	//PREVENT-DOUBLE COUNTING WHEN HISTOGRAMMING
-		//Sometimes, some content is the exact same between one combo and the next
-			//e.g. maybe two combos have different beam particles, but the same data for the final-state
-		//When histogramming, you don't want to double-count when this happens: artificially inflates your signal (or background)
-		//So, for each quantity you histogram, keep track of what particles you used (for a given combo)
-		//Then for each combo, just compare to what you used before, and make sure it's unique
+	//Sometimes, some content is the exact same between one combo and the next
+	//e.g. maybe two combos have different beam particles, but the same data for the final-state
+	//When histogramming, you don't want to double-count when this happens: artificially inflates your signal (or background)
+	//So, for each quantity you histogram, keep track of what particles you used (for a given combo)
+	//Then for each combo, just compare to what you used before, and make sure it's unique
 
 	//EXAMPLE 1: Particle-specific info:
 	set<Int_t> locUsedSoFar_BeamEnergy; //Int_t: Unique ID for beam particles. set: easy to use, fast to search
 
 	//EXAMPLE 2: Combo-specific info:
-		//In general: Could have multiple particles with the same PID: Use a set of Int_t's
-		//In general: Multiple PIDs, so multiple sets: Contain within a map
-		//Multiple combos: Contain maps within a set (easier, faster to search)
+	//In general: Could have multiple particles with the same PID: Use a set of Int_t's
+	//In general: Multiple PIDs, so multiple sets: Contain within a map
+	//Multiple combos: Contain maps within a set (easier, faster to search)
 	set<map<Particle_t, set<Int_t> > > locUsedSoFar_MissingMass;
 
 	//INSERT USER ANALYSIS UNIQUENESS TRACKING HERE
@@ -347,12 +347,12 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 	TString locThrownTopology = Get_ThrownTopologyString();
 
 	//Thrown beam: just use directly
-        float locBeamE_thrown=0;
-        float locMetapi0_thrown=0;
-        float locT_thrown=0; 
-        TLorentzVector locProtonP4_thrown;
-        TLorentzVector locEtaP4_thrown;
-        TLorentzVector locPi0P4_thrown;
+    float locBeamE_thrown=0;
+    float locMetapi0_thrown=0;
+    float locT_thrown=0; 
+    TLorentzVector locProtonP4_thrown;
+    TLorentzVector locEtaP4_thrown;
+    TLorentzVector locPi0P4_thrown;
 
 	if(dThrownBeam != NULL)
 		locBeamE_thrown = dThrownBeam->Get_P4().E();
@@ -364,26 +364,26 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		dThrownWrapper->Set_ArrayIndex(loc_i);
 		Particle_t locPID = dThrownWrapper->Get_PID();
 		TLorentzVector locThrownP4_thrown = dThrownWrapper->Get_P4();
-                if (locPID==14)
-                    locProtonP4_thrown=locThrownP4_thrown;
-                else if (locPID==7)
-                    locPi0P4_thrown=locThrownP4_thrown;
-                else if (locPID==17)
-                    locEtaP4_thrown=locThrownP4_thrown;
+        if (locPID==14)
+            locProtonP4_thrown=locThrownP4_thrown;
+        else if (locPID==7)
+            locPi0P4_thrown=locThrownP4_thrown;
+        else if (locPID==17)
+            locEtaP4_thrown=locThrownP4_thrown;
 	}
 
 	locMetapi0_thrown=(locPi0P4_thrown+locEtaP4_thrown).M();
 	locT_thrown=-(dTargetP4-locProtonP4_thrown).M2();		
 	//bool bMetapi0_thrown = (locMetapi0_thrown>1.04)*(locMetapi0_thrown<1.56);
 	bool bmandelstamt_thrown=(locT_thrown<1.0)*(locT_thrown>0.1); 
-        bool bBeamE_thrown = (locBeamE_thrown<8.8)*(locBeamE_thrown>8.2);
-        bool bMpi0eta_thrown = (locMetapi0_thrown<1.80)*(locMetapi0_thrown>0.8);
-        bool bTopology = locThrownTopology==topologyString; 
-        //bTopology=true; // For the BGGEN study
-        bool selection_thrown=bTopology;//*bBeamE_thrown;//*bmandelstamt_thrown*bMpi0eta_thrown;
-        selection_thrown=true;
-        if (dIsMC*!selection_thrown)
-            return kTRUE;
+    bool bBeamE_thrown = (locBeamE_thrown<8.8)*(locBeamE_thrown>8.2);
+    bool bMpi0eta_thrown = (locMetapi0_thrown<1.80)*(locMetapi0_thrown>0.8);
+    bool bTopology = locThrownTopology==topologyString; 
+    //bTopology=true; // For the BGGEN study
+    bool selection_thrown=bTopology;//*bBeamE_thrown;//*bmandelstamt_thrown*bMpi0eta_thrown;
+    selection_thrown=true;
+    if (dIsMC*!selection_thrown)
+        return kTRUE;
 
 	/************************************************* LOOP OVER COMBOS *************************************************/
 
@@ -415,70 +415,70 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		Int_t locPhoton3NeutralID = dPhoton3Wrapper->Get_NeutralID();
 		Int_t locPhoton4NeutralID = dPhoton4Wrapper->Get_NeutralID();
 
-                // We have access to the truth information so we can construct a scheme to select the true combination
-                //    in the simulated recon tree there is a branch "isTrueCombo" that exists but for some reason
-                //    it is all set to zero for our trees. We can do this manually though by checking PIDs
-                // Set the default values to true so that if we do not have thrown information we do not need to do any matching
-                // USAGE: Filling the output tree with the information allows us to select on the truth
-                //      1. Accidental subtraction statistically selects the true beam photon = isCorrectBeam
-                //      2. Mass sideband subtraction statistically selects the true pi0/eta combination = isCorrectSpect
-                //      The idea is to apply all selections then make a plot. Compare subtraction scheme to correct particles
-                bool isCorrectCombo=true; 
-                bool isCorrectBeam=true;
-                bool isCorrectSpect=true;
-	        vector<Int_t> thrownPIDs;
-	        vector<Int_t> parentIDs;
-                vector<Int_t> matchedParentPIDs;
-	        if (Get_NumThrown()!=0){
-	            for(UInt_t loc_i = 0; loc_i < Get_NumThrown(); ++loc_i)
-	            {	
-	                dThrownWrapper->Set_ArrayIndex( loc_i );
-	                //cout << "thrown PID: " << dThrownWrapper->Get_PID() << " with parent thrown index: " <<  dThrownWrapper->Get_ParentIndex() << endl;
-	                thrownPIDs.push_back(dThrownWrapper->Get_PID());
-	                parentIDs.push_back(dThrownWrapper->Get_ParentIndex());
-	            }
+        // We have access to the truth information so we can construct a scheme to select the true combination
+        //    in the simulated recon tree there is a branch "isTrueCombo" that exists but for some reason
+        //    it is all set to zero for our trees. We can do this manually though by checking PIDs
+        // Set the default values to true so that if we do not have thrown information we do not need to do any matching
+        // USAGE: Filling the output tree with the information allows us to select on the truth
+        //      1. Accidental subtraction statistically selects the true beam photon = isCorrectBeam
+        //      2. Mass sideband subtraction statistically selects the true pi0/eta combination = isCorrectSpect
+        //      The idea is to apply all selections then make a plot. Compare subtraction scheme to correct particles
+        bool isCorrectCombo=true; 
+        bool isCorrectBeam=true;
+        bool isCorrectSpect=true;
+	    vector<Int_t> thrownPIDs;
+	    vector<Int_t> parentIDs;
+        vector<Int_t> matchedParentPIDs;
 
-                    // Obtain all the thrown IDs for the photons
-                    vector<Int_t> thrownID_phs = {
-                        dPhoton1Wrapper->Get_ThrownIndex(), 
-                        dPhoton2Wrapper->Get_ThrownIndex(), 
-                        dPhoton3Wrapper->Get_ThrownIndex(), 
-                        dPhoton4Wrapper->Get_ThrownIndex(),
-                    };
-
-                    for (auto thrownID: thrownID_phs){
-                        if (thrownID != -1){ // if -1 then not matched to a thrown particle
-                            //cout << "ph parent " << parentIDs[thrownID] << " has PID " << thrownPIDs[parentIDs[thrownID]] << endl;
-                            matchedParentPIDs.push_back(thrownPIDs[parentIDs[thrownID]]);
-                        }
-                        else{ // if any of  the photons did not match to a thrown particle we do not have the correct combo clearly
-                            isCorrectSpect=false;
-                            //cout << "ph has no parent" << endl;
-                            matchedParentPIDs.push_back(-1);
-                        }
-                    }
-                    // photons 1,2 should pair to a pi0 (Geant PID=7) and photons 3,4 should pair to an eta (17)
-                    //    proton should have a proton PID=14
-                    if ((matchedParentPIDs[0]==7)*
-                        (matchedParentPIDs[1]==7)*
-                        (matchedParentPIDs[2]==17)*
-                        (matchedParentPIDs[3]==17)*
-                        (thrownPIDs[dProtonWrapper->Get_ThrownIndex()]==14)){
-                        isCorrectSpect=true;}
-                    else{
-                        isCorrectSpect=false;}
-
-                    // Checking to see if the beam photon matches the thrown by comparing the energies
-                    //cout << "Thrown:Combo Beam E " << locBeamE_thrown << ":" << (dComboBeamWrapper->Get_P4()).E() << endl;
-                    if ( abs(locBeamE_thrown-(dComboBeamWrapper->Get_P4()).E())<0.0001 )
-                        isCorrectBeam=true;
-                    else
-                        isCorrectBeam=false;
-
-                    // Finally, the true combo is when we have the true spectroscopic combination and the true beam photon
-                    isCorrectCombo=isCorrectSpect*isCorrectBeam;
-                    //cout << "correct beam/spect/combo: " << isCorrectBeam << "/" << isCorrectSpect << "/" << isCorrectCombo <<endl;
+	    if (Get_NumThrown()!=0){
+	        for(UInt_t loc_i = 0; loc_i < Get_NumThrown(); ++loc_i)
+	        {	
+	            dThrownWrapper->Set_ArrayIndex( loc_i );
+	            //cout << "thrown PID: " << dThrownWrapper->Get_PID() << " with parent thrown index: " <<  dThrownWrapper->Get_ParentIndex() << endl;
+	            thrownPIDs.push_back(dThrownWrapper->Get_PID());
+	            parentIDs.push_back(dThrownWrapper->Get_ParentIndex());
 	        }
+
+            // Obtain all the thrown IDs for the photons
+            vector<Int_t> thrownID_phs = {
+                dPhoton1Wrapper->Get_ThrownIndex(), 
+                dPhoton2Wrapper->Get_ThrownIndex(), 
+                dPhoton3Wrapper->Get_ThrownIndex(), 
+                dPhoton4Wrapper->Get_ThrownIndex(),
+            };
+
+            for (auto thrownID: thrownID_phs){
+                if (thrownID != -1){ // if -1 then not matched to a thrown particle
+                    //cout << "ph parent " << parentIDs[thrownID] << " has PID " << thrownPIDs[parentIDs[thrownID]] << endl;
+                    matchedParentPIDs.push_back(thrownPIDs[parentIDs[thrownID]]);
+                }
+                else{ // if any of  the photons did not match to a thrown particle we do not have the correct combo clearly
+                    isCorrectSpect=false;
+                    //cout << "ph has no parent" << endl;
+                    matchedParentPIDs.push_back(-1);
+                }
+            }
+            // photons 1,2 should pair to a pi0 (Geant PID=7) and photons 3,4 should pair to an eta (17)
+            //    proton should have a proton PID=14
+            if ((matchedParentPIDs[0]==7)*
+                (matchedParentPIDs[1]==7)*
+                (matchedParentPIDs[2]==17)*
+                (matchedParentPIDs[3]==17)*
+                (thrownPIDs[dProtonWrapper->Get_ThrownIndex()]==14)){
+                isCorrectSpect=true;}
+            else{ isCorrectSpect=false; }
+
+            // Checking to see if the beam photon matches the thrown by comparing the energies
+            //cout << "Thrown:Combo Beam E " << locBeamE_thrown << ":" << (dComboBeamWrapper->Get_P4()).E() << endl;
+            if ( abs(locBeamE_thrown-(dComboBeamWrapper->Get_P4()).E())<0.0001 )
+                isCorrectBeam=true;
+            else
+                isCorrectBeam=false;
+
+            // Finally, the true combo is when we have the true spectroscopic combination and the true beam photon
+            isCorrectCombo=isCorrectSpect*isCorrectBeam;
+            //cout << "correct beam/spect/combo: " << isCorrectBeam << "/" << isCorrectSpect << "/" << isCorrectCombo <<endl;
+	    }
 
 
 		/*********************************************** GET FOUR-MOMENTUM **********************************************/
@@ -511,12 +511,12 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		TLorentzVector locPhoton4P4_Measured = dPhoton4Wrapper->Get_P4_Measured();
 
             
-                // Get Detector System:
-                // Step 1/2
-                DetectorSystem_t locPhoton1System = dPhoton1Wrapper->Get_Detector_System_Timing();
-                DetectorSystem_t locPhoton2System = dPhoton2Wrapper->Get_Detector_System_Timing();
-                DetectorSystem_t locPhoton3System = dPhoton3Wrapper->Get_Detector_System_Timing();
-                DetectorSystem_t locPhoton4System = dPhoton4Wrapper->Get_Detector_System_Timing();
+         // Get Detector System:
+         // Step 1/2
+         DetectorSystem_t locPhoton1System = dPhoton1Wrapper->Get_Detector_System_Timing();
+         DetectorSystem_t locPhoton2System = dPhoton2Wrapper->Get_Detector_System_Timing();
+         DetectorSystem_t locPhoton3System = dPhoton3Wrapper->Get_Detector_System_Timing();
+         DetectorSystem_t locPhoton4System = dPhoton4Wrapper->Get_Detector_System_Timing();
 
 		/********************************************* GET COMBO RF TIMING INFO *****************************************/
 
@@ -529,7 +529,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		//Number of out-of-time beam bunches in tree (on a single side, so that total number out-of-time bunches accepted is 2 times 
 		//	this number for left + right bunches) 
 		Bool_t locSkipNearestOutOfTimeBunch = true; // True: skip events from nearest out-of-time bunch on either side (recommended).
-                int bunchesToSkip=1;
+        int bunchesToSkip=1;
 		Int_t locNumOutOfTimeBunchesToUse = locSkipNearestOutOfTimeBunch ? locNumOutOfTimeBunchesInTree-bunchesToSkip:locNumOutOfTimeBunchesInTree; 
 		// Ideal value would be 1, but deviations require added factor, which is different for data and MC.
 		float locAccidentalScalingFactor = (float)(dAnalysisUtilities.Get_AccidentalScalingFactor(Get_RunNumber(), locBeamP4.E(), dIsMC)); 
@@ -537,9 +537,10 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		// Weight by 1 for in-time events, ScalingFactor*(1/NBunches) for out-of-time
 		float locHistAccidWeightFactor = (float)(locRelBeamBucket==0 ? 1 : -locAccidentalScalingFactor/(2*locNumOutOfTimeBunchesToUse)) ; 
 		if((locSkipNearestOutOfTimeBunch && (abs(locRelBeamBucket)<=bunchesToSkip && abs(locRelBeamBucket)>0)) || 
-                        abs(locDeltaT_RF)>4*(locNumOutOfTimeBunchesInTree+1)) { 
-                    // Skip nearest out-of-time bunch: tails of in-time distribution also leak in
-                    // Sometimes we get RF times that are very large, like O(10^5). Lets just keep times within an extra bunch 
+                        abs(locDeltaT_RF)>4*(locNumOutOfTimeBunchesInTree+1)) 
+		{ 
+            // Skip nearest out-of-time bunch: tails of in-time distribution also leak in
+            // Sometimes we get RF times that are very large, like O(10^5). Lets just keep times within an extra bunch 
 		    dComboWrapper->Set_IsComboCut(true); 
 		    continue; 
 		} 
@@ -559,20 +560,20 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		float etaStd=0.0191;
 		float pi0_sbweight; // this will be used to fill the flat trees
 		float eta_sbweight;
-                //        NOMINAL
-                // [x,y,z] where x,y,z is # of sigmas on one side denoting the end of the 
-                //     signal region, the start of the skip region, and the end of the sb region
-                float nstd_pi0[3] = {3, 4, 5.5};
-                float nstd_eta[3] = {3, 4, 6};
-                //        TIGHTER
-                //float nstd_pi0[3] = {2.75, 4.25, 5.5};
-                //float nstd_eta[3] = {2.75, 4.25, 6};
-                //        LOOSER
-                //float nstd_pi0[3] = {3.25, 3.75, 5.5};
-                //float nstd_eta[3] = {3.25, 3.75, 6};
+        //        NOMINAL
+        // [x,y,z] where x,y,z is # of sigmas on one side denoting the end of the 
+        //     signal region, the start of the skip region, and the end of the sb region
+        float nstd_pi0[3] = {3, 4, 5.5};
+        float nstd_eta[3] = {3, 4, 6};
+        //        TIGHTER
+        //float nstd_pi0[3] = {2.75, 4.25, 5.5};
+        //float nstd_eta[3] = {2.75, 4.25, 6};
+        //        LOOSER
+        //float nstd_pi0[3] = {3.25, 3.75, 5.5};
+        //float nstd_eta[3] = {3.25, 3.75, 6};
 
-                float weight_pi0=-1*nstd_pi0[0]/(nstd_pi0[2]-nstd_pi0[1]); // this is fixed valued for the weight of the pi0 sidebands
-                float weight_eta=-1*nstd_eta[0]/(nstd_eta[2]-nstd_eta[1]); // this is fixed valued for the weight of the eta sidebands
+        float weight_pi0=-1*nstd_pi0[0]/(nstd_pi0[2]-nstd_pi0[1]); // this is fixed valued for the weight of the pi0 sidebands
+        float weight_eta=-1*nstd_eta[0]/(nstd_eta[2]-nstd_eta[1]); // this is fixed valued for the weight of the eta sidebands
 		// The signal regions are both +/- 3 sigmas around the peak the left and right sidebands 
 		// 	which are some N sigmas wide with some M sigma skip region included 
 		// 	between the signal and sideband regions. The weight = the ratio the lengths
@@ -599,19 +600,25 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		//    genmc = thrown trees created during simulation process
 		bool bSignalRegion;
 		float branchWeight;
-                int choice=3;
+        int choice=2;
 		//---------CHOICE 1 FOR "data" RUN OVER SIGNAL/DATA-------------
-                if (choice==1){
+        if (choice==1)
+		{
 		    bSignalRegion=(pi0_sbweight==1)*(eta_sbweight==1)*(locHistAccidWeightFactor==1); // Keep combos ONLY in the signal region
-		    branchWeight=1;}
+		    branchWeight=1;
+		}
 		//---------CHOICE 2 FOR "bkgnd" RUN OVER SIGNAL/DATA-------------
-                if (choice==2){
+        if (choice==2)
+		{
 		    bSignalRegion=!((pi0_sbweight==1)*(eta_sbweight==1)*(locHistAccidWeightFactor==1)); // Keep combo NOT in the signal region
-		    branchWeight=-weight;}
+		    branchWeight=-weight;
+		}
 		//---------CHOICE 3 FOR "accmc" RUN OVER FLAT MC-------------
-                if (choice==3){
+        if (choice==3)
+		{
 		    bSignalRegion=true; // Keep combos that exist in the signal AND sideband region
-		    branchWeight=weight;}
+		    branchWeight=weight;
+		}
 		//----------------------
 
 		// Combine 4-vectors
@@ -692,8 +699,8 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		float Metap=(locEtaP4+locProtonP4).M();
 		float Metapi0=(locPi0P4+locEtaP4).M();
 		float mandelstam_t=-(dTargetP4-locProtonP4).M2();		
-                float mandelstam_teta = -(locBeamP4-locEtaP4).M2();
-                float mandelstam_tpi0 = -(locBeamP4-locPi0P4).M2();
+        float mandelstam_teta = -(locBeamP4-locEtaP4).M2();
+        float mandelstam_tpi0 = -(locBeamP4-locPi0P4).M2();
 		// Select on coherent peak for region of high polarization. The AMPTOOLS fit using Zlm amplitudes will use the polarization
 		// 	for extra separation power (will tell us something about the production mechanism)
 		bool bBeamEnergy=(locBeamP4.E()>8.2)*(locBeamP4.E()<8.8); 
@@ -737,18 +744,18 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
    		      (eta_res.Vect()).Dot(z) );
    		float cosTheta_gj = angles.CosTheta();
    		float phi_gj = angles.Phi();
-                TVector3 eps(TMath::Cos(locPolarizationAngle*TMath::DegToRad()), TMath::Sin(locPolarizationAngle*TMath::DegToRad()), 0.0); // beam polarization vector
-                float Phi = TMath::ATan2(y.Dot(eps), beam_cm.Vect().Unit().Dot(eps.Cross(y)))*radToDeg;
-                float mandelstam_t0 = -(TMath::Power(-(locPi0P4+locEtaP4).M2()/(2*(locBeamP4+dTargetP4).M()),2)
-                                        -TMath::Power(beam_cm.Vect().Mag()-(pi0_cm+eta_cm).Vect().Mag(),2));
-                float mandelstam_tp = mandelstam_t-mandelstam_t0;
-                std::tuple<double, double> vh = dAnalysisUtilities.Calc_vanHoveCoord(recoil_cm,pi0_cm,eta_cm);
-                float q = get<0>(vh);
-                float omega = get<1>(vh);
-                float vanHove_x=q*cos(omega);
-                float vanHove_y=q*sin(omega);
-                bool bVH_pi0p = -29.0*atan(-1.05*(locPi0P4+locEtaP4).M()+2.78)+328 > omega*radToDeg;
-                float pVH=(float)filterOmega(omega*radToDeg,(locPi0P4+locEtaP4).M());
+        TVector3 eps(TMath::Cos(locPolarizationAngle*TMath::DegToRad()), TMath::Sin(locPolarizationAngle*TMath::DegToRad()), 0.0); // beam polarization vector
+        float Phi = TMath::ATan2(y.Dot(eps), beam_cm.Vect().Unit().Dot(eps.Cross(y)))*radToDeg;
+        float mandelstam_t0 = -(TMath::Power(-(locPi0P4+locEtaP4).M2()/(2*(locBeamP4+dTargetP4).M()),2)
+                                -TMath::Power(beam_cm.Vect().Mag()-(pi0_cm+eta_cm).Vect().Mag(),2));
+        float mandelstam_tp = mandelstam_t-mandelstam_t0;
+        std::tuple<double, double> vh = dAnalysisUtilities.Calc_vanHoveCoord(recoil_cm,pi0_cm,eta_cm);
+        float q = get<0>(vh);
+        float omega = get<1>(vh);
+        float vanHove_x=q*cos(omega);
+        float vanHove_y=q*sin(omega);
+        bool bVH_pi0p = -29.0*atan(-1.05*(locPi0P4+locEtaP4).M()+2.78)+328 > omega*radToDeg;
+        float pVH=(float)filterOmega(omega*radToDeg,(locPi0P4+locEtaP4).M());
 
 		// 5. With the above selections and sidebands stucture, the subtraction near threshold has problems
 		// 	The backgrounds that populate the near threshold region are pi0pi0->4g and omega->3gamma
@@ -761,64 +768,65 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		    !(((Mg1g3<0.15)*(Mg2g4<0.15)) || ((Mg1g4<0.15)*(Mg2g3<0.15)) ||
 		    ((Mg1g3<0.12)*(Mg2g3<0.12)) || ((Mg1g4<0.12)*(Mg2g4<0.12)));
 
-                // Turn off some selections (if you want) related to M(4g) and t so that we can use another program to
-                //      split the final flat trees up. This should lower our total run times
-		bMetapi0=true; 
-                bmandelstamt=true; 
-                bMpi0p=true;
-                bLowMassAltCombo=true;
+        // Turn off some selections (if you want) related to M(4g) and t so that we can use another program to
+        //      split the final flat trees up. This should lower our total run times
+		bMetapi0=true;
+        bmandelstamt=true;
+        bMpi0p=true;
+        bLowMassAltCombo=true;
 
-                ///////////////////////////////////////////////////////////////////////////////////
-                ///////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////
 		//// We can finally multiply all of our selections together to define our final selection criteria. 
 		//	Since we have defined SELECTIONS we have to flip the boolean to get a CUT since the 
 		//	FLAG used asks if the combo should be cut
-                // Choice 0: Simple loose selections to filter the phase 1 data to a more managable size
-                //bool selection=(dComboWrapper->Get_ChiSq_KinFit("")<100)*(dComboWrapper->Get_Energy_UnusedShowers()<0.5); 
-                // Choice 1: Do not make any selections
-                //bool selection=true;
-                // Choice 2: Only make the beam energy selection for event selection showcase for thesis 
-                //bool selection=bBeamEnergy;
-                //         :  For similar study above, for chiSq cut tuning and final thesis event selection plots
+        // Choice 0: Simple loose selections to filter the phase 1 data to a more managable size
+        //bool selection=(dComboWrapper->Get_ChiSq_KinFit("")<100)*(dComboWrapper->Get_Energy_UnusedShowers()<0.5); 
+        // Choice 1: Do not make any selections
+        //bool selection=true;
+        // Choice 2: Only make the beam energy selection for event selection showcase for thesis 
+        //bool selection=bBeamEnergy;
+        //         :  For similar study above, for chiSq cut tuning and final thesis event selection plots
 		//bool selection=bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*(dComboWrapper->Get_ChiSq_KinFit("")<100)*bUnusedEnergy*bMMsq*bBeamEnergy*
 		//		bmandelstamt*bMpi0p*bMetapi0*bSignalRegion;
-                // Choice 3: Nominal selection for a2 pwa
+        // Choice 3: Nominal selection for a2 pwa
 		bool selection=bBeamEnergy*bChiSq*bUnusedEnergy*bPhotonTheta*bProtonZ*bPhotonE*bProton_dEdx*bProtonMomentum*bMMsq*
 				bmandelstamt*bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion;
-                // Choice 3.1: Loose selections for a2 pwa for systematic variations
-                //    1/27/23 - turned off unused energy selection so we can understand number of unused shower selection
-                //bool selection=bBeamEnergy*(dComboWrapper->Get_ChiSq_KinFit("")<25)* //(dComboWrapper->Get_Energy_UnusedShowers()<0.5)*
-                //            ((locPhoton1P4.Theta()*radToDeg>=1.5 && locPhoton1P4.Theta()*radToDeg<=11) || locPhoton1P4.Theta()*radToDeg>=11.4)*
-                //            ((locPhoton2P4.Theta()*radToDeg>=1.5 && locPhoton2P4.Theta()*radToDeg<=11) || locPhoton2P4.Theta()*radToDeg>=11.4)*
-                //            ((locPhoton3P4.Theta()*radToDeg>=1.5 && locPhoton3P4.Theta()*radToDeg<=11) || locPhoton3P4.Theta()*radToDeg>=11.4)*
-                //            ((locPhoton4P4.Theta()*radToDeg>=1.5 && locPhoton4P4.Theta()*radToDeg<=11) || locPhoton4P4.Theta()*radToDeg>=11.4)*
-                //            (locProtonX4.Z()>50)*(locProtonX4.Z()<80)*  
-                //            bPhotonE*bProton_dEdx*bProtonMomentum*bMMsq* // These selections remain unchanged (systematic only going tighter) - MMSq selection removed
-                //            bSignalRegion;
-                // Choice 4: Nominal selections for double Regge beam asymmetry systematic studies. Loosen most cuts. 
-                //           MANUALLY COMMENT OUT bWeight FILTERING LINE BELOW
-                //bool selection=(Metapi0>1.6)*(Metapi0<3.0)*bBeamEnergy*(dComboWrapper->Get_ChiSq_KinFit("")<50)*(dComboWrapper->Get_Energy_UnusedShowers()<10)*
-                //            ((locPhoton1P4.Theta()*radToDeg>=1.5 && locPhoton1P4.Theta()*radToDeg<=11) || locPhoton1P4.Theta()*radToDeg>=11.4)*
-                //            ((locPhoton2P4.Theta()*radToDeg>=1.5 && locPhoton2P4.Theta()*radToDeg<=11) || locPhoton2P4.Theta()*radToDeg>=11.4)*
-                //            ((locPhoton3P4.Theta()*radToDeg>=1.5 && locPhoton3P4.Theta()*radToDeg<=11) || locPhoton3P4.Theta()*radToDeg>=11.4)*
-                //            ((locPhoton4P4.Theta()*radToDeg>=1.5 && locPhoton4P4.Theta()*radToDeg<=11) || locPhoton4P4.Theta()*radToDeg>=11.4)*
-                //            (locProtonX4.Z()>50)*(locProtonX4.Z()<80)*  
-                //            bPhotonE*bProton_dEdx*bProtonMomentum* // These selections remain unchanged (systematic only going tighter) - MMSq selection removed
-                //            ((mandelstam_tpi0<1.0)||(mandelstam_teta<1.0)); // We only care about events where the eta or pion is fast
-                ///////////////////////////////////////////////////////////////////////////////////
-                ///////////////////////////////////////////////////////////////////////////////////
+        // Choice 3.1: Loose selections for a2 pwa for systematic variations
+        //    1/27/23 - turned off unused energy selection so we can understand number of unused shower selection
+        //bool selection=bBeamEnergy*(dComboWrapper->Get_ChiSq_KinFit("")<25)* //(dComboWrapper->Get_Energy_UnusedShowers()<0.5)*
+        //            ((locPhoton1P4.Theta()*radToDeg>=1.5 && locPhoton1P4.Theta()*radToDeg<=11) || locPhoton1P4.Theta()*radToDeg>=11.4)*
+        //            ((locPhoton2P4.Theta()*radToDeg>=1.5 && locPhoton2P4.Theta()*radToDeg<=11) || locPhoton2P4.Theta()*radToDeg>=11.4)*
+        //            ((locPhoton3P4.Theta()*radToDeg>=1.5 && locPhoton3P4.Theta()*radToDeg<=11) || locPhoton3P4.Theta()*radToDeg>=11.4)*
+        //            ((locPhoton4P4.Theta()*radToDeg>=1.5 && locPhoton4P4.Theta()*radToDeg<=11) || locPhoton4P4.Theta()*radToDeg>=11.4)*
+        //            (locProtonX4.Z()>50)*(locProtonX4.Z()<80)*  
+        //            bPhotonE*bProton_dEdx*bProtonMomentum*bMMsq* // These selections remain unchanged (systematic only going tighter) - MMSq selection removed
+        //            bSignalRegion;
+        // Choice 4: Nominal selections for double Regge beam asymmetry systematic studies. Loosen most cuts. 
+        //           MANUALLY COMMENT OUT bWeight FILTERING LINE BELOW
+        //bool selection=(Metapi0>1.6)*(Metapi0<3.0)*bBeamEnergy*(dComboWrapper->Get_ChiSq_KinFit("")<50)*(dComboWrapper->Get_Energy_UnusedShowers()<10)*
+        //            ((locPhoton1P4.Theta()*radToDeg>=1.5 && locPhoton1P4.Theta()*radToDeg<=11) || locPhoton1P4.Theta()*radToDeg>=11.4)*
+        //            ((locPhoton2P4.Theta()*radToDeg>=1.5 && locPhoton2P4.Theta()*radToDeg<=11) || locPhoton2P4.Theta()*radToDeg>=11.4)*
+        //            ((locPhoton3P4.Theta()*radToDeg>=1.5 && locPhoton3P4.Theta()*radToDeg<=11) || locPhoton3P4.Theta()*radToDeg>=11.4)*
+        //            ((locPhoton4P4.Theta()*radToDeg>=1.5 && locPhoton4P4.Theta()*radToDeg<=11) || locPhoton4P4.Theta()*radToDeg>=11.4)*
+        //            (locProtonX4.Z()>50)*(locProtonX4.Z()<80)*  
+        //            bPhotonE*bProton_dEdx*bProtonMomentum* // These selections remain unchanged (systematic only going tighter) - MMSq selection removed
+        //            ((mandelstam_tpi0<1.0)||(mandelstam_teta<1.0)); // We only care about events where the eta or pion is fast
+        ///////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////////////////////////////////////////
 
 		// We generally do not want to apply a cut on a histogram we are trying to view. To this extent,
 		// 	we will just apply all other selections that are not used in the current plot
 		// 	i.e. if we want to plot MMSq we will apply all selections EXCEPT for bMMsq
 		if (bPhotonE*bPhotonTheta*bProtonMomentum*bProton_dEdx*bProtonZ*bChiSq*bUnusedEnergy*bMMsq*bBeamEnergy*bmandelstamt*
-                    bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion){ 
+                    bMpi0p*bLowMassAltCombo*bMetapi0*bSignalRegion)
+		{ 
 			dHist_Mpi0->Fill((locPhoton1P4+locPhoton2P4).M(),locHistAccidWeightFactor);
 			dHist_Meta->Fill((locPhoton3P4+locPhoton4P4).M(),locHistAccidWeightFactor);
 		}
 		if (!bWeight){ 
-                        // Turn ON for a2 study: We do not want to keep any combos with weight 0. Not just a waste of space, can cause problems during fitting
-                        // Turn OFF for double regge study since we do sideband subtraction separately there 
+            // Turn ON for a2 study: We do not want to keep any combos with weight 0. Not just a waste of space, can cause problems during fitting
+            // Turn OFF for double regge study since we do sideband subtraction separately there 
 			dComboWrapper->Set_IsComboCut(true);
 			continue;
 		}
@@ -879,117 +887,118 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		}
 		*/
                 
-                if (dFlatTreeFileName!=""){
-                    // Photon Related 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta1", locPhoton1P4.Theta()*radToDeg);	
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta2", locPhoton2P4.Theta()*radToDeg);	
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta3", locPhoton3P4.Theta()*radToDeg);	
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta4", locPhoton4P4.Theta()*radToDeg);	
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonE1", locPhoton1P4.E());	
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonE2", locPhoton2P4.E());	
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonE3", locPhoton3P4.E());	
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonE4", locPhoton4P4.E());	
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonSystem1", locPhoton1System);	
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonSystem2", locPhoton2System);	
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonSystem3", locPhoton3System);	
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("photonSystem4", locPhoton4System);	
-                    dFlatTreeInterface->Fill_Fundamental<Bool_t>("pPhotonE", bPhotonE);
-                    dFlatTreeInterface->Fill_Fundamental<Bool_t>("pPhotonTheta", bPhotonTheta);
-                    // Proton Related
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_momentum", locProtonP4.Vect().Mag());
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_z", locProtonX4.Z());
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_R", TMath::Sqrt(TMath::Power(locProtonX4.X(),2)+TMath::Power(locProtonX4.Y(),2)));
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_dEdxCDC", dProtonWrapper->Get_dEdx_CDC());
-                    dFlatTreeInterface->Fill_Fundamental<Bool_t>("pMagP3Proton", bProtonMomentum);
-                    dFlatTreeInterface->Fill_Fundamental<Bool_t>("pzCutmin", bProtonZ);
-                    dFlatTreeInterface->Fill_Fundamental<Bool_t>("pdEdxCDCProton", bProton_dEdx);
-                    // Exclusivity Related
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("DOFKinFit", dComboWrapper->Get_NDF_KinFit("")); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("chiSq", dComboWrapper->Get_ChiSq_KinFit("")); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("unusedEnergy",dComboWrapper->Get_Energy_UnusedShowers()); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("unusedShowers",(float)(dComboWrapper->Get_NumUnusedShowers())); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("mmsq",locMissingMassSquared);
-                    dFlatTreeInterface->Fill_Fundamental<Bool_t>("pMissingMassSquared", bMMsq);
-                    // Kinematics Related
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("mismatchPairMass_13", Mg1g3);
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("mismatchPairMass_24", Mg2g4);
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("mismatchPairMass_23", Mg2g3);
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("mismatchPairMass_14", Mg1g4);
-                    dFlatTreeInterface->Fill_Fundamental<Bool_t>("omegaCut",bLowMassAltCombo);
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0p",Mpi0p);
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("Metap",Metap);
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0g3",(locPi0P4+locPhoton3P4).M()); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0g4",(locPi0P4+locPhoton4P4).M()); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0",Mpi0); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("Meta",Meta); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0eta",Metapi0); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("Ebeam",locBeamP4.E()); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_tp",mandelstam_tp); 
- 	            dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_t",mandelstam_t); 
-	            dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_teta",mandelstam_teta);	
-	            dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_tpi0",mandelstam_tpi0);	
-                    ////// Angles related
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("Phi",Phi); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_X_cm",(pi0_cm+eta_cm).CosTheta()); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_X_cm",(pi0_cm+eta_cm).Phi()*radToDeg); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_cm",eta_cm.CosTheta()); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_pi0_cm",pi0_cm.CosTheta()); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_X_lab",(locPi0P4+locEtaP4).Phi()*radToDeg); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_lab",locEtaP4.Phi()*radToDeg); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_pi0_lab",locPi0P4.Phi()*radToDeg); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_gj", cosTheta_gj); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_gj", phi_gj*radToDeg); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_hel",cosTheta_hel); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_hel",phi_hel*radToDeg); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_omega",omega*radToDeg);
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_x",vanHove_x);
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_y",vanHove_y);
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("pVH", pVH);
-                    // Weighting Related
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("AccWeight", locHistAccidWeightFactor); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("weightASBS", weight); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("weightBS", sbweight); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("weightBSpi0", pi0_sbweight); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("weightBSeta", eta_sbweight); 
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("rfTime", locDeltaT_RF); 
-                    // Thrown Variables
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0eta_thrown",locMetapi0_thrown);
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_t_thrown",locT_thrown);
-                    dFlatTreeInterface->Fill_Fundamental<Float_t>("Ebeam_thrown",locBeamE_thrown);
-                    dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectCombo",isCorrectCombo);
-                    dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectBeam",isCorrectBeam);
-                    dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectSpect",isCorrectSpect);
-                    // Event Related
-                    dFlatTreeInterface->Fill_Fundamental<Int_t>("event",Get_EventNumber());
-                    dFlatTreeInterface->Fill_Fundamental<Int_t>("run",Get_RunNumber());
-                    if (mapTopologyToInt.find(locThrownTopology)==mapTopologyToInt.end()){
-                        dFlatTreeInterface->Fill_Fundamental<Int_t>("topologyId",-1);
-                    }
-                    else
-                        dFlatTreeInterface->Fill_Fundamental<Int_t>("topologyId",mapTopologyToInt[locThrownTopology]);
-
-
-		    // AmpTools tree output - step 3
-		    // Filling the branches of the flat tree
-		    vector<TLorentzVector> locFinalStateP4; // should be in the same order as PID_FinalState
-		    locFinalStateP4.push_back(locProtonP4); 
-		    locFinalStateP4.push_back(locPi0P4);
-		    locFinalStateP4.push_back(locEtaP4);
-		    dFlatTreeInterface->Fill_Fundamental<Float_t>("Weight", branchWeight);
-		    dFlatTreeInterface->Fill_Fundamental<Int_t>("BeamAngle", locPolarizationAngle); // include so we can split on this branch later
-		    dFlatTreeInterface->Fill_Fundamental<Float_t>("Target_Mass", 0.9382720); // Necesary for divideData.pl not for AmpTools itself (I think)
-		    dFlatTreeInterface->Fill_Fundamental<Int_t>("PID_FinalState", 2212, 0); // proton
-		    dFlatTreeInterface->Fill_Fundamental<Int_t>("PID_FinalState", 111, 1);  // Pi0
-		    dFlatTreeInterface->Fill_Fundamental<Int_t>("PID_FinalState", 221, 2);  // Eta
-		    FillAmpTools_FlatTree(locBeamP4, locFinalStateP4);
-		    Fill_FlatTree(); //for the active combo
+            if (dFlatTreeFileName!=""){
+                // Photon Related 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta1", locPhoton1P4.Theta()*radToDeg);	
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta2", locPhoton2P4.Theta()*radToDeg);	
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta3", locPhoton3P4.Theta()*radToDeg);	
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("photonTheta4", locPhoton4P4.Theta()*radToDeg);	
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("photonE1", locPhoton1P4.E());	
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("photonE2", locPhoton2P4.E());	
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("photonE3", locPhoton3P4.E());	
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("photonE4", locPhoton4P4.E());	
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("photonSystem1", locPhoton1System);	
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("photonSystem2", locPhoton2System);	
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("photonSystem3", locPhoton3System);	
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("photonSystem4", locPhoton4System);	
+                dFlatTreeInterface->Fill_Fundamental<Bool_t>("pPhotonE", bPhotonE);
+                dFlatTreeInterface->Fill_Fundamental<Bool_t>("pPhotonTheta", bPhotonTheta);
+                // Proton Related
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_momentum", locProtonP4.Vect().Mag());
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_z", locProtonX4.Z());
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_R", TMath::Sqrt(TMath::Power(locProtonX4.X(),2)+TMath::Power(locProtonX4.Y(),2)));
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("proton_dEdxCDC", dProtonWrapper->Get_dEdx_CDC());
+                dFlatTreeInterface->Fill_Fundamental<Bool_t>("pMagP3Proton", bProtonMomentum);
+                dFlatTreeInterface->Fill_Fundamental<Bool_t>("pzCutmin", bProtonZ);
+                dFlatTreeInterface->Fill_Fundamental<Bool_t>("pdEdxCDCProton", bProton_dEdx);
+                // Exclusivity Related
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("DOFKinFit", dComboWrapper->Get_NDF_KinFit("")); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("chiSq", dComboWrapper->Get_ChiSq_KinFit("")); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("unusedEnergy",dComboWrapper->Get_Energy_UnusedShowers()); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("unusedShowers",(float)(dComboWrapper->Get_NumUnusedShowers())); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("mmsq",locMissingMassSquared);
+                dFlatTreeInterface->Fill_Fundamental<Bool_t>("pMissingMassSquared", bMMsq);
+                // Kinematics Related
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("mismatchPairMass_13", Mg1g3);
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("mismatchPairMass_24", Mg2g4);
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("mismatchPairMass_23", Mg2g3);
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("mismatchPairMass_14", Mg1g4);
+                dFlatTreeInterface->Fill_Fundamental<Bool_t>("omegaCut",bLowMassAltCombo);
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0p",Mpi0p);
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("Metap",Metap);
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0g3",(locPi0P4+locPhoton3P4).M()); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0g4",(locPi0P4+locPhoton4P4).M()); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0",Mpi0); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("Meta",Meta); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0eta",Metapi0); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("Ebeam",locBeamP4.E()); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_tp",mandelstam_tp); 
+ 	        	dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_t",mandelstam_t); 
+	        	dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_teta",mandelstam_teta);	
+	        	dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_tpi0",mandelstam_tpi0);	
+                ////// Angles related
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("Phi",Phi); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_X_cm",(pi0_cm+eta_cm).CosTheta()); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_X_cm",(pi0_cm+eta_cm).Phi()*radToDeg); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_cm",eta_cm.CosTheta()); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_pi0_cm",pi0_cm.CosTheta()); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_X_lab",(locPi0P4+locEtaP4).Phi()*radToDeg); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_lab",locEtaP4.Phi()*radToDeg); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_pi0_lab",locPi0P4.Phi()*radToDeg); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_gj", cosTheta_gj); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_gj", phi_gj*radToDeg); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_hel",cosTheta_hel); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_hel",phi_hel*radToDeg); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_omega",omega*radToDeg);
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_x",vanHove_x);
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_y",vanHove_y);
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("pVH", pVH);
+                // Weighting Related
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("AccWeight", locHistAccidWeightFactor); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("weightASBS", weight); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("weightBS", sbweight); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("weightBSpi0", pi0_sbweight); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("weightBSeta", eta_sbweight); 
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("rfTime", locDeltaT_RF); 
+                // Thrown Variables
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0eta_thrown",locMetapi0_thrown);
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_t_thrown",locT_thrown);
+                dFlatTreeInterface->Fill_Fundamental<Float_t>("Ebeam_thrown",locBeamE_thrown);
+                dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectCombo",isCorrectCombo);
+                dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectBeam",isCorrectBeam);
+                dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectSpect",isCorrectSpect);
+                // Event Related
+                dFlatTreeInterface->Fill_Fundamental<Int_t>("event",Get_EventNumber());
+                dFlatTreeInterface->Fill_Fundamental<Int_t>("run",Get_RunNumber());
+                if (mapTopologyToInt.find(locThrownTopology)==mapTopologyToInt.end()){
+                    dFlatTreeInterface->Fill_Fundamental<Int_t>("topologyId",-1);
                 }
-
-                // Use me to find the topologies in the MC sample
-                if (topologyCount.find(locThrownTopology)==topologyCount.end())
-                    topologyCount[locThrownTopology]=0;
                 else
-                    topologyCount[locThrownTopology]+=1;
+                    dFlatTreeInterface->Fill_Fundamental<Int_t>("topologyId",mapTopologyToInt[locThrownTopology]);
+
+
+		    	// AmpTools tree output - step 3
+		    	// Filling the branches of the flat tree
+		    	vector<TLorentzVector> locFinalStateP4; // should be in the same order as PID_FinalState
+		    	locFinalStateP4.push_back(locProtonP4); 
+		    	locFinalStateP4.push_back(locPi0P4);
+		    	locFinalStateP4.push_back(locEtaP4);
+		    	dFlatTreeInterface->Fill_Fundamental<Float_t>("Weight", branchWeight);
+		    	dFlatTreeInterface->Fill_Fundamental<Int_t>("BeamAngle", locPolarizationAngle); // include so we can split on this branch later
+		    	dFlatTreeInterface->Fill_Fundamental<Float_t>("Target_Mass", 0.9382720); // Necesary for divideData.pl not for AmpTools itself (I think)
+		    	dFlatTreeInterface->Fill_Fundamental<Int_t>("PID_FinalState", 2212, 0); // proton
+		    	dFlatTreeInterface->Fill_Fundamental<Int_t>("PID_FinalState", 111, 1);  // Pi0
+		    	dFlatTreeInterface->Fill_Fundamental<Int_t>("PID_FinalState", 221, 2);  // Eta
+		    	FillAmpTools_FlatTree(locBeamP4, locFinalStateP4);
+		    	Fill_FlatTree(); //for the active combo
+        	}
+
+            // Use me to find the topologies in the MC sample
+            if (topologyCount.find(locThrownTopology)==topologyCount.end())
+                topologyCount[locThrownTopology]=0;
+            else
+                topologyCount[locThrownTopology]+=1;
+
 	} // end of combo loop
 
 	//FILL HISTOGRAMS: Num combos / events surviving actions
@@ -1053,12 +1062,12 @@ void DSelector_etapi::Finalize(void)
 	//Save anything to output here that you do not want to be in the default DSelector output ROOT file.
 
 	//Otherwise, don't do anything else (especially if you are using PROOF).
-		//If you are using PROOF, this function is called on each thread,
-		//so anything you do will not have the combined information from the various threads.
-		//Besides, it is best-practice to do post-processing (e.g. fitting) separately, in case there is a problem.
+	//If you are using PROOF, this function is called on each thread,
+	//so anything you do will not have the combined information from the various threads.
+	//Besides, it is best-practice to do post-processing (e.g. fitting) separately, in case there is a problem.
 
 	//DO YOUR STUFF HERE
-        print_sorted_map(topologyCount);
+    print_sorted_map(topologyCount);
 
 	//CALL THIS LAST
 	DSelector::Finalize(); //Saves results to the output file

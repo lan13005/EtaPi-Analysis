@@ -24,6 +24,8 @@ void DSelector_thrown::Init(TTree *locTree)
 	dFlatTreeName = "kin"; //if blank, default name will be chosen
 	dSaveDefaultFlatBranches = false; // False: don't save default branches, reduce disk footprint.
 
+	dSkipNoTriggerEvents = false; // 04/03/24 required for now
+
 	//Because this function gets called for each TTree in the TChain, we must be careful:
 		//We need to re-initialize the tree interface & branch wrappers, but don't want to recreate histograms
 	bool locInitializedPriorFlag = dInitializedFlag; //save whether have been initialized previously
@@ -36,27 +38,27 @@ void DSelector_thrown::Init(TTree *locTree)
 
         if (dFlatTreeFileName!=""){
             // Fundamental = char, int, float, double, etc.
-	    // AmpTools tree output - step 2
-	    // Creating new branches in the flat tree
- 	    SetupAmpTools_FlatTree(); // sets most of the branches necesary for AmpTools PWA
- 	    dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Target_Mass"); 
- 	    dFlatTreeInterface->Create_Branch_FundamentalArray<Int_t>("PID_FinalState","NumFinalState");
- 	    dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("BeamAngle");
- 	    //dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Weight"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0eta_thrown"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0p_thrown"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Metap_thrown"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_eta_hel_thrown"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_eta_gj_thrown"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_eta_hel_thrown"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_eta_gj_thrown"); 
- 	    dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mandelstam_t_thrown"); 
- 	    dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Ebeam_thrown"); 
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_omega_thrown");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_x_thrown");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_y_thrown");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Phi_thrown");
-            dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("pVH_thrown");
+	    	// AmpTools tree output - step 2
+	    	// Creating new branches in the flat tree
+ 	    	SetupAmpTools_FlatTree(); // sets most of the branches necesary for AmpTools PWA
+ 	    	dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Target_Mass"); 
+ 	    	dFlatTreeInterface->Create_Branch_FundamentalArray<Int_t>("PID_FinalState","NumFinalState");
+ 	    	dFlatTreeInterface->Create_Branch_Fundamental<Int_t>("BeamAngle");
+ 	    	//dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Weight"); 
+        	dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0eta_thrown"); 
+        	dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0p_thrown"); 
+        	dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Metap_thrown"); 
+        	dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_eta_hel_thrown"); 
+        	dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("cosTheta_eta_gj_thrown"); 
+        	dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_eta_hel_thrown"); 
+        	dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("phi_eta_gj_thrown"); 
+ 	    	dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mandelstam_t_thrown"); 
+ 	    	dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Ebeam_thrown"); 
+        	dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_omega_thrown");
+        	dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_x_thrown");
+        	dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("vanHove_y_thrown");
+        	dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Phi_thrown");
+        	dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("pVH_thrown");
         }
 
 	/******************************** EXAMPLE USER INITIALIZATION: STAND-ALONE HISTOGRAMS *******************************/
@@ -64,10 +66,10 @@ void DSelector_thrown::Init(TTree *locTree)
 	/************************************* ADVANCED EXAMPLE: CHOOSE BRANCHES TO READ ************************************/
 
 	//TO SAVE PROCESSING TIME
-		//If you know you don't need all of the branches/data, but just a subset of it, you can speed things up
-		//By default, for each event, the data is retrieved for all branches
-		//If you know you only need data for some branches, you can skip grabbing data from the branches you don't need
-		//Do this by doing something similar to the commented code below
+	//If you know you don't need all of the branches/data, but just a subset of it, you can speed things up
+	//By default, for each event, the data is retrieved for all branches
+	//If you know you only need data for some branches, you can skip grabbing data from the branches you don't need
+	//Do this by doing something similar to the commented code below
 
 	//dTreeInterface->Clear_GetEntryBranches(); //now get none
 	//dTreeInterface->Register_GetEntryBranch("Proton__P4"); //manually set the branches you want
@@ -161,13 +163,13 @@ Bool_t DSelector_thrown::Process(Long64_t locEntry)
 	float Metap=(locEtaP4+locProtonP4).M();
 	float Mpi0p=(locPi0P4+locProtonP4).M();
 	float mandelstam_t=-(dTargetP4-locProtonP4).M2();		
-        float beam_e=locBeamP4.E();
+    float beam_e=locBeamP4.E();
 	//bool bMetapi0 = (Metapi0>1.04)*(Metapi0<1.56);
 	bool bmandelstamt=(mandelstam_t<1.0)*(mandelstam_t>0.1); 
-        bool bMpi0eta = (Metapi0<1.80)*(Metapi0>0.8);
-        bool bBeamE = (beam_e<8.8)*(beam_e>8.2);
-        bool bTopology = locThrownTopology==topologyString; 
-        bool selection=bTopology*bBeamE;//*bmandelstamt*bMpi0eta;
+    bool bMpi0eta = (Metapi0<1.80)*(Metapi0>0.8);
+    bool bBeamE = (beam_e<8.8)*(beam_e>8.2);
+    bool bTopology = locThrownTopology==topologyString; 
+    bool selection=bTopology*bBeamE;//*bmandelstamt*bMpi0eta;
 
 	TLorentzRotation cmRestBoost( -(locBeamP4+dTargetP4).BoostVector() );
 	TLorentzVector pi0_cm = cmRestBoost * locPi0P4; 
@@ -196,16 +198,16 @@ Bool_t DSelector_thrown::Process(Long64_t locEntry)
    	      (eta_res.Vect()).Dot(z) );
    	float cosTheta_gj = angles.CosTheta();
    	float phi_gj = angles.Phi();
-        TVector3 eps(TMath::Cos(locPolarizationAngle*TMath::DegToRad()), TMath::Sin(locPolarizationAngle*TMath::DegToRad()), 0.0); // beam polarization vector
-        float Phi = TMath::ATan2(y.Dot(eps), beam_cm.Vect().Unit().Dot(eps.Cross(y)))*radToDeg;
-        std::tuple<double, double> vh = dAnalysisUtilities.Calc_vanHoveCoord(recoil_cm,pi0_cm,eta_cm);
-        float q = get<0>(vh);
-        float omega = get<1>(vh);
-        float vanHove_x=q*cos(omega);
-        float vanHove_y=q*sin(omega);
-        float pVH=(float)filterOmega(omega*radToDeg,(locPi0P4+locEtaP4).M());
+    TVector3 eps(TMath::Cos(locPolarizationAngle*TMath::DegToRad()), TMath::Sin(locPolarizationAngle*TMath::DegToRad()), 0.0); // beam polarization vector
+    float Phi = TMath::ATan2(y.Dot(eps), beam_cm.Vect().Unit().Dot(eps.Cross(y)))*radToDeg;
+    std::tuple<double, double> vh = dAnalysisUtilities.Calc_vanHoveCoord(recoil_cm,pi0_cm,eta_cm);
+    float q = get<0>(vh);
+    float omega = get<1>(vh);
+    float vanHove_x=q*cos(omega);
+    float vanHove_y=q*sin(omega);
+    float pVH=(float)filterOmega(omega*radToDeg,(locPi0P4+locEtaP4).M());
 
-        if ((dFlatTreeFileName!="")*(selection)){
+    if ((dFlatTreeFileName!="")*(selection)){
 	    vector<TLorentzVector> locFinalStateP4; // should be in the same order as PID_FinalState
 	    locFinalStateP4.push_back(locProtonP4); 
 	    locFinalStateP4.push_back(locPi0P4);
@@ -217,21 +219,21 @@ Bool_t DSelector_thrown::Process(Long64_t locEntry)
 	    dFlatTreeInterface->Fill_Fundamental<Int_t>("PID_FinalState", 111, 1);  // Pi0
 	    dFlatTreeInterface->Fill_Fundamental<Int_t>("PID_FinalState", 221, 2);  // Eta
  	    dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_t_thrown",mandelstam_t); 
-            dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0eta_thrown",Metapi0); 
-            dFlatTreeInterface->Fill_Fundamental<Float_t>("Metap_thrown",Metap); 
-            dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0p_thrown",Mpi0p); 
-            dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_hel_thrown",cosTheta_hel); 
-            dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_gj_thrown",cosTheta_gj); 
-            dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_hel_thrown",phi_hel); 
-            dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_gj_thrown",phi_gj); 
-            dFlatTreeInterface->Fill_Fundamental<Float_t>("Ebeam_thrown",beam_e); 
-            dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_omega_thrown",omega*radToDeg);
-            dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_x_thrown",vanHove_x);
-            dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_y_thrown",vanHove_y);
-            dFlatTreeInterface->Fill_Fundamental<Float_t>("Phi_thrown",Phi);
+        dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0eta_thrown",Metapi0); 
+        dFlatTreeInterface->Fill_Fundamental<Float_t>("Metap_thrown",Metap); 
+        dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0p_thrown",Mpi0p); 
+        dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_hel_thrown",cosTheta_hel); 
+        dFlatTreeInterface->Fill_Fundamental<Float_t>("cosTheta_eta_gj_thrown",cosTheta_gj); 
+        dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_hel_thrown",phi_hel); 
+        dFlatTreeInterface->Fill_Fundamental<Float_t>("phi_eta_gj_thrown",phi_gj); 
+        dFlatTreeInterface->Fill_Fundamental<Float_t>("Ebeam_thrown",beam_e); 
+        dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_omega_thrown",omega*radToDeg);
+        dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_x_thrown",vanHove_x);
+        dFlatTreeInterface->Fill_Fundamental<Float_t>("vanHove_y_thrown",vanHove_y);
+        dFlatTreeInterface->Fill_Fundamental<Float_t>("Phi_thrown",Phi);
 	    FillAmpTools_FlatTree(locBeamP4, locFinalStateP4);
 	    Fill_FlatTree(); //for the active combo
-        }
+    }
 
 	/******************************************* BIN THROWN DATA INTO SEPARATE TREES FOR AMPTOOLS ***************************************/
 
@@ -253,14 +255,14 @@ void DSelector_thrown::Finalize(void)
 	//Save anything to output here that you do not want to be in the default DSelector output ROOT file.
 
 	//Otherwise, don't do anything else (especially if you are using PROOF).
-		//If you are using PROOF, this function is called on each thread,
-		//so anything you do will not have the combined information from the various threads.
-		//Besides, it is best-practice to do post-processing (e.g. fitting) separately, in case there is a problem.
+	//If you are using PROOF, this function is called on each thread,
+	//so anything you do will not have the combined information from the various threads.
+	//Besides, it is best-practice to do post-processing (e.g. fitting) separately, in case there is a problem.
 
 	//DO YOUR STUFF HERE
-        cout << "Topologies in chain" << endl;
-        for (auto topology: topologies)
-            cout << topology << endl;
+    cout << "Topologies in chain" << endl;
+    for (auto topology: topologies)
+        cout << topology << endl;
 
 	//CALL THIS LAST
 	DSelector::Finalize(); //Saves results to the output file
