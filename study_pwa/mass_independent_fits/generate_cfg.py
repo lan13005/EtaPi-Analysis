@@ -1,5 +1,4 @@
 import random
-import sys
 import re
 import os
 
@@ -178,7 +177,7 @@ def constructOutputFileName(lmes,i=-1):
     else:
         return cfgFileName+"("+str(i)+").cfg"
 
-def getPreamble(reference_file,i):
+def getPreamble(reference_file,waveset,i):
     '''
     reference_file: we will get our preamble from here
     i: iteration number, we should set this when doing multiple fits with random initializations
@@ -200,8 +199,9 @@ def getPreamble(reference_file,i):
         preamble=[line for line in preamble if not line.startswith("initialize")]
         preamble=[line for line in preamble if not line.startswith("constrain")]
         preamble=[line for line in preamble if not line.startswith("scale")]
+        preamble=[line for line in preamble if "LOOPNIFILE" not in line]
 
-        preamble=[line.rstrip().lstrip()+"-"+str(i)+"\n" if line.startswith("fit") else line for line in preamble]
+        preamble=[line.rstrip().lstrip()+"_"+waveset+"("+str(i)+")\n" if line.startswith("fit") else line for line in preamble]
 
         reactionLine=[line for line in preamble if line.startswith("reaction")]
 
@@ -244,7 +244,7 @@ def getPreamble(reference_file,i):
     return preamble,pols
 
     
-def writeCfg(lmes,reference_file,seed,i):
+def writeCfg(lmes,reference_file,waveset,seed,i):
     '''
     lmes: List of lists. Each sublist is in the [l,m,e,anchor] format
     reference_file: we will get our preamble from here
@@ -254,7 +254,8 @@ def writeCfg(lmes,reference_file,seed,i):
     if seed!=-1:
         random.seed(seed)
         
-    preamble, pols = getPreamble(reference_file,i)
+    preamble, pols = getPreamble(reference_file,waveset,i)
+    bin_prefix = reference_file.split('-')[0]
 
     waveStrings=[preamble]
     for lme in lmes:
@@ -269,6 +270,7 @@ def writeCfg(lmes,reference_file,seed,i):
     with open(cfgFileName,"w") as cfgFile:
         outputString="\n\n".join(waveStrings)
         outputString=outputString.replace("\r\n", os.linesep)
+        outputString.replace
         cfgFile.writelines(outputString)
     return cfgFileName, pols
 

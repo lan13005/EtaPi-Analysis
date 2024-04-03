@@ -2,18 +2,11 @@
 
 use Cwd;
 
-#$genmc_filter=" mandelstam_t_thrown 0.1 1.0";
-#$accmc_filter="";
-#$bkgnd_filter="";
-#$data_filter="";
-
 $lowMass = 1.04;
-$highMass = 1.80;
-$nBins =  19;
+$highMass = 1.56;
+$nBins =  13;
 $fitName = "EtaPi_fit";
 
-# put a limit on the number of data events to process
-# gen MC and acc MC smaples are not limited
 $maxEvts = 1E9;
 
 $workingDir=getcwd();
@@ -21,30 +14,17 @@ print "\n\ncurrent working dir: $workingDir";
 print "\n===================================\n";
 
 $t="010020";
-$m="104180";
-$extraTag="_mpipGT2_selectGenT";
-$baseGenDir="/d/grid17/ln16/dselector_v3/phase1_selected_v2/t$t\_m$m$extraTag/";
-$baseAccDir="/d/grid17/ln16/dselector_v3/phase1_selected_v2/t$t\_m$m$extraTag/";
-$baseBkgDir="/d/grid17/ln16/dselector_v3/phase1_selected_v2/t$t\_m$m$extraTag/";
-$baseDatDir="/d/grid17/ln16/dselector_v3/phase1_selected_v2/t$t\_m$m$extraTag/";
-$baseGenFileName="_t$t\_m$m$extraTag\_FTOT_gen_data_flat"; # cannot contain the file extension .root
-$baseAccFileName="_t$t\_m$m$extraTag\_FTOT_selected_acc_flat";
-$baseBkgFileName="_t$t\_m$m$extraTag\_DTOT_selected_bkgnd_flat";
-$baseDatFileName="_t$t\_m$m$extraTag\_DTOT_selected_data_flat";
-
-#$baseAccDir="/d/grid17/ln16/dselector_v3/kmatrix_selected_v1/tall_m104156/";
-#$baseGenDir="/d/grid17/ln16/dselector_v3/kmatrix_selected_v1/tall_m104156/";
-#$baseDatDir="/d/grid17/ln16/dselector_v3/kmatrix_selected_v1/tall_m104156/";
-#$baseBkgDir="/d/grid17/ln16/dselector_v3/kmatrix_selected_v1/tall_m104156/";
-#$baseAccFileName="_tall_m104156_F2018_8_selected_acc_flat";
-#$baseGenFileName="_tall_m104156_F2018_8_gen_data_flat";
-#$baseDatFileName="_tall_m104156_kmatrix_selected_data_flat";
-#$baseBkgFileName="_tall_m104156_kmatrix_selected_bkgnd_flat";
+$baseGenDir="/w/halld-scshelf2101/lng/WORK/EtaPi-Analysis/study_pwa/mass_independent_fits/rootFiles/t$t\_m104180_selectGenTandM/";
+$baseAccDir="/w/halld-scshelf2101/lng/WORK/EtaPi-Analysis/study_pwa/mass_independent_fits/rootFiles/t$t\_m104172_selectGenTandM_nominal/";
+$baseBkgDir="/w/halld-scshelf2101/lng/WORK/EtaPi-Analysis/study_pwa/mass_independent_fits/rootFiles/t$t\_m104172_selectGenTandM_nominal/";
+$baseDatDir="/w/halld-scshelf2101/lng/WORK/EtaPi-Analysis/study_pwa/mass_independent_fits/rootFiles/t$t\_m104172_selectGenTandM_nominal/";
+$baseGenFileName="_t$t\_m104180_selectGenTandM_FTOT_gen_data_flat"; # cannot contain the file extension .root
+$baseAccFileName="_t$t\_m104172_selectGenTandM_FTOT_selected_nominal_acc_flat";
+$baseBkgFileName="_t$t\_m104172_selectGenTandM_DTOT_selected_nominal_bkgnd_flat";
+$baseDatFileName="_t$t\_m104172_selectGenTandM_DTOT_selected_nominal_data_flat";
 
 @polTags_DB=qw(000 045 090 135); # D/B = data, bkgnd
 @polTags_AG=qw(000 045 090 135); # A/G = accmc, genmc. i.e. we can choose qw(ALL)
-#@polTags_DB=qw(000); # D/B = data, bkgnd
-#@polTags_AG=qw(000); # A/G = accmc, genmc. i.e. we can choose qw(ALL)
 
 print "DATAFILES:\n";
 foreach $polTag (@polTags_DB){
@@ -81,12 +61,12 @@ print "Output fitDir: $fitDir";
 print "\n";
 
 #### CHOICE 1 : Create a regular folder 
-#mkdir $fitDir unless -d $fitDir;
+mkdir $fitDir unless -d $fitDir;
 #### CHOICE 2 : Create a ram disk if you have access to lots of ram
-system( "rm -f $fitName" );
-system( "rm -rf /dev/shm/$fitName" );
-system( "mkdir /dev/shm/$fitName" );
-system( "ln -s /dev/shm/$fitName $fitName" );
+#system( "rm -f $fitName" );
+#system( "rm -rf /dev/shm/$fitName" );
+#system( "mkdir /dev/shm/$fitName" );
+#system( "ln -s /dev/shm/$fitName $fitName" );
 
 chdir $fitDir;
 

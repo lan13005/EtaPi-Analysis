@@ -1,16 +1,12 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import os
-import re #regex
+import re 
 import numpy as np
 import shutil
-import math
-import glob
 import random
-import sys
 import subprocess
 import time
-import fileinput
 from multiprocessing import Pool
 from generate_cfg import writeCfg, constructOutputFileName, getPreamble
 from determineAmbiguities import executeFinders
@@ -18,6 +14,19 @@ import pandas as pd
 import itertools
 import operator as op
 from functools import reduce
+import argparse
+import tqdm
+
+batch_submit = False
+
+if batch_submit:
+    parser = argparse.ArgumentParser(description='Run fit with particular LME')
+    parser.add_argument('i', type=int, default=0, help='chunk index of list of lists of all potential {lme, random fit iteration, mass bin}')
+    parser.add_argument('nchunks', type=int, default=1, help='number of chunks to split the job into')
+    args = parser.parse_args()
+    chunkid=args.i
+    nchunks = args.nchunks
+
 
 logDirBaseName="logs" # creates a folder in each bin_x folder with the name logDirBaseName+"_"+waveset
 fitName="EtaPi_fit" # location of the folder containing the inputs that were created from divideData.pl
@@ -32,7 +41,8 @@ doAccCorr="false" # has to be a string input
 # [True, ["data", "bkgnd", "accmc"], [1,1,1]] to bootstrap data and acceptance mc together (I think this is the proper final uncertainty) 
 # [True, ["acc", "genmc"], [N,N]] to under or oversample the MC that will be used for acceptance correction. "genmc" needs to be here also or else
 #      the acceptance changes
-bootstrapSettings=[True,["data","bkgnd"],[1,1]] 
+bootstrapSettings=[False,["data","bkgnd"],[1,1]] 
+# bootstrapSettings=[True,["data","bkgnd"],[1,1]] 
 bsFolderTag="_bs_"+"_".join([sample+str(factor)+"x" for sample,factor in zip(bootstrapSettings[1],bootstrapSettings[2])]) # appends a tag to the logs folder in each bin subfolder
 bsFolderTag+="" # starts with underscore: include another tag for more folder separation
 forceDataBkngdSameSeed=True # data and bkgnd trees can be read with the same seed. If tree same size then it would grab same set of indicies
@@ -54,7 +64,7 @@ def reorderWaveset(waveset):
     tmp.sort() # We can apply a sort to order things
     return "_".join(tmp)
 
-def determineBestFit(srcLogDir,binNum):
+def determineBestFit(srcLogDir,waveset,binNum):
     '''
     When running fits we can save a file whose name contains the best fit iteration
        This file name can then be grabbed by the bootstrap function to construct
@@ -64,7 +74,7 @@ def determineBestFit(srcLogDir,binNum):
     bestMinimum=0
     os.system("rm -f FIT_ITER_USED*")
     for i in range(numIters):
-        fname=srcLogDir+"/bin_"+str(binNum)+"-"+str(i)+".fit"
+        fname=srcLogDir+"/bin_"+str(binNum)+"_"+waveset+"("+str(i)+").fit"
         if not os.path.exists(fname):
             raise ValueError("There should be a fit file at this location but there isnt! {}".format(fname))
         with open(fname) as f:
@@ -111,10 +121,10 @@ def bootstrapCfgGenerator(srcLogDir,binNum,waveset,j):
     ##########################
     mapInitializeLines={}
     mapParameters={}
-    f=srcLogDir+"/"+seedFileTag+"_"+str(bestIteration)+".cfg"
+    f=srcLogDir+"/"+seedFileTag+"_"+waveset+"("+str(bestIteration)+").cfg"
     if not os.path.exists(f):
         raise ValueError("bootstrapCfgGenerator could not find the seed file: {}".format(f))
-    with open(srcLogDir+"/"+seedFileTag+"_"+str(bestIteration)+".cfg") as param:
+    with open(f) as param:
         lines=param.readlines()
         lines=[line.rstrip().lstrip() for line in lines]
         for line in lines:
@@ -181,8 +191,9 @@ def getAmplitudesInBin(params):
     waveset=constructOutputFileName(lmes)
     waveset=reorderWaveset(waveset)
     os.chdir("bin_"+str(binNum))
-    seedFile=seedFileTag+"_"+str(j)+".cfg"
-    os.system("touch "+seedFile)
+    seedFile=seedFileTag+"_"+waveset+"\("+str(j)+"\).cfg"
+    #os.system("touch "+seedFile)
+    print(f'Running: {params}')
 
     binCfgSrc = "bin_"+str(binNum)+"-full.cfg"
 
@@ -208,7 +219,7 @@ def getAmplitudesInBin(params):
         # Config generator with random initialization
         if verbose:
             print("Making configuration file for nominal fits")
-        binCfgDest, pols=writeCfg(lmes,binCfgSrc,writeCfgSeed,j)
+        binCfgDest, pols=writeCfg(lmes,binCfgSrc,waveset,writeCfgSeed,j)
         # The following is left over code from a merge - no use I think
         # replaceStr="fit {}({})".format(waveset,j)
         # searchStr="^fit .*";
@@ -223,7 +234,7 @@ def getAmplitudesInBin(params):
     
         # We needed to create another fit results file so we can run things in parallel
         #resultsFile="{}({}).fit".format(waveset,j)
-        resultsFile="bin_"+str(binNum)+"-"+str(j)+".fit"
+        resultsFile="bin_"+str(binNum)+"_"+waveset+"("+str(j)+").fit"
         if os.path.exists(resultsFile):
             os.remove(resultsFile)
 
@@ -232,6 +243,9 @@ def getAmplitudesInBin(params):
         except subprocess.CalledProcessError as err:
             print("*** ABOVE CALL FAILED TO COMPLETE - TRY TO RUN THE FIT MANUALLY IN THE CORRESPONDING BIN FOLDER AS FOLLOWS ***\n*** cd {0}".format(fitDir+"/bin_"+str(binNum))+" ***\n*** "+callFit+" ***\n*** IF RUNFITS.PY DOES NOT EXIT BY ITSELF YOU SHOULD KILL IT MANUALLY NOW ***")
             exit(0)
+
+        if type(output)==bytes:
+            output=output.decode("utf-8")
 
         os.rename(binCfgDest,logDir+"_"+waveset+"/"+binCfgDest)
 
@@ -256,14 +270,20 @@ def getAmplitudesInBin(params):
             print("Moving fit results to: "+os.getcwd()+"/"+resultsFilePath)
         if os.path.exists(resultsFile) and os.stat(resultsFile).st_size!=0: # if the fit files is not empty then we will try and use it
             shutil.move(resultsFile,resultsFilePath)
-            if os.path.exists(seedFile) and os.stat(seedFile).st_size!=0: # seedFile only exists if the fit converged
-                shutil.move(seedFile,os.getcwd()+"/"+logDir+"_"+waveset+"/"+seedFileTag+"_"+str(j)+".cfg")
+        else:
+            print("fit file does not exist or is empty! The fit program failed to complete on bin {}".format(binNum))
+            print("  fit file exists? {}".format(os.path.exists(resultsFile)))
+            print("  fit file has non-zero size? {}".format(os.stat(resultsFile).st_size!=0))
+        if os.path.exists(seedFile) and os.stat(seedFile).st_size!=0:  # seedFile only exists if the fit converged
+            shutil.move(seedFile,os.getcwd()+"/"+logDir+"_"+waveset+"/"+seedFileTag+"_"+waveset+"("+str(j)+").cfg")
             getAmplitudeCmd='getAmpsInBin "'+binCfgDest+'" "'+resultsFilePath+'" "'+pols+'" "'+str(j)+'" "'+doAccCorr+'" "'+str(entries)
             if verbose:
                 print(getAmplitudeCmd)
             getAmplitudeCmd=getAmplitudeCmd.split(" ")
             getAmplitudeCmd=[cmd.replace('"','') for cmd in getAmplitudeCmd]
             output=subprocess.check_output(getAmplitudeCmd)
+            if type(output)==bytes:
+                output=output.decode("utf-8")
             output=output.split("\n")
             for out in output:
                 if len(out.split("\t"))>1:
@@ -277,9 +297,7 @@ def getAmplitudesInBin(params):
                         outFile.write("O\t") 
                         outFile.write(out+"\n")
         else:
-            print("fit file does not exist or is empty! The fit program failed to complete on bin {}".format(binNum))
-            print("  fit file exists? {}".format(os.path.exists(resultsFile)))
-            print("  fit file has non-zero size? {}".format(os.stat(resultsFile).st_size!=0))
+            os.system(f'rm -rf {seedFile}')
 
     os.chdir("..")
 
@@ -287,7 +305,7 @@ def getAmplitudesInBin(params):
 
 def makeLogFolders(logDir,binNum,lmess):
     '''
-    Remove all the log/ directories in each bin folder
+    Make all the log/ directories in each bin folder
     '''
     for lmes in lmess: 
         waveset=constructOutputFileName(lmes)
@@ -332,7 +350,7 @@ def gatherResults(params):
     
     if not bootstrapSettings[0]: # If we are not bootstrapping then we will save the best fit
         # Include an extra step here to grab the best fit result
-        determineBestFit(logDir+"_"+waveset, binNum) # using logDir as the source directory to load desired cfg
+        determineBestFit(logDir+"_"+waveset, waveset, binNum) # using logDir as the source directory to load desired cfg
     os.chdir("..")
 
 def gatherMomentResults(params):
@@ -538,14 +556,14 @@ def mapYields(startBin,endBin,fitDir):
 if __name__ == '__main__':
     os.chdir(fitDir)
     startBin=0
-    endBin=19
-    numIters=500 # number of iterations to randomly sample and try to fit. No guarantees any of them will converge 
+    endBin=13
+    numIters=15 # number of iterations to randomly sample and try to fit. No guarantees any of them will converge 
     # (int) number of seeds such that the seed used for iteration j is j%nRollingSeeds. 
     #     This gives us a way to reinitialize the parameters in a fit but keep the same bootstrap seed
     nRollingSeeds=numIters 
     # EACH BIN SHARES THE SAME SEED FOR A GIVEN ITERATION
     seeds=[[random.randint(1,999999) for _ in range(nRollingSeeds)] for _ in range(endBin)]
-    processes=50 # number of process to spawn to do the fits
+    processes=5 # number of process to spawn to do the fits
     
     finalAmpsFolder="finalAmps"
     logDir=logDirBaseName
@@ -567,29 +585,30 @@ if __name__ == '__main__':
     #   SPECT IS THE WAVE REPRESENTATION AS A STRING, I.E. S0++
     #   VECT IS A CORRESPONDING VECTOR NOTATION, I.E. [0,0,"+"] = S0+ in [L,M,e] format
     ##############################################################
-    #potential_vects=getVectorOfPotentialLMEs(fitDir,startBin,endBin,numIters)
-    potential_vects=[
-            #### S + TMD
-            [
-            [0,0,"+",True],
-            [0,0,"-",True],
-            [2,-1,"-",False],
-            [2,0,"+",False],
-            [2,0,"-",False],
-            [2,1,"+",False],
-            [2,1,"-",False],
-            [2,2,"+",False]
-            ],
-            ### K-MATRIX
-#            [
-#            [0,0,"+",True],
-#            [0,0,"-",True],
-#            [2,0,"+",False],
-#            [2,0,"-",False],
-#            [2,2,"-",False],
-#            [2,2,"+",False]
-#            ],
-    ]
+    potential_vects=getVectorOfPotentialLMEs(fitDir,startBin,endBin,numIters)
+    # potential_vects=[
+    #         #### S + TMD
+    #         [
+    #         [0,0,"+",True],
+    #         [0,0,"-",True],
+    #         [2,-1,"-",False],
+    #         [2,0,"+",False],
+    #         [2,0,"-",False],
+    #         [2,1,"+",False],
+    #         [2,1,"-",False],
+    #         [2,2,"+",False]
+    #         ],
+    #         ### K-MATRIX
+    #        [
+    #        [0,0,"+",True],
+    #        [0,0,"-",True],
+    #        [2,0,"+",False],
+    #        [2,0,"-",False],
+    #        [2,2,"-",False],
+    #        [2,2,"+",False]
+    #        ],
+    # ]
+
     os.chdir(fitDir)
     for ibin in range(startBin,endBin):
         makeLogFolders(logDir,ibin,potential_vects)
@@ -601,28 +620,51 @@ if __name__ == '__main__':
     os.chdir(workingDir)
     mapYields(startBin,endBin,fitDir)
 
-    ##############################################################
-    ## BEGIN FITTING AND GETTING AMPLITUDE RESULTS
-    ##############################################################
-    print("Total number jobs to complete: {}".format((endBin-startBin)*numIters*len(potential_vects)))
-    print("** Beginning in 2 seconds **")
-    print("----------------------------------\n\n")
-    os.chdir(fitDir)
-    params=[(i,potential_vect,j,logDir) for i in range(startBin,endBin) for potential_vect in potential_vects for j in range(numIters)]
-    p=Pool(processes)
-    p.map(getAmplitudesInBin, params)
-    p.terminate()
+
+    def chunk(xs, chunkid, nchunks):
+        ''' Split a list into nchunks chunks '''
+        assert( chunkid < nchunks )
+        L = len(xs)
+        chunk_size = L // nchunks
+        start = chunkid * chunk_size
+        end = start + chunk_size
+        if L - end < chunk_size:
+            end = L
+        print(f'       {start} {end}')
+        return xs[start:end]
+    
+    if batch_submit:
+        #### BATCH SUBMIT
+        params=[(i,potential_vect,j,logDir) for i in range(startBin,endBin) for potential_vect in potential_vects for j in range(numIters)]
+        print(f"Running chunk #{chunkid-1}, there are {nchunks} total chunks")
+        chunked_params = chunk(params, chunkid-1, nchunks)
+        for p in chunked_params:
+            os.chdir(fitDir)
+            print(f'   Jobs (massBin, lme, iteration): ({p[0]} {constructOutputFileName(p[1])} {p[2]})')
+            getAmplitudesInBin(p) 
+    else:
+        # ##############################################################
+        # ## BEGIN FITTING AND GETTING AMPLITUDE RESULTS
+        # ##############################################################
+        print("Total number jobs to complete: {}".format((endBin-startBin)*numIters*len(potential_vects)))
+        print("** Beginning in 2 seconds **")
+        print("----------------------------------\n\n")
+        os.chdir(fitDir)
+        params=[(i,potential_vect,j,logDir) for i in range(startBin,endBin) for potential_vect in potential_vects for j in range(numIters)][:50]
+        p=Pool(processes)
+        r = list(tqdm.tqdm(p.imap(getAmplitudesInBin, params), total=50))
+        p.terminate()
     
     ##############################################################
     ## GATHER ALL THE RESULTS INTO A SINGLE LOCATION
     ##############################################################
-    p=Pool(len(potential_vects)*(endBin-startBin))
-    params=[(logDir,fitDir,finalAmpsFolder,i,potential_vect) for i in range(startBin,endBin) for potential_vect in potential_vects]
-    p.map(gatherResults, params)
+    # p=Pool(len(potential_vects)*(endBin-startBin))
+    # params=[(logDir,fitDir,finalAmpsFolder,i,potential_vect) for i in range(startBin,endBin) for potential_vect in potential_vects]
+    # p.map(gatherResults, params)
     #p.map(gatherMomentResults, params)
     #gatherResults(logDir,fitDir,finalAmpsFolder,ibin,potential_vect)
     #gatherMomentResults(logDir,fitDir,finalAmpsFolder,potential_vect)
-    p.terminate()
+    # p.terminate()
         
 
 stop = time.time()

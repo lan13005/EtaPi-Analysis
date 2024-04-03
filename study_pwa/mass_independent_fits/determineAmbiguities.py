@@ -1,10 +1,9 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
 import glob
 import os
 import numpy as np
 import subprocess
 from multiprocessing import Pool
-import shutil
 
 def runcommand(cmd):
     print("running: "+cmd)
