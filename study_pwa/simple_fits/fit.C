@@ -1,6 +1,6 @@
 #include "RooRelBreitWigner.h"
 //R__ADD_LIBRARY_PATH("/d/grid17/ln16/dselector_v3/study_pwa/simple_fits/")
-R__LOAD_LIBRARY(/d/grid17/ln16/dselector_v3/study_pwa/simple_fits/RooRelBreitWigner_C.so)
+R__LOAD_LIBRARY(/w/halld-scshelf2101/lng/WORK/EtaPi-Analysis/study_pwa/simple_fits/RooRelBreitWigner_C.so)
 //#include "/d/grid17/ln16/dselector_v3/study_pwa/simple_fits/RooRelBreitWigner_C.so"
 
 void fit(){
@@ -44,12 +44,12 @@ void fit(){
             ////////////////////////
             //  LOAD DATA
             ////////////////////////
-            string floc="/d/grid17/ln16/dselector_v3/phase1_selected_v4/D"+run+"_selected_nominal_acc_flat.root";
+            string floc="/w/halld-scshelf2101/lng/DATA/phase1_selected_v4/D"+run+"_selected_nominal_acc_flat.root";
             cout << "loading: " << floc << endl;
             ROOT::RDataFrame d("kin", floc.c_str());
             auto df=d.Filter(Form("mandelstam_t>%f && mandelstam_t<%f",mint,maxt));
             df=df.Filter(Form("Mpi0eta>%f && Mpi0eta<%f",minm,maxm));
-            df=df.Filter(Form("-29.0*atan(-1.05*Mpi0eta+2.78)+328 > vanHove_omega"));
+            df=df.Filter(Form("0.5 < pVH"));
             df=df.Filter("BeamAngle != -1"); // REJECT AMO
             auto df_hist=df.Histo1D({("M4g"+to_string(i)+"_data").c_str(),"M4g",mbins,minm,maxm},"Mpi0eta","Weight");
             if (i==0)
@@ -66,12 +66,12 @@ void fit(){
             ////////////////////////
             //  LOAD ACC
             ////////////////////////
-            string floc="/d/grid17/ln16/dselector_v3/phase1_selected_v4/F"+run+"_selected_nominal_acc_flat.root";
+            string floc="/w/halld-scshelf2101/lng/DATA/phase1_selected_v4/F"+run+"_selected_nominal_acc_flat.root";
             cout << "loading: " << floc << endl;
             ROOT::RDataFrame dacc("kin", floc.c_str());
             auto df=dacc.Filter(Form("mandelstam_t>%f && mandelstam_t<%f",mint,maxt));
             df=df.Filter(Form("Mpi0eta>%f && Mpi0eta<%f",minm,maxm));
-            df=df.Filter(Form("-29.0*atan(-1.05*Mpi0eta+2.78)+328 > vanHove_omega"));
+            df=df.Filter(Form("0.5 < pVH"));
             //df=df.Filter(Form("mandelstam_t_thrown>%f && mandelstam_t_thrown<%f",mint,maxt));
             //df=df.Filter(Form("Mpi0eta_thrown>%f && Mpi0eta_thrown<%f",minm,maxm));
             //df=df.Filter("BeamAngle != -1"); // REJECT AMO; NO NEED TO REJECT SINCE ITS NOT SIMULATED
@@ -90,7 +90,7 @@ void fit(){
             ////////////////////////
             //  LOAD GEN
             ////////////////////////
-            string floc="/d/grid17/ln16/dselector_v3/phase1_selected_v4/F"+run+"_gen_data_flat.root";
+            string floc="/w/halld-scshelf2101/lng/DATA/phase1_selected_v4/F"+run+"_gen_data_flat.root";
             cout << "loading: " << floc << endl;
             ROOT::RDataFrame dgen("kin", floc.c_str(),{"Weight","mandelstam_t_thrown","Mpi0eta_thrown"});
             auto df=dgen.Filter(Form("mandelstam_t_thrown>%f && mandelstam_t_thrown<%f",mint,maxt));
@@ -124,7 +124,7 @@ void fit(){
             // Draw all frames on a canvas
             c->Clear();
             gPad->SetLeftMargin(0.15);
-                     
+
             RooRealVar x("x","x",hmin,hmax) ;
             RooDataHist dh("dh","dh",x,Import(*hist)) ;
             
