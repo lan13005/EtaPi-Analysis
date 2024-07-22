@@ -20,23 +20,18 @@ void split_flat_kinematics(){
     bool remergePols=true; // should we remerge polarizations after splitting? 
     
     string otag="_selectGenTandM";
-    string itag="_wUnusedShowers_sbN_accT";
+    string itag="";
 
-    string folder="phase1_selected_v4/";
+    string folder="/w/halld-scshelf2101/lng/DATA/phase1_selected_v5/";
     bool ignorePolarization=false; // Kmatrix stuff has only one polarization, so ignore. No polarization in Flat MC so ignore also
     vector<string> runs={"2017_1","2018_1","2018_8"};
     vector<string> files;
     for (auto run: runs){
-        files.push_back("D"+run+"_selected"+itag+"_data_flat.root");
-        files.push_back("D"+run+"_selected"+itag+"_bkgnd_flat.root");
-        files.push_back("D"+run+"_selected"+itag+"_acc_flat.root");
-        files.push_back("F"+run+"_selected"+itag+"_acc_flat.root");
-        //files.push_back("F"+run+"_gen_data_flat.root");
-        
-        //files.push_back("K"+run+"_selected"+itag+"_data_flat.root");
-        //files.push_back("K"+run+"_selected"+itag+"_bkgnd_flat.root");
-        //files.push_back("F"+run+"_selected"+itag+"_acc_flat.root");
-        //files.push_back("F"+run+"_gen_data_flat.root");
+        // files.push_back("D"+run+"_selected"+itag+"_data_flat.root");
+        // files.push_back("D"+run+"_selected"+itag+"_bkgnd_flat.root");
+        // files.push_back("D"+run+"_selected"+itag+"_acc_flat.root");
+        // files.push_back("F"+run+"_selected"+itag+"_acc_flat.root");
+        files.push_back("F"+run+"_gen_data_flat.root");
     }
 
     // ********************************************
@@ -47,23 +42,30 @@ void split_flat_kinematics(){
     map<int,int> pols={{0,0},{45,1},{90,2},{135,3},{-1,4}};
     vector<string> polstrings={"000","045","090","135","AMO"};
 
-    /// NOMINAL t-binning
-    map<string,int> ts={{"010020",0},{"0200325",1},{"0325050",2},{"050075",3},{"075100",4}}; // t
-    vector<float> mint={0.1,0.2,0.325,0.5,0.75};
-    vector<float> maxt={0.2,0.325,0.5,0.75,1.0};
-    /// VARIATION of t-binning
-    //map<string,int> ts={{"01502625",0},{"0262504125",1},{"041250625",2},{"06250875",3}}; // t
-    //vector<float> mint={0.15,0.2625,0.4125,0.625};   // Check to see if there is any t-binning effect going on
-    //vector<float> maxt={0.2625,0.4125,0.625,0.875};
-    map<string,int> mpi0etas={{"104172",0}}; // m 
-    vector<float> minmpi0eta={1.04};
-    vector<float> maxmpi0eta={1.72};
-    //map<string,int> ts={{"010100",1.0}}; // t
-    //vector<float> mint={0};
-    //vector<float> maxt={1.0};
-    //map<string,int> mpi0etas={{"104156",0},{"104160",1},{"104164",2},{"104168",3},{"104172",4},{"104176",5},{"104180",6}}; // m 
-    //vector<float> minmpi0eta={1.04,1.04,1.04,1.04,1.04,1.04,1.04};
-    //vector<float> maxmpi0eta={1.56,1.60,1.64,1.68,1.72,1.76,1.80};
+    // /// NOMINAL t-binning
+    // map<string,int> ts={{"010020",0},{"0200325",1},{"0325050",2},{"050075",3},{"075100",4}}; // t
+    // vector<float> mint={0.1,0.2,0.325,0.5,0.75};
+    // vector<float> maxt={0.2,0.325,0.5,0.75,1.0};
+    // /// VARIATION of t-binning
+    // //map<string,int> ts={{"01502625",0},{"0262504125",1},{"041250625",2},{"06250875",3}}; // t
+    // //vector<float> mint={0.15,0.2625,0.4125,0.625};   // Check to see if there is any t-binning effect going on
+    // //vector<float> maxt={0.2625,0.4125,0.625,0.875};
+    // map<string,int> mpi0etas={{"104172",0}}; // m 
+    // vector<float> minmpi0eta={1.04};
+    // vector<float> maxmpi0eta={1.72};
+    // //map<string,int> ts={{"010100",1.0}}; // t
+    // //vector<float> mint={0};
+    // //vector<float> maxt={1.0};
+    // //map<string,int> mpi0etas={{"104156",0},{"104160",1},{"104164",2},{"104168",3},{"104172",4},{"104176",5},{"104180",6}}; // m 
+    // //vector<float> minmpi0eta={1.04,1.04,1.04,1.04,1.04,1.04,1.04};
+    // //vector<float> maxmpi0eta={1.56,1.60,1.64,1.68,1.72,1.76,1.80};
+
+    map<string,int> ts={{"010100",0}};
+    vector<float> mint={0.1};
+    vector<float> maxt={1.0};
+    map<string,int> mpi0etas={{"090250",0}}; // m 
+    vector<float> minmpi0eta={0.90};
+    vector<float> maxmpi0eta={2.50};
 
     const int nts=(const int)mint.size();
     const int nms=(const int)minmpi0eta.size();
@@ -118,6 +120,7 @@ void split_flat_kinematics(){
             float mandelstam_t_thrown;
             float Ebeam_thrown;
             float mpi0eta_thrown;
+            float mpi0p_thrown;
             float vanHove_omega;
             float VH;
             bool pVH;
@@ -139,6 +142,7 @@ void split_flat_kinematics(){
             oldtree->SetBranchAddress("mandelstam_t_thrown",&mandelstam_t_thrown);
             oldtree->SetBranchAddress("Ebeam_thrown",&Ebeam_thrown);
             oldtree->SetBranchAddress("Mpi0eta_thrown",&mpi0eta_thrown);
+            oldtree->SetBranchAddress("Mpi0p_thrown", &mpi0p_thrown);
             oldtree->GetEntry(0);
             bool has_thrown_branches = (Ebeam_thrown!=0);
             cout << "has proper thrown branches: " << has_thrown_branches << endl;
@@ -151,27 +155,30 @@ void split_flat_kinematics(){
             /////// FILL TREES IN THE CORRECT BINNING
             // ********************************************
             for (Long64_t i=0;i<nentries; i++) {
-                 oldtree->GetEntry(i);
-                 pVH=VH==1;
-                 it=0;
-                 if (!ignorePolarization)
-                     beamAngle=BeamAngle;
-                 for (auto const& t: ts){ im=-1;
-                     for (auto const& m: mpi0etas){
-                         ++im; // this has to be first otherwise it might never increment
-                         //pVH2=filterOmega(vanHove_omega,mpi0eta);
-                         //if (has_recon_branches*!pVH2) continue;
-                         //if (has_recon_branches*!pVH) continue;
-                         //if (has_recon_branches*!(mpi0p>2.0)) continue;
-                         if (has_recon_branches*!((mandelstam_t>mint[it])*(mandelstam_t<maxt[it]))) continue;
-                         if (has_recon_branches*!((mpi0eta>minmpi0eta[im])*(mpi0eta<maxmpi0eta[im]))) continue;
-                         //if (has_thrown_branches*!((mandelstam_t_thrown>mint[it])*(mandelstam_t_thrown<maxt[it]))) continue;
-                         //if (has_thrown_branches*!((mpi0eta_thrown>minmpi0eta[im])*(mpi0eta_thrown<maxmpi0eta[im]))) continue;
-                         if (isGen*!((mandelstam_t_thrown>mint[it])*(mandelstam_t_thrown<maxt[it]))) continue;
-                         if (isGen*!((mpi0eta_thrown>minmpi0eta[im])*(mpi0eta_thrown<maxmpi0eta[im]))) continue;
-                         newtree[pols[beamAngle]][it][im]->Fill();
-                     } ++it;
-                 }
+                oldtree->GetEntry(i);
+                pVH=VH==1;
+                it=0;
+                if (!ignorePolarization)
+                    beamAngle=BeamAngle;
+                for (auto const& t: ts){ im=-1;
+                    for (auto const& m: mpi0etas){
+                        ++im; // this has to be first otherwise it might never increment
+                        //pVH2=filterOmega(vanHove_omega,mpi0eta);
+                        //if (has_recon_branches*!pVH2) continue;
+                        //if (has_recon_branches*!pVH) continue;
+                        if (has_recon_branches*!((mandelstam_t>mint[it])*(mandelstam_t<maxt[it]))) continue;
+                        if (has_recon_branches*!((mpi0eta>minmpi0eta[im])*(mpi0eta<maxmpi0eta[im]))) continue;
+                        if (has_recon_branches*!((Ebeam>8.2)*(Ebeam<8.8))) continue;
+                        //  if (has_recon_branches*!(mpi0p>2.0)) continue;
+                        //if (has_thrown_branches*!((mandelstam_t_thrown>mint[it])*(mandelstam_t_thrown<maxt[it]))) continue;
+                        //if (has_thrown_branches*!((mpi0eta_thrown>minmpi0eta[im])*(mpi0eta_thrown<maxmpi0eta[im]))) continue;
+                        if (isGen*!((mandelstam_t_thrown>mint[it])*(mandelstam_t_thrown<maxt[it]))) continue;
+                        if (isGen*!((mpi0eta_thrown>minmpi0eta[im])*(mpi0eta_thrown<maxmpi0eta[im]))) continue;
+                        if (isGen*!((Ebeam_thrown>8.2)*(Ebeam_thrown<8.8))) continue;
+                            //if (isGen*!((mpi0p_thrown>2.0))) continue;
+                        newtree[pols[beamAngle]][it][im]->Fill();
+                    } ++it;
+                }
             }
 
 
