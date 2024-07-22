@@ -218,6 +218,11 @@ void fit(){
             RooAbsReal* integral_full=sigPDF->createIntegral(x,NormSet(x),Range("full"));
             float normalization = integral_signal->getVal()/integral_full->getVal();
 
+            // Print voigt resolution value
+            if (form=="voigt"){
+                cout << "Voigt resolution: " << sg.getVal() << " +/- " << sg.getError() << endl;
+            }
+
             ofile << mint+(maxt-mint)/2 << "\t" << form << "\t" << nsig.getVal()*normalization  << "\t" << nsig.getError()*normalization << "\t"
                 << normalization << "\t" 
                 << mean.getVal() << "\t" << mean.getError() << "\t"

@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import root_pandas as rp
 import numpy as np
 import matplotlib as mpl
 mpl.use("Agg")
@@ -10,7 +9,7 @@ import ROOT
 from decimal import Decimal
 import pandas as pd
 import re
-import uproot3 as uproot
+import uproot as uproot
 import scipy.stats as sts
 
 import mplhep as hep
@@ -29,10 +28,10 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 #dselectedFolder="zDSelectedBkgndSamples_noUE_t010100_m104172/"
 #baseDir="zExpectedLeakage_noUE_t010100_m104172/"
-dselectedFolder="zDSelectedBkgndSamples/"
-baseDir="zExpectedLeakage/"
-#dselectedFolder="zDSelectedBkgndSamples_no_lmac/"
-#baseDir="zExpectedLeakage_no_lmac/"
+# dselectedFolder="zDSelectedBkgndSamples/"
+# baseDir="zExpectedLeakage/"
+dselectedFolder="zDSelectedBkgndSamples_no_lmac/"
+baseDir="zExpectedLeakage_no_lmac/"
 
 os.system("mkdir -p "+baseDir+"/montage")
 f=open(baseDir+"tabulate_calculations.csv","w")
@@ -78,14 +77,14 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
     #### Plotting sidebands distributions comparing data to expected b1 background leakage
     def getVal(search):
         val=-1
-        with open("/d/grid17/ln16/dselector_v3/study_expectedYields/DSelector_etapi.C") as selector:
+        with open("/w/halld-scshelf2101/lng/WORK/EtaPi-Analysis/study_expectedYields/DSelector_etapi.C") as selector:
             for line in selector:
                 if search in line and "float" in line:
                     match=line.split("=")[1].split(";")[0]
                     val=float(match)
         return val
     def getSidebands():
-        with open("/d/grid17/ln16/dselector_v3/study_expectedYields/DSelector_etapi.C") as selector:
+        with open("/w/halld-scshelf2101/lng/WORK/EtaPi-Analysis/study_expectedYields/DSelector_etapi.C") as selector:
             for line in selector:
                 pi0Mean=getVal("pi0Mean")
                 etaMean=getVal("etaMean")
@@ -140,11 +139,11 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         crossSectionErrs=np.array([fa2018_err,sp2018_err,sp2017_err])*1000
         baseFolder=dselectedFolder+"/b1vps_"
         for run in ["2018_8","2018_1","2017_1"]:
-            entries=uproot.open(baseFolder+run+"/bkgndSample_recon_acc_flat.root")['kin'].numentries
+            entries=uproot.open(baseFolder+run+"/bkgndSample_recon_acc_flat.root")['kin'].num_entries
             if entries==0:
                 return 0
-            recons.append(rp.read_root(baseFolder+run+"/bkgndSample_recon_acc_flat.root",columns=columns))
-            throwns.append(rp.read_root(baseFolder+run+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy]))
+            recons.append(uproot.open(baseFolder+run+"/bkgndSample_recon_acc_flat.root")["kin"].arrays(columns, library='pd'))
+            throwns.append(uproot.open(baseFolder+run+"/bkgndSample_gen_data_flat.root")["kin"].arrays([thrownEnergy], library='pd'))
     
     
     if getEta:
@@ -158,11 +157,11 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         crossSections=np.array([[37.9,34.5]]) 
         crossSectionErrs=np.array([[0,0]]) 
         baseFolder=dselectedFolder+"/eta_to_3pi/"
-        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].numentries
+        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].num_entries
         if entries==0:
             return 0
-        recons=[rp.read_root(baseFolder+"bkgndSample_recon_acc_flat.root",columns=columns)]
-        throwns=[rp.read_root(baseFolder+"bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
+        recons=[uproot.open(baseFolder+"bkgndSample_recon_acc_flat.root")["kin"].arrays(columns, library='pd')]
+        throwns=[uproot.open(baseFolder+"bkgndSample_gen_data_flat.root")["kin"].arrays([thrownEnergy], library='pd')]
     
     if getF1:
         BR=br_f1_etapi0pi0*br_eta_2g*br_pi0_gg*br_pi0_gg; # f1->etapi0pi0 52% of the time, eta->2g ~40% of the time, 2 pi0->2g ~99%
@@ -175,11 +174,11 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         crossSections=np.array([[37.9,34.5]])
         crossSectionErrs=np.array([[0,0]]) 
         baseFolder=dselectedFolder+"/f1_1285_to_etapipi/"
-        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].numentries
+        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].num_entries
         if entries==0:
             return 0
-        recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
-        throwns=[rp.read_root(baseFolder+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
+        recons=[uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")["kin"].arrays(columns, library='pd')]
+        throwns=[uproot.open(baseFolder+"/bkgndSample_gen_data_flat.root")["kin"].arrays([thrownEnergy], library='pd')]
 
     if getEtaPr:
         BR=br_etap_etapi0pi0*br_eta_2g*br_pi0_gg*br_pi0_gg; # etapr->etapi0pi0 22.4% of the time, eta->2g ~40% of the time, 2 pi0->2g ~99%
@@ -192,11 +191,11 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         crossSections=np.array([[12.2,11]])/0.394 # George did not divide the cross sections by the branching ratio for eta->2g which is ~40%
         crossSectionErrs=np.array([[0.234,0.234]]) 
         baseFolder=dselectedFolder+"/etap_to_etapipi/"
-        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].numentries
+        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].num_entries
         if entries==0:
             return 0
-        recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
-        throwns=[rp.read_root(baseFolder+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
+        recons=[uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")["kin"].arrays(columns, library='pd')]
+        throwns=[uproot.open(baseFolder+"/bkgndSample_gen_data_flat.root")["kin"].arrays([thrownEnergy], library='pd')]
 
     if getA2Pi:
         BR=br_a2_etapi0*br_eta_2g*br_pi0_gg*br_pi0_gg; # a2->etapi 14.5% of the time, eta->2g ~40% of the time, 2 pi0->2g ~99%
@@ -209,11 +208,11 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         crossSections=np.array([[37.9,34.5]]) 
         crossSectionErrs=np.array([[0,0]]) 
         baseFolder=dselectedFolder+"/a2pi/"
-        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].numentries
+        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].num_entries
         if entries==0:
             return 0
-        recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
-        throwns=[rp.read_root(baseFolder+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
+        recons=[uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")["kin"].arrays(columns, library='pd')]
+        throwns=[uproot.open(baseFolder+"/bkgndSample_gen_data_flat.root")["kin"].arrays([thrownEnergy], library='pd')]
 
     if getF2:
         BR=br_f2_pi0pi0*br_pi0_gg*br_pi0_gg; 
@@ -226,11 +225,11 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         crossSections=np.array([[12.72645681]]) # These new estimates simply come from a BW fit to the f2 mass peak
         crossSectionErrs=np.array([[1.1274463]]) # These new estimates simply come from a BW fit to the f2 mass peak
         baseFolder=dselectedFolder+"/pi0pi0/"
-        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].numentries
+        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].num_entries
         if entries==0:
             return 0
-        recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
-        throwns=[rp.read_root(baseFolder+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
+        recons=[uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")["kin"].arrays(columns, library='pd')]
+        throwns=[uproot.open(baseFolder+"/bkgndSample_gen_data_flat.root")["kin"].arrays([thrownEnergy], library='pd')]
     
 
     if getOmega:
@@ -244,11 +243,11 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         crossSections=np.array([[1.331, 1.293, 1.275]])*1000
         crossSectionErrs=np.array([[0.08, 0.08, 0.08]])*1000
         baseFolder=dselectedFolder+"/omega_pi0g_2018_8_v2/"
-        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].numentries
+        entries=uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")['kin'].num_entries
         if entries==0:
             return 0
-        recons=[rp.read_root(baseFolder+"/bkgndSample_recon_acc_flat.root",columns=columns)]
-        throwns=[rp.read_root(baseFolder+"/bkgndSample_gen_data_flat.root",columns=[thrownEnergy])]
+        recons=[uproot.open(baseFolder+"/bkgndSample_recon_acc_flat.root")["kin"].arrays(columns, library='pd')]
+        throwns=[uproot.open(baseFolder+"/bkgndSample_gen_data_flat.root")["kin"].arrays([thrownEnergy], library='pd')]
 
 
     os.system("mkdir -p "+outputFolder)
@@ -279,11 +278,6 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
 
 
     print('Avg cross section for {}: {:0.5f}'.format(channel,np.mean(crossSections)))
-    return 0
-    #############################################
-    ###### END  
-    #############################################
-
 
     ####################################
     # Plot Cross Sections 
@@ -330,9 +324,9 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         # Calculate efficiencies
         dat_counts_err=np.sqrt(abs(dat_counts)) # since we oversubtract sometimes we will have negative yields
         thrown_counts_err=np.sqrt(thrown_counts)
-        efficiencyErrors.append(efficiency*np.sqrt( 
+        efficiencyErrors.append(abs(efficiency*np.sqrt( 
             (dat_counts_err/dat_counts)*(dat_counts_err/dat_counts) + 
-            (thrown_counts_err/thrown_counts)*(thrown_counts_err/thrown_counts) ))
+            (thrown_counts_err/thrown_counts)*(thrown_counts_err/thrown_counts) )))
     
         print("efficiency:")
         print(efficiencies[j])
@@ -366,9 +360,9 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
     def fluxIntegrator(fluxFile,minxs,maxxs):
         #print("trying to open: {}".format(fluxFile))
         h=uproot.open(fluxFile)['tagged_flux']
-        edges=h.edges
+        edges=h.axis().edges()
         centers=edges[:-1]+(edges[1]-edges[0])/2
-        values=h.values
+        values=h.values()
         fluxIntegrals=[]
         for minx,maxx in zip(minxs,maxxs):
             extrema=[minx,maxx]
@@ -385,8 +379,9 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
     runEnds=[51768,42577,31057]
     rcdbQueries=[""," --rcdb-query='@is_2018production and @status_approved'"," --rcdb-query='@is_2018production and @status_approved and beam_on_current > 49'"]
     fluxCounts=[]
+    HD_UTILITIES_HOME = "/group/halld/Software/builds/Linux_Alma9-x86_64-gcc11.4.1/hd_utilities/hd_utilities-1.48"
     for i in range(3):
-        cmd_base="/d/grid13/gluex/gluex_top/hd_utilities/hd_utilities-1.17/psflux/plot_flux_ccdb.py --begin-run="+str(runStarts[i])+" --end-run="+str(runEnds[i])
+        cmd_base=f"{HD_UTILITIES_HOME}/psflux/plot_flux_ccdb.py --begin-run="+str(runStarts[i])+" --end-run="+str(runEnds[i])
         cmd_bins="--num-bins=300"
         cmd_lowE="--energy-min=8.2"
         cmd_uppE="--energy-max=8.8"
@@ -474,7 +469,7 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
     print("Overlaying expected leakage from channel onto phase 1 data")
     datas=[]
     for i,run in enumerate(["2018_8","2018_1","2017_1"]):
-        tmp=rp.read_root(dselectedFolder+"gluex_"+run+"/bkgndSample_recon_acc_flat.root",columns=columns)
+        tmp=uproot.open(dselectedFolder+"gluex_"+run+"/bkgndSample_recon_acc_flat.root")["kin"].arrays(columns, library='pd')
         datas.append(tmp)
         print("{} has {} entries".format(run,datas[i].AccWeight.sum()))
     data=pd.concat(datas)
@@ -483,11 +478,23 @@ def runAnalysis(channel,weightBranch,signalTag,selectSignalRegion):
         data=data[(data["weightBSpi0"]==1)&(data["weightBSeta"]==1)]
     print("phase1 has {} entries".format(data.AccWeight.sum()))
     
+    def getBinning(xmin,xmax,binwidth):
+        nbins=int((xmax-xmin)/binwidth)
+        bins=np.linspace(xmin,xmax,nbins+1)
+        return bins
+
     for varx,label in zip(["Mpi0eta","Mpi0g3","Mpi0g4","cosTheta_eta_gj","cosTheta_eta_hel","phi_eta_gj","phi_eta_hel","Mpi0","Meta"],
                 [r"$M(4\gamma)$ GeV",r"$M(\pi\gamma_3)$ GeV",r"$M(\pi\gamma_4)$ GeV",r"$cos\theta_{GJ}$ radians",r"$cos\theta_{hel}$ radians",
                     r"$\phi_{GJ}$i degrees",r"$\phi_{hel}$ degrees",r"$M(\pi)$ GeV",r"$M(\eta)$ GeV"]):
         fig,ax=plt.subplots(1,1,figsize=(8,6))
-        _, edges = np.histogram(dataFull[varx],bins=histBinning)
+
+        _edges = histBinning
+        if varx=="Mpi0eta":
+            mrange=(0.5,3.2)
+            mstep=0.02
+            _edges=getBinning(*mrange,mstep)
+    
+        _, edges = np.histogram(dataFull[varx],bins=_edges)
         centers=edges[:-1]+(edges[1]-edges[0])/2
         dcount=np.histogram(data[varx],weights=data[weightBranch],bins=edges)[0]
         hep.histplot((dcount,edges),color='black',linewidth=2,label="Phase1 Data")
