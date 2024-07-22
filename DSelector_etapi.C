@@ -122,6 +122,8 @@ void DSelector_etapi::Init(TTree *locTree)
         dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0eta_thrown");
         dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("mandelstam_t_thrown");
         dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Ebeam_thrown");
+		dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Mpi0p_thrown");
+		dFlatTreeInterface->Create_Branch_Fundamental<Float_t>("Metap_thrown");
         dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("isCorrectCombo");
         dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("isCorrectBeam");
         dFlatTreeInterface->Create_Branch_Fundamental<Bool_t>("isCorrectSpect");
@@ -350,6 +352,8 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
     float locBeamE_thrown=0;
     float locMetapi0_thrown=0;
     float locT_thrown=0; 
+	float locMpi0p_thrown=0;
+	float locMetap_thrown=0;
     TLorentzVector locProtonP4_thrown;
     TLorentzVector locEtaP4_thrown;
     TLorentzVector locPi0P4_thrown;
@@ -374,6 +378,8 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 
 	locMetapi0_thrown=(locPi0P4_thrown+locEtaP4_thrown).M();
 	locT_thrown=-(dTargetP4-locProtonP4_thrown).M2();		
+	locMpi0p_thrown=(locPi0P4_thrown+locProtonP4_thrown).M();
+	locMetap_thrown=(locEtaP4_thrown+locProtonP4_thrown).M();
 	//bool bMetapi0_thrown = (locMetapi0_thrown>1.04)*(locMetapi0_thrown<1.56);
 	bool bmandelstamt_thrown=(locT_thrown<1.0)*(locT_thrown>0.1); 
     bool bBeamE_thrown = (locBeamE_thrown<8.8)*(locBeamE_thrown>8.2);
@@ -381,7 +387,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
     bool bTopology = locThrownTopology==topologyString; 
     //bTopology=true; // For the BGGEN study
     bool selection_thrown=bTopology;//*bBeamE_thrown;//*bmandelstamt_thrown*bMpi0eta_thrown;
-    selection_thrown=true;
+    // selection_thrown=true;
     if (dIsMC*!selection_thrown)
         return kTRUE;
 
@@ -600,7 +606,7 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		//    genmc = thrown trees created during simulation process
 		bool bSignalRegion;
 		float branchWeight;
-        int choice=2;
+        int choice=3;
 		//---------CHOICE 1 FOR "data" RUN OVER SIGNAL/DATA-------------
         if (choice==1)
 		{
@@ -773,7 +779,8 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
 		bMetapi0=true;
         bmandelstamt=true;
         bMpi0p=true;
-        bLowMassAltCombo=true;
+        // bLowMassAltCombo=true;
+		bBeamEnergy=true;
 
         ///////////////////////////////////////////////////////////////////////////////////
         ///////////////////////////////////////////////////////////////////////////////////
@@ -964,6 +971,8 @@ Bool_t DSelector_etapi::Process(Long64_t locEntry)
                 dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0eta_thrown",locMetapi0_thrown);
                 dFlatTreeInterface->Fill_Fundamental<Float_t>("mandelstam_t_thrown",locT_thrown);
                 dFlatTreeInterface->Fill_Fundamental<Float_t>("Ebeam_thrown",locBeamE_thrown);
+				dFlatTreeInterface->Fill_Fundamental<Float_t>("Mpi0p_thrown",locMpi0p_thrown);
+				dFlatTreeInterface->Fill_Fundamental<Float_t>("Metap_thrown",locMetap_thrown);
                 dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectCombo",isCorrectCombo);
                 dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectBeam",isCorrectBeam);
                 dFlatTreeInterface->Fill_Fundamental<Bool_t>("isCorrectSpect",isCorrectSpect);

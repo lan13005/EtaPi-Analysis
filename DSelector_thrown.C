@@ -133,12 +133,12 @@ Bool_t DSelector_thrown::Process(Long64_t locEntry)
 		Particle_t locPID = dThrownWrapper->Get_PID();
 		TLorentzVector locThrownP4 = dThrownWrapper->Get_P4();
 
-                if (locPID==14)
-                    locProtonP4=locThrownP4;
-                else if (locPID==7)
-                    locPi0P4=locThrownP4;
-                else if (locPID==17)
-                    locEtaP4=locThrownP4;
+        if (locPID==14)
+            locProtonP4=locThrownP4;
+        else if (locPID==7)
+            locPi0P4=locThrownP4;
+        else if (locPID==17)
+            locEtaP4=locThrownP4;
 		//cout << "Thrown " << loc_i << ": " << locPID << ", " << locThrownP4.Px() << ", " << locThrownP4.Py() << ", " << locThrownP4.Pz() << ", " << locThrownP4.E() << endl;
 	}
         //cout << locPi0P4.M() << ", " << locEtaP4.M() << ", " << locProtonP4.M() << endl;
@@ -169,7 +169,7 @@ Bool_t DSelector_thrown::Process(Long64_t locEntry)
     bool bMpi0eta = (Metapi0<1.80)*(Metapi0>0.8);
     bool bBeamE = (beam_e<8.8)*(beam_e>8.2);
     bool bTopology = locThrownTopology==topologyString; 
-    bool selection=bTopology*bBeamE;//*bmandelstamt*bMpi0eta;
+    bool selection=bTopology;//*bBeamE;//*bmandelstamt*bMpi0eta;
 
 	TLorentzRotation cmRestBoost( -(locBeamP4+dTargetP4).BoostVector() );
 	TLorentzVector pi0_cm = cmRestBoost * locPi0P4; 

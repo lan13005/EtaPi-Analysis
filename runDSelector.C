@@ -19,7 +19,7 @@ void runDSelector(string inputFileLocation, string treeName, string outputFileNa
 	//// Choice 1: run with proof with your desired number of threads
 	DPROOFLiteManager::Process_Chain(chain, "DSelector_etapi.C++",  proof_Nthreads, outputHistFileName, outputTreeFileName, "");
 	//// Choice 2: run interactively - useful for debugging sometimes when running over small (sub)samples
-	// chain->Process("DSelector_etapi.C+", options.data());
+	// chain->Process("DSelector_etapi.C+");
 
 	return;
 }
